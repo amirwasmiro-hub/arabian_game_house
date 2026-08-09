@@ -1,4 +1,3 @@
-import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -95,7 +94,7 @@ class _HomeScreenState extends State<HomeScreen>
             left: -40.w,
             child: AnimatedBuilder(
               animation: _glowController,
-              builder: (_, __) => Container(
+              builder: (_, _) => Container(
                 width: 280.w,
                 height: 200.h,
                 decoration: BoxDecoration(
@@ -237,7 +236,7 @@ class _HomeScreenState extends State<HomeScreen>
           // Avatar with glow
           AnimatedBuilder(
             animation: _glowController,
-            builder: (_, __) => Container(
+            builder: (_, _) => Container(
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 boxShadow: [
@@ -530,7 +529,7 @@ class _HomeScreenState extends State<HomeScreen>
       },
       child: AnimatedBuilder(
         animation: _glowController,
-        builder: (_, __) => Container(
+        builder: (_, _) => Container(
           decoration: BoxDecoration(
             gradient: LinearGradient(
               colors: [
