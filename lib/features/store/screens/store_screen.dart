@@ -17,24 +17,30 @@ class StoreScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                'المتجر الملكي 🛒',
-                style: GoogleFonts.cairo(color: OrientalTheme.primaryGold, fontSize: 16.sp, fontWeight: FontWeight.bold),
+              Row(
+                children: [
+                  Icon(Icons.shopping_bag_rounded, color: OrientalTheme.accentCyan, size: 20.r),
+                  SizedBox(width: 6.w),
+                  Text(
+                    'المتجر الملكي 🛒',
+                    style: GoogleFonts.cairo(color: Colors.white, fontSize: 15.sp, fontWeight: FontWeight.w900),
+                  ),
+                ],
               ),
               SizedBox(height: 8.h),
               Expanded(
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Left Side: Coins Packages (4 grid cards)
+                    // Left Side: Coins Packages
                     Expanded(
                       flex: 6,
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'حزم الذهب 🪙',
-                            style: GoogleFonts.cairo(color: OrientalTheme.textLight, fontSize: 12.sp, fontWeight: FontWeight.bold),
+                            'حزم الكوينز 🪙',
+                            style: GoogleFonts.cairo(color: OrientalTheme.accentCyan, fontSize: 11.sp, fontWeight: FontWeight.w800),
                           ),
                           SizedBox(height: 6.h),
                           Expanded(
@@ -45,8 +51,8 @@ class StoreScreen extends StatelessWidget {
                               childAspectRatio: 1.8,
                               children: [
                                 _buildStoreCard('10,000 ذهبية', '1.99\$', '🪙', OrientalTheme.primaryGold),
-                                _buildStoreCard('50,000 ذهبية', '4.99\$', '💰', OrientalTheme.accentEmerald),
-                                _buildStoreCard('150,000 ذهبية', '9.99\$', '👑', OrientalTheme.accentAmber),
+                                _buildStoreCard('50,000 ذهبية', '4.99\$', '💰', OrientalTheme.accentCyan),
+                                _buildStoreCard('150,000 ذهبية', '9.99\$', '👑', OrientalTheme.accentPurple),
                                 _buildStoreCard('500,000 ذهبية', '24.99\$', '🏆', OrientalTheme.accentRuby),
                               ],
                             ),
@@ -56,29 +62,31 @@ class StoreScreen extends StatelessWidget {
                     ),
                     SizedBox(width: 14.w),
 
-                    // Right Side: Custom Decks & Felts
+                    // Right Side: Customization Loot
                     Expanded(
                       flex: 4,
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'أوراق وطاولات فاخرة 🎴',
-                            style: GoogleFonts.cairo(color: OrientalTheme.textLight, fontSize: 12.sp, fontWeight: FontWeight.bold),
+                            'أوراق وطاولات احترافية 🎴',
+                            style: GoogleFonts.cairo(color: OrientalTheme.accentCyan, fontSize: 11.sp, fontWeight: FontWeight.w800),
                           ),
                           SizedBox(height: 6.h),
                           _buildCustomizationTile(
-                            title: 'ورق لعب ذهب السلاطين',
-                            desc: 'أوراق مطعمة بطلاء الذهبي الملكي',
+                            title: 'ورق لعب سايبر الفاخر',
+                            desc: 'أوراق بتأثيرات النيون التفاعلية',
                             price: '25,000 🪙',
-                            icon: Icons.style,
+                            icon: Icons.style_rounded,
+                            accentColor: OrientalTheme.accentCyan,
                           ),
                           SizedBox(height: 8.h),
                           _buildCustomizationTile(
                             title: 'طاولة الزمرد الأندلسية',
-                            desc: 'مفرش مخملي زمردي وزخارف نادرة',
+                            desc: 'مفرش مخملي بتصميم ساحة eSports',
                             price: '50,000 🪙',
-                            icon: Icons.table_bar,
+                            icon: Icons.table_bar_rounded,
+                            accentColor: OrientalTheme.accentPurple,
                           ),
                         ],
                       ),
@@ -93,38 +101,34 @@ class StoreScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildStoreCard(String title, String price, String emoji, Color color) {
+  Widget _buildStoreCard(String title, String price, String emoji, Color accentColor) {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 6.h),
       decoration: BoxDecoration(
         color: OrientalTheme.bgCard,
-        borderRadius: BorderRadius.circular(12.r),
-        border: Border.all(color: color.withValues(alpha: 0.5), width: 1.w),
+        borderRadius: BorderRadius.circular(14.r),
+        border: Border.all(color: accentColor.withValues(alpha: 0.35), width: 1.w),
       ),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Row(
-            children: [
-              Text(emoji, style: TextStyle(fontSize: 22.sp)),
-              SizedBox(width: 8.w),
-              Text(
-                title,
-                style: GoogleFonts.cairo(color: OrientalTheme.textLight, fontWeight: FontWeight.bold, fontSize: 11.sp),
-              ),
-            ],
-          ),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: color,
-              foregroundColor: Colors.black,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.r)),
-              padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 2.h),
-            ),
-            onPressed: () => SoundManager().playCoinsCollect(),
-            child: Text(
-              price,
-              style: GoogleFonts.cairo(fontWeight: FontWeight.bold, fontSize: 10.sp),
+          Text(emoji, style: TextStyle(fontSize: 22.sp)),
+          SizedBox(width: 8.w),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(title, style: GoogleFonts.cairo(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 10.sp)),
+                SizedBox(height: 2.h),
+                Container(
+                  padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 2.h),
+                  decoration: BoxDecoration(
+                    color: accentColor.withValues(alpha: 0.2),
+                    borderRadius: BorderRadius.circular(6.r),
+                  ),
+                  child: Text(price, style: GoogleFonts.cairo(color: accentColor, fontWeight: FontWeight.w900, fontSize: 9.sp)),
+                ),
+              ],
             ),
           ),
         ],
@@ -132,36 +136,49 @@ class StoreScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildCustomizationTile({required String title, required String desc, required String price, required IconData icon}) {
+  Widget _buildCustomizationTile({
+    required String title,
+    required String desc,
+    required String price,
+    required IconData icon,
+    required Color accentColor,
+  }) {
     return Container(
       padding: EdgeInsets.all(10.r),
       decoration: BoxDecoration(
         color: OrientalTheme.bgCard,
-        borderRadius: BorderRadius.circular(12.r),
-        border: Border.all(color: OrientalTheme.primaryGold.withValues(alpha: 0.3), width: 1.w),
+        borderRadius: BorderRadius.circular(14.r),
+        border: Border.all(color: accentColor.withValues(alpha: 0.35), width: 1.w),
       ),
       child: Row(
         children: [
-          Icon(icon, color: OrientalTheme.primaryGold, size: 28.r),
+          Container(
+            padding: EdgeInsets.all(8.r),
+            decoration: BoxDecoration(
+              color: accentColor.withValues(alpha: 0.15),
+              borderRadius: BorderRadius.circular(10.r),
+            ),
+            child: Icon(icon, color: accentColor, size: 20.r),
+          ),
           SizedBox(width: 10.w),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(title, style: GoogleFonts.cairo(color: OrientalTheme.textLight, fontWeight: FontWeight.bold, fontSize: 11.sp)),
-                Text(desc, style: GoogleFonts.cairo(color: OrientalTheme.textMuted, fontSize: 9.sp)),
+                Text(title, style: GoogleFonts.cairo(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 10.sp)),
+                Text(desc, style: GoogleFonts.cairo(color: OrientalTheme.textMuted, fontSize: 8.sp)),
               ],
             ),
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
-              backgroundColor: OrientalTheme.primaryGold,
+              backgroundColor: accentColor,
               foregroundColor: Colors.black,
+              padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.r)),
-              padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 2.h),
             ),
             onPressed: () => SoundManager().playButtonClick(),
-            child: Text(price, style: GoogleFonts.cairo(fontWeight: FontWeight.bold, fontSize: 9.sp)),
+            child: Text(price, style: GoogleFonts.cairo(fontWeight: FontWeight.w900, fontSize: 9.sp)),
           ),
         ],
       ),

@@ -38,29 +38,35 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
       backgroundColor: OrientalTheme.bgDark,
       body: SafeArea(
         child: _isLoading
-            ? Center(child: CircularProgressIndicator(color: OrientalTheme.primaryGold, strokeWidth: 3.w))
+            ? Center(child: CircularProgressIndicator(color: OrientalTheme.accentCyan, strokeWidth: 2.5.w))
             : Padding(
                 padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      'سلاطين البلوت والألعاب 👑',
-                      style: GoogleFonts.cairo(
-                        color: OrientalTheme.primaryGold,
-                        fontSize: 16.sp,
-                        fontWeight: FontWeight.bold,
-                      ),
+                    Row(
+                      children: [
+                        Icon(Icons.emoji_events_rounded, color: OrientalTheme.primaryGold, size: 20.r),
+                        SizedBox(width: 6.w),
+                        Text(
+                          'قائمة صدارة المحترفين 🏆',
+                          style: GoogleFonts.cairo(
+                            color: Colors.white,
+                            fontSize: 15.sp,
+                            fontWeight: FontWeight.w900,
+                          ),
+                        ),
+                      ],
                     ),
                     SizedBox(height: 8.h),
                     Expanded(
                       child: Row(
                         children: [
-                          // Left Panel: Podium
+                          // Left Panel: Cyber Podium
                           if (_topSultans.length >= 3)
                             Expanded(
                               flex: 4,
-                              child: _buildPodium(),
+                              child: _buildCyberPodium(),
                             ),
                           SizedBox(width: 14.w),
                           // Right Panel: Rankings List
@@ -71,13 +77,14 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
                               separatorBuilder: (context, index) => SizedBox(height: 6.h),
                               itemBuilder: (context, index) {
                                 final sultan = _topSultans[index];
+                                final isMe = index == 3;
                                 return Container(
                                   padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
                                   decoration: BoxDecoration(
-                                    color: index == 3 ? OrientalTheme.primaryGold.withValues(alpha: 0.15) : OrientalTheme.bgCard,
+                                    color: isMe ? OrientalTheme.accentCyan.withValues(alpha: 0.15) : OrientalTheme.bgCard,
                                     borderRadius: BorderRadius.circular(12.r),
                                     border: Border.all(
-                                      color: index == 3 ? OrientalTheme.primaryGold : Colors.transparent,
+                                      color: isMe ? OrientalTheme.accentCyan : Colors.white.withValues(alpha: 0.08),
                                       width: 1.w,
                                     ),
                                   ),
@@ -86,9 +93,9 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
                                       Text(
                                         '#${index + 1}',
                                         style: GoogleFonts.cairo(
-                                          color: OrientalTheme.primaryGold,
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 13.sp,
+                                          color: index < 3 ? OrientalTheme.primaryGold : OrientalTheme.accentCyan,
+                                          fontWeight: FontWeight.w900,
+                                          fontSize: 12.sp,
                                         ),
                                       ),
                                       SizedBox(width: 10.w),
@@ -103,39 +110,21 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
                                           children: [
                                             Text(
                                               sultan.name,
-                                              style: GoogleFonts.cairo(
-                                                color: OrientalTheme.textLight,
-                                                fontWeight: FontWeight.bold,
-                                                fontSize: 12.sp,
-                                              ),
+                                              style: GoogleFonts.cairo(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 11.sp),
                                             ),
                                             Text(
-                                              sultan.title,
-                                              style: GoogleFonts.cairo(
-                                                color: OrientalTheme.textMuted,
-                                                fontSize: 10.sp,
-                                              ),
+                                              sultan.vipTier,
+                                              style: GoogleFonts.cairo(color: OrientalTheme.textMuted, fontSize: 8.sp),
                                             ),
                                           ],
                                         ),
                                       ),
-                                      Column(
-                                        crossAxisAlignment: CrossAxisAlignment.end,
+                                      Row(
                                         children: [
+                                          Text('🪙 ', style: TextStyle(fontSize: 10.sp)),
                                           Text(
-                                            '${sultan.coins} 🪙',
-                                            style: GoogleFonts.cairo(
-                                              color: OrientalTheme.primaryGold,
-                                              fontWeight: FontWeight.bold,
-                                              fontSize: 11.sp,
-                                            ),
-                                          ),
-                                          Text(
-                                            'فوز: ${sultan.winRate.toStringAsFixed(0)}%',
-                                            style: GoogleFonts.cairo(
-                                              color: OrientalTheme.accentEmerald,
-                                              fontSize: 9.sp,
-                                            ),
+                                            '${sultan.coins}',
+                                            style: GoogleFonts.cairo(color: OrientalTheme.primaryGold, fontWeight: FontWeight.w800, fontSize: 10.sp),
                                           ),
                                         ],
                                       ),
@@ -155,7 +144,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
     );
   }
 
-  Widget _buildPodium() {
+  Widget _buildCyberPodium() {
     final first = _topSultans[0];
     final second = _topSultans[1];
     final third = _topSultans[2];
@@ -164,66 +153,54 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.end,
       children: [
-        // 2nd Place
-        _buildPodiumStep(second, rank: 2, height: 110.h, color: Colors.blueGrey.shade300),
+        _buildPodiumStep(second, '2', OrientalTheme.accentCyan, 90.h),
         SizedBox(width: 8.w),
-        // 1st Place
-        _buildPodiumStep(first, rank: 1, height: 140.h, color: OrientalTheme.primaryGold),
+        _buildPodiumStep(first, '1', OrientalTheme.primaryGold, 120.h, isFirst: true),
         SizedBox(width: 8.w),
-        // 3rd Place
-        _buildPodiumStep(third, rank: 3, height: 90.h, color: Colors.amber.shade800),
+        _buildPodiumStep(third, '3', OrientalTheme.accentPurple, 75.h),
       ],
     );
   }
 
-  Widget _buildPodiumStep(UserModel user, {required int rank, required double height, required Color color}) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Stack(
-          alignment: Alignment.topRight,
-          children: [
-            CircleAvatar(
-              radius: rank == 1 ? 24.r : 20.r,
-              backgroundImage: NetworkImage(user.avatarUrl),
+  Widget _buildPodiumStep(UserModel user, String rank, Color accentColor, double height, {bool isFirst = false}) {
+    return Expanded(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          if (isFirst) Icon(Icons.workspace_premium_rounded, color: OrientalTheme.primaryGold, size: 24.r),
+          CircleAvatar(
+            radius: isFirst ? 22.r : 17.r,
+            backgroundImage: NetworkImage(user.avatarUrl),
+          ),
+          SizedBox(height: 4.h),
+          Text(
+            user.name,
+            style: GoogleFonts.cairo(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 9.sp),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+          SizedBox(height: 4.h),
+          Container(
+            height: height,
+            width: double.infinity,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [accentColor.withValues(alpha: 0.3), accentColor.withValues(alpha: 0.08)],
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+              ),
+              borderRadius: BorderRadius.vertical(top: Radius.circular(12.r)),
+              border: Border.all(color: accentColor.withValues(alpha: 0.5), width: 1.w),
             ),
-            if (rank == 1)
-              Positioned(
-                top: -4.h,
-                right: -4.w,
-                child: Text('👑', style: TextStyle(fontSize: 14.sp)),
+            child: Center(
+              child: Text(
+                rank,
+                style: GoogleFonts.cairo(color: accentColor, fontWeight: FontWeight.w900, fontSize: 22.sp),
               ),
-          ],
-        ),
-        SizedBox(height: 4.h),
-        Text(
-          user.name.split(' ')[0],
-          style: GoogleFonts.cairo(color: OrientalTheme.textLight, fontSize: 10.sp, fontWeight: FontWeight.bold),
-        ),
-        SizedBox(height: 2.h),
-        Container(
-          width: 70.w,
-          height: height,
-          decoration: BoxDecoration(
-            color: color.withValues(alpha: 0.2),
-            borderRadius: BorderRadius.vertical(top: Radius.circular(12.r)),
-            border: Border.all(color: color, width: 1.2.w),
+            ),
           ),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                '#$rank',
-                style: GoogleFonts.cairo(color: color, fontWeight: FontWeight.bold, fontSize: 18.sp),
-              ),
-              Text(
-                '${user.coins}',
-                style: GoogleFonts.cairo(color: Colors.white, fontSize: 9.sp),
-              ),
-            ],
-          ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }

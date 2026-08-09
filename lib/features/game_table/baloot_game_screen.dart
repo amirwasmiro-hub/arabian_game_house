@@ -44,16 +44,16 @@ class _BalootGameScreenState extends State<BalootGameScreen> with TickerProvider
   final List<PlayingCard> _myHand = [
     PlayingCard(suit: '♠', value: 'A', color: Colors.white),
     PlayingCard(suit: '♠', value: 'K', color: Colors.white),
-    PlayingCard(suit: '♥', value: 'J', color: Colors.redAccent),
-    PlayingCard(suit: '♦', value: 'Q', color: Colors.redAccent),
+    PlayingCard(suit: '♥', value: 'J', color: OrientalTheme.accentRuby),
+    PlayingCard(suit: '♦', value: 'Q', color: OrientalTheme.accentRuby),
     PlayingCard(suit: '♣', value: '10', color: Colors.white),
-    PlayingCard(suit: '♦', value: '9', color: Colors.redAccent),
+    PlayingCard(suit: '♦', value: '9', color: OrientalTheme.accentRuby),
     PlayingCard(suit: '♠', value: '7', color: Colors.white),
   ];
 
   final List<PlayingCard> _tableCards = [
-    PlayingCard(suit: '♥', value: 'A', color: Colors.redAccent),
-    PlayingCard(suit: '♥', value: '10', color: Colors.redAccent),
+    PlayingCard(suit: '♥', value: 'A', color: OrientalTheme.accentRuby),
+    PlayingCard(suit: '♥', value: '10', color: OrientalTheme.accentRuby),
   ];
 
   String? _playerEmote;
@@ -101,16 +101,16 @@ class _BalootGameScreenState extends State<BalootGameScreen> with TickerProvider
         backgroundColor: OrientalTheme.bgCard,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(18.r),
-          side: BorderSide(color: OrientalTheme.primaryGold, width: 2.w),
+          side: BorderSide(color: OrientalTheme.accentCyan, width: 2.w),
         ),
         title: Column(
           children: [
             Icon(Icons.emoji_events, color: OrientalTheme.primaryGold, size: 48.r),
             SizedBox(height: 6.h),
             Text(
-              'فوز كاسح! 👑',
+              'انتصار كاسح! 👑',
               style: GoogleFonts.cairo(
-                color: OrientalTheme.primaryGold,
+                color: OrientalTheme.accentCyan,
                 fontWeight: FontWeight.bold,
                 fontSize: 20.sp,
               ),
@@ -118,7 +118,7 @@ class _BalootGameScreenState extends State<BalootGameScreen> with TickerProvider
           ],
         ),
         content: Text(
-          'مبروك! لقد ربحت ${widget.betCoins * 2} ذهبية في هذه الجولة المباركة.',
+          'مبروك! لقد ربحت ${widget.betCoins * 2} ذهبية في هذه المباراة الجبارة.',
           textAlign: TextAlign.center,
           style: GoogleFonts.cairo(color: OrientalTheme.textLight, fontSize: 14.sp),
         ),
@@ -126,9 +126,9 @@ class _BalootGameScreenState extends State<BalootGameScreen> with TickerProvider
           Center(
             child: ElevatedButton(
               style: ElevatedButton.styleFrom(
-                backgroundColor: OrientalTheme.primaryGold,
+                backgroundColor: OrientalTheme.accentCyan,
                 foregroundColor: Colors.black,
-                padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 8.h),
+                padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 8.h),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.r)),
               ),
               onPressed: () {
@@ -136,8 +136,8 @@ class _BalootGameScreenState extends State<BalootGameScreen> with TickerProvider
                 Navigator.pop(context);
               },
               child: Text(
-                'العودة للمجلس',
-                style: GoogleFonts.cairo(fontWeight: FontWeight.bold, fontSize: 14.sp),
+                'العودة للرئيسية',
+                style: GoogleFonts.cairo(fontWeight: FontWeight.bold, fontSize: 13.sp),
               ),
             ),
           ),
@@ -153,30 +153,30 @@ class _BalootGameScreenState extends State<BalootGameScreen> with TickerProvider
       body: SafeArea(
         child: Stack(
           children: [
-            // Background Felt Pattern
+            // Cyber Grid Background
             Positioned.fill(
               child: CustomPaint(
-                painter: ArabianPatternPainter(opacity: 0.04),
+                painter: ArabianPatternPainter(color: OrientalTheme.accentCyan, opacity: 0.03),
               ),
             ),
 
-            // Oval Felt Table Surface (Landscape Horizontal Layout)
+            // Modern Cyber Oval Table Surface
             Positioned.fill(
               child: Padding(
                 padding: EdgeInsets.symmetric(horizontal: 35.w, vertical: 10.h),
                 child: Container(
                   decoration: BoxDecoration(
                     gradient: const RadialGradient(
-                      colors: [Color(0xFF0F4733), Color(0xFF07241A)],
-                      radius: 0.9,
+                      colors: [Color(0xFF142238), Color(0xFF0A111E)],
+                      radius: 0.95,
                     ),
                     borderRadius: BorderRadius.circular(250.r),
-                    border: Border.all(color: OrientalTheme.primaryGold.withValues(alpha: 0.4), width: 3.5.w),
+                    border: Border.all(color: OrientalTheme.accentCyan.withValues(alpha: 0.4), width: 3.w),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.6),
-                        blurRadius: 18.r,
-                        spreadRadius: 4.r,
+                        color: OrientalTheme.accentCyan.withValues(alpha: 0.15),
+                        blurRadius: 20.r,
+                        spreadRadius: 2.r,
                       )
                     ],
                   ),
@@ -184,7 +184,7 @@ class _BalootGameScreenState extends State<BalootGameScreen> with TickerProvider
               ),
             ),
 
-            // Top Bar - Back Button & Scoreboard & Room Name
+            // Top Bar - Navigation & Scores HUD
             Positioned(
               top: 6.h,
               left: 12.w,
@@ -195,200 +195,193 @@ class _BalootGameScreenState extends State<BalootGameScreen> with TickerProvider
                   Row(
                     children: [
                       IconButton(
-                        icon: Icon(Icons.arrow_back_ios_new, color: OrientalTheme.primaryGold, size: 18.r),
+                        icon: Icon(Icons.arrow_back_ios_new, color: OrientalTheme.accentCyan, size: 18.r),
                         onPressed: () => Navigator.pop(context),
                       ),
                       SizedBox(width: 4.w),
                       Text(
                         widget.roomName,
-                        style: GoogleFonts.cairo(color: OrientalTheme.primaryGold, fontSize: 12.sp, fontWeight: FontWeight.bold),
+                        style: GoogleFonts.cairo(color: OrientalTheme.accentCyan, fontSize: 12.sp, fontWeight: FontWeight.w800),
                       ),
                     ],
                   ),
-                  // Score Panel
+                  // Modern Scoreboard HUD
                   Container(
-                    padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 3.h),
+                    padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 4.h),
                     decoration: BoxDecoration(
-                      color: OrientalTheme.bgDark.withValues(alpha: 0.85),
+                      color: OrientalTheme.bgCard.withValues(alpha: 0.9),
                       borderRadius: BorderRadius.circular(16.r),
-                      border: Border.all(color: OrientalTheme.primaryGold, width: 1.w),
+                      border: Border.all(color: OrientalTheme.accentCyan.withValues(alpha: 0.5), width: 1.w),
+                      boxShadow: [
+                        BoxShadow(color: OrientalTheme.accentCyan.withValues(alpha: 0.15), blurRadius: 8.r)
+                      ],
                     ),
                     child: Row(
                       children: [
-                        Text('لنا: ', style: GoogleFonts.cairo(color: OrientalTheme.accentEmerald, fontWeight: FontWeight.bold, fontSize: 12.sp)),
-                        Text('$_ourScore', style: GoogleFonts.cairo(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14.sp)),
-                        SizedBox(width: 10.w),
-                        Text('|', style: TextStyle(color: OrientalTheme.primaryGold.withValues(alpha: 0.5))),
-                        SizedBox(width: 10.w),
-                        Text('لهم: ', style: GoogleFonts.cairo(color: OrientalTheme.accentRuby, fontWeight: FontWeight.bold, fontSize: 12.sp)),
-                        Text('$_theirScore', style: GoogleFonts.cairo(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14.sp)),
+                        Text('فريقنا: ', style: GoogleFonts.cairo(color: OrientalTheme.accentEmerald, fontWeight: FontWeight.w800, fontSize: 11.sp)),
+                        Text('$_ourScore', style: GoogleFonts.cairo(color: Colors.white, fontWeight: FontWeight.w900, fontSize: 13.sp)),
+                        SizedBox(width: 12.w),
+                        Container(width: 1.w, height: 12.h, color: Colors.white24),
+                        SizedBox(width: 12.w),
+                        Text('الخصم: ', style: GoogleFonts.cairo(color: OrientalTheme.accentRuby, fontWeight: FontWeight.w800, fontSize: 11.sp)),
+                        Text('$_theirScore', style: GoogleFonts.cairo(color: Colors.white, fontWeight: FontWeight.w900, fontSize: 13.sp)),
+                        SizedBox(width: 12.w),
+                        Container(
+                          padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
+                          decoration: BoxDecoration(
+                            color: OrientalTheme.primaryGold.withValues(alpha: 0.15),
+                            borderRadius: BorderRadius.circular(6.r),
+                            border: Border.all(color: OrientalTheme.primaryGold.withValues(alpha: 0.4), width: 1.w),
+                          ),
+                          child: Text(_currentBid, style: GoogleFonts.cairo(color: OrientalTheme.primaryGold, fontSize: 9.sp, fontWeight: FontWeight.bold)),
+                        ),
                       ],
                     ),
                   ),
-                  // Current Bid Badge
-                  Container(
-                    padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 3.h),
-                    decoration: BoxDecoration(
-                      color: OrientalTheme.primaryGold,
-                      borderRadius: BorderRadius.circular(10.r),
-                    ),
-                    child: Text(
-                      _currentBid,
-                      style: GoogleFonts.cairo(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 11.sp),
-                    ),
+
+                  // Emotes Trigger Bar
+                  Row(
+                    children: [
+                      _buildEmoteButton('🔥'),
+                      _buildEmoteButton('👑'),
+                      _buildEmoteButton('👏'),
+                    ],
                   ),
                 ],
               ),
             ),
 
-            // Top Player (الشريك)
+            // PLAYERS PODS AROUND THE TABLE
+            // 1. Top Player (Partner)
             Positioned(
-              top: 8.h,
+              top: 45.h,
               left: 0,
               right: 0,
               child: Center(
-                child: _buildPlayerAvatar(
+                child: _buildPlayerPod(
                   name: 'أبو فهد (الشريك)',
-                  avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100',
+                  avatarUrl: 'https://i.pravatar.cc/150?img=33',
+                  isTurn: _currentTurn.contains('الشريك'),
                   cardsCount: 5,
-                  isTurn: _currentTurn.contains('أبو فهد'),
                 ),
               ),
             ),
 
-            // Left Player (الخصم 1)
+            // 2. Left Player (Opponent 1)
             Positioned(
               left: 45.w,
-              top: 0.28.sh,
-              child: _buildPlayerAvatar(
-                name: 'سالم (الخصم)',
-                avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100',
+              top: 100.h,
+              child: _buildPlayerPod(
+                name: 'خالد (خصم)',
+                avatarUrl: 'https://i.pravatar.cc/150?img=12',
+                isTurn: _currentTurn.contains('خالد'),
                 cardsCount: 6,
-                isTurn: _currentTurn.contains('سالم'),
               ),
             ),
 
-            // Right Player (الخصم 2)
+            // 3. Right Player (Opponent 2)
             Positioned(
               right: 45.w,
-              top: 0.28.sh,
-              child: _buildPlayerAvatar(
-                name: 'طارق (الخصم)',
-                avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100',
+              top: 100.h,
+              child: _buildPlayerPod(
+                name: 'بدر (خصم)',
+                avatarUrl: 'https://i.pravatar.cc/150?img=68',
+                isTurn: _currentTurn.contains('بدر'),
                 cardsCount: 6,
-                isTurn: _currentTurn.contains('طارق'),
               ),
             ),
 
-            // Center Table Cards Stack
-            Center(
-              child: Container(
-                width: 140.w,
-                height: 110.h,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: Colors.black.withValues(alpha: 0.15),
-                ),
-                child: Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    if (_tableCards.isEmpty)
-                      Text(
-                        'اقذف ورقتك هنا',
-                        style: GoogleFonts.cairo(color: Colors.white38, fontSize: 12.sp),
-                      ),
-                    ..._tableCards.asMap().entries.map((entry) {
-                      int idx = entry.key;
-                      PlayingCard card = entry.value;
-                      double offset = (idx - (_tableCards.length - 1) / 2) * 16.w;
-                      return Transform.translate(
-                        offset: Offset(offset, idx * 3.h),
-                        child: Transform.rotate(
-                          angle: (idx % 2 == 0 ? 0.1 : -0.1),
-                          child: _buildCardWidget(card, width: 48.w, height: 70.h),
+            // CENTER TABLE — PLAYED CARDS
+            Positioned.fill(
+              child: Center(
+                child: SizedBox(
+                  width: 220.w,
+                  height: 120.h,
+                  child: Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      if (_tableCards.isEmpty)
+                        Text(
+                          'في انتظار الورقة الأولى...',
+                          style: GoogleFonts.cairo(color: Colors.white24, fontSize: 11.sp),
                         ),
-                      );
-                    }),
-                  ],
+                      for (int i = 0; i < _tableCards.length; i++)
+                        Positioned(
+                          left: 70.w + (i * 25.w),
+                          child: Transform.rotate(
+                            angle: (i % 2 == 0 ? 0.08 : -0.08),
+                            child: _buildCardWidget(_tableCards[i], isSmall: true),
+                          ),
+                        ),
+                    ],
+                  ),
                 ),
               ),
             ),
 
-            // Vertical Emote Action Bar (Left Side)
-            Positioned(
-              left: 8.w,
-              bottom: 16.h,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: ['👑', '☕', '👏', '😂', '🔥'].map((emote) {
-                  return Padding(
-                    padding: EdgeInsets.only(bottom: 4.h),
-                    child: InkWell(
-                      onTap: () => _triggerEmote(emote),
-                      child: Container(
-                        padding: EdgeInsets.all(5.r),
-                        decoration: BoxDecoration(
-                          color: OrientalTheme.bgCard,
-                          shape: BoxShape.circle,
-                          border: Border.all(color: OrientalTheme.primaryGold.withValues(alpha: 0.5), width: 1.w),
-                        ),
-                        child: Text(emote, style: TextStyle(fontSize: 14.sp)),
-                      ),
-                    ),
-                  );
-                }).toList(),
-              ),
-            ),
-
-            // Emote bubble preview if triggered
+            // Emote Floating Bubble (If triggered)
             if (_playerEmote != null)
               Positioned(
-                bottom: 100.h,
-                right: 70.w,
-                child: Container(
-                  padding: EdgeInsets.all(6.r),
-                  decoration: BoxDecoration(
-                    color: Colors.black87,
-                    borderRadius: BorderRadius.circular(20.r),
-                    border: Border.all(color: OrientalTheme.primaryGold, width: 1.w),
+                bottom: 110.h,
+                left: 0,
+                right: 0,
+                child: Center(
+                  child: Container(
+                    padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 6.h),
+                    decoration: BoxDecoration(
+                      color: OrientalTheme.accentPurple,
+                      borderRadius: BorderRadius.circular(20.r),
+                      boxShadow: [
+                        BoxShadow(color: OrientalTheme.accentPurple.withValues(alpha: 0.5), blurRadius: 10.r),
+                      ],
+                    ),
+                    child: Text(_playerEmote!, style: TextStyle(fontSize: 22.sp)),
                   ),
-                  child: Text(_playerEmote!, style: TextStyle(fontSize: 24.sp)),
                 ),
               ),
 
-            // Bottom Player (أنت - السلطان) & Hand Cards
+            // BOTTOM HAND CARDS (USER)
             Positioned(
-              bottom: 2.h,
+              bottom: 8.h,
               left: 0,
               right: 0,
               child: Column(
-                mainAxisSize: MainAxisSize.min,
                 children: [
-                  // Cards Hand Carousel
-                  SizedBox(
-                    height: 90.h,
-                    child: Stack(
-                      alignment: Alignment.bottomCenter,
-                      children: _myHand.asMap().entries.map((entry) {
-                        int index = entry.key;
-                        PlayingCard card = entry.value;
-                        double totalCards = _myHand.length.toDouble();
-                        double centerOffset = index - (totalCards - 1) / 2;
-                        double angle = centerOffset * 0.07;
-                        double translateX = centerOffset * 32.w;
-                        double translateY = (centerOffset.abs()) * 3.h;
+                  // Turn Indicator Badge
+                  Container(
+                    padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 2.h),
+                    decoration: BoxDecoration(
+                      color: OrientalTheme.accentCyan.withValues(alpha: 0.15),
+                      borderRadius: BorderRadius.circular(8.r),
+                      border: Border.all(color: OrientalTheme.accentCyan.withValues(alpha: 0.4), width: 1.w),
+                    ),
+                    child: Text(
+                      'دور اللعب: $_currentTurn',
+                      style: GoogleFonts.cairo(color: OrientalTheme.accentCyan, fontSize: 9.sp, fontWeight: FontWeight.w700),
+                    ),
+                  ),
 
-                        return Transform.translate(
-                          offset: Offset(translateX, translateY),
-                          child: Transform.rotate(
-                            angle: angle,
-                            child: GestureDetector(
-                              onTap: () => _playCard(index),
-                              child: _buildCardWidget(card, width: 52.w, height: 80.h),
+                  SizedBox(height: 6.h),
+
+                  // Cards Hand List
+                  SizedBox(
+                    height: 95.h,
+                    child: Center(
+                      child: ListView.builder(
+                        shrinkWrap: true,
+                        scrollDirection: Axis.horizontal,
+                        itemCount: _myHand.length,
+                        itemBuilder: (context, index) {
+                          final card = _myHand[index];
+                          return GestureDetector(
+                            onTap: () => _playCard(index),
+                            child: Padding(
+                              padding: EdgeInsets.symmetric(horizontal: 2.w),
+                              child: _buildCardWidget(card),
                             ),
-                          ),
-                        );
-                      }).toList(),
+                          );
+                        },
+                      ),
                     ),
                   ),
                 ],
@@ -400,11 +393,18 @@ class _BalootGameScreenState extends State<BalootGameScreen> with TickerProvider
     );
   }
 
-  Widget _buildPlayerAvatar({
+  Widget _buildEmoteButton(String emote) {
+    return IconButton(
+      icon: Text(emote, style: TextStyle(fontSize: 16.sp)),
+      onPressed: () => _triggerEmote(emote),
+    );
+  }
+
+  Widget _buildPlayerPod({
     required String name,
-    required String avatar,
-    required int cardsCount,
+    required String avatarUrl,
     required bool isTurn,
+    required int cardsCount,
   }) {
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -414,80 +414,95 @@ class _BalootGameScreenState extends State<BalootGameScreen> with TickerProvider
           decoration: BoxDecoration(
             shape: BoxShape.circle,
             border: Border.all(
-              color: isTurn ? OrientalTheme.accentEmerald : OrientalTheme.primaryGold,
-              width: isTurn ? 2.w : 1.w,
+              color: isTurn ? OrientalTheme.accentCyan : Colors.white24,
+              width: isTurn ? 2.5.w : 1.w,
             ),
             boxShadow: isTurn
-                ? [BoxShadow(color: OrientalTheme.accentEmerald.withValues(alpha: 0.6), blurRadius: 6.r)]
+                ? [BoxShadow(color: OrientalTheme.accentCyan.withValues(alpha: 0.5), blurRadius: 10.r)]
                 : null,
           ),
           child: CircleAvatar(
             radius: 16.r,
-            backgroundImage: NetworkImage(avatar),
+            backgroundImage: NetworkImage(avatarUrl),
           ),
         ),
         SizedBox(height: 2.h),
         Container(
-          padding: EdgeInsets.symmetric(horizontal: 5.w, vertical: 1.h),
+          padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 1.h),
           decoration: BoxDecoration(
-            color: OrientalTheme.bgDark.withValues(alpha: 0.8),
+            color: OrientalTheme.bgCard,
             borderRadius: BorderRadius.circular(6.r),
+            border: Border.all(color: Colors.white12, width: 1.w),
           ),
-          child: Text(
-            name,
-            style: GoogleFonts.cairo(color: OrientalTheme.textLight, fontSize: 9.sp, fontWeight: FontWeight.bold),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(name, style: GoogleFonts.cairo(color: Colors.white, fontSize: 8.sp, fontWeight: FontWeight.bold)),
+              SizedBox(width: 3.w),
+              Icon(Icons.style, color: OrientalTheme.primaryGold, size: 8.r),
+              Text(' $cardsCount', style: GoogleFonts.cairo(color: OrientalTheme.primaryGold, fontSize: 8.sp, fontWeight: FontWeight.bold)),
+            ],
           ),
         ),
       ],
     );
   }
 
-  Widget _buildCardWidget(PlayingCard card, {required double width, required double height}) {
+  Widget _buildCardWidget(PlayingCard card, {bool isSmall = false}) {
+    final double width = isSmall ? 40.w : 52.w;
+    final double height = isSmall ? 60.h : 80.h;
+
     return Container(
       width: width,
       height: height,
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(5.r),
-        border: Border.all(color: Colors.black12, width: 1.w),
+        color: const Color(0xFF1E2638),
+        borderRadius: BorderRadius.circular(8.r),
+        border: Border.all(
+          color: OrientalTheme.accentCyan.withValues(alpha: 0.4),
+          width: 1.w,
+        ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.3),
-            blurRadius: 4.r,
-            offset: Offset(0, 2.h),
-          ),
+            color: Colors.black.withValues(alpha: 0.4),
+            blurRadius: 6.r,
+            offset: Offset(0, 3.h),
+          )
         ],
       ),
       child: Padding(
-        padding: EdgeInsets.all(2.r),
+        padding: EdgeInsets.all(4.r),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Align(
-              alignment: Alignment.topLeft,
+              alignment: Alignment.topRight,
               child: Text(
-                '${card.value}\n${card.suit}',
-                style: TextStyle(
+                card.value,
+                style: GoogleFonts.cairo(
                   color: card.color,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 9.sp,
-                  height: 0.9,
+                  fontWeight: FontWeight.w900,
+                  fontSize: isSmall ? 10.sp : 12.sp,
+                  height: 1.0,
                 ),
               ),
             ),
             Text(
               card.suit,
-              style: TextStyle(color: card.color, fontSize: 16.sp),
+              style: TextStyle(
+                color: card.color,
+                fontSize: isSmall ? 14.sp : 18.sp,
+              ),
             ),
             Align(
-              alignment: Alignment.bottomRight,
+              alignment: Alignment.bottomLeft,
               child: Text(
-                '${card.value}\n${card.suit}',
-                style: TextStyle(
+                card.value,
+                style: GoogleFonts.cairo(
                   color: card.color,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 9.sp,
-                  height: 0.9,
+                  fontWeight: FontWeight.w900,
+                  fontSize: isSmall ? 10.sp : 12.sp,
+                  height: 1.0,
                 ),
               ),
             ),

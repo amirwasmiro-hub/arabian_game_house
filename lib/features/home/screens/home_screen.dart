@@ -72,8 +72,8 @@ class _HomeScreenState extends State<HomeScreen>
         backgroundColor: OrientalTheme.bgDark,
         body: Center(
           child: CircularProgressIndicator(
-            color: OrientalTheme.primaryGold,
-            strokeWidth: 2.w,
+            color: OrientalTheme.accentCyan,
+            strokeWidth: 2.5.w,
           ),
         ),
       );
@@ -83,26 +83,53 @@ class _HomeScreenState extends State<HomeScreen>
       backgroundColor: OrientalTheme.bgDark,
       body: Stack(
         children: [
-          // ─── Animated Background Pattern ───────────────
+          // ─── Cyber Tech Grid Background ───────────────
           Positioned.fill(
-            child: CustomPaint(painter: ArabianPatternPainter(opacity: 0.035)),
+            child: CustomPaint(
+              painter: ArabianPatternPainter(
+                color: OrientalTheme.accentCyan,
+                opacity: 0.03,
+              ),
+            ),
           ),
 
-          // ─── Radial Top-Left Glow ───────────────────────
+          // ─── Ambient Neon Backdrop Glows ─────────────
           Positioned(
-            top: -60.h,
-            left: -40.w,
+            top: -70.h,
+            left: -50.w,
             child: AnimatedBuilder(
               animation: _glowController,
               builder: (_, _) => Container(
-                width: 280.w,
+                width: 320.w,
+                height: 220.h,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  gradient: RadialGradient(
+                    colors: [
+                      OrientalTheme.accentPurple.withValues(
+                        alpha: 0.12 + _glowController.value * 0.08,
+                      ),
+                      Colors.transparent,
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+          Positioned(
+            bottom: -60.h,
+            right: -40.w,
+            child: AnimatedBuilder(
+              animation: _glowController,
+              builder: (_, _) => Container(
+                width: 300.w,
                 height: 200.h,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   gradient: RadialGradient(
                     colors: [
-                      OrientalTheme.primaryGold.withValues(
-                        alpha: 0.07 + _glowController.value * 0.06,
+                      OrientalTheme.accentCyan.withValues(
+                        alpha: 0.10 + _glowController.value * 0.06,
                       ),
                       Colors.transparent,
                     ],
@@ -112,23 +139,23 @@ class _HomeScreenState extends State<HomeScreen>
             ),
           ),
 
-          // ─── Main 3-Column Layout ──────────────────────
+          // ─── Main 3-Column Modern Gaming Layout ─────────
           SafeArea(
             child: Padding(
-              padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 8.h),
+              padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 6.h),
               child: Row(
                 children: [
-                  // ════ LEFT PANEL — Player Profile ════
+                  // ════ LEFT PANEL — Gamer Card & Stats ════
                   _buildLeftPanel(),
 
                   SizedBox(width: 12.w),
 
-                  // ════ CENTER PANEL — Featured Game ════
+                  // ════ CENTER PANEL — Logo & Hero Game Card ════
                   _buildCenterPanel(),
 
                   SizedBox(width: 12.w),
 
-                  // ════ RIGHT PANEL — Live Rooms ════
+                  // ════ RIGHT PANEL — Live Battle Lobbies ════
                   _buildRightPanel(),
                 ],
               ),
@@ -140,117 +167,133 @@ class _HomeScreenState extends State<HomeScreen>
   }
 
   // ───────────────────────────────────────────────
-  // LEFT PANEL
+  // LEFT PANEL — Gamer Card & Stats
   // ───────────────────────────────────────────────
   Widget _buildLeftPanel() {
     return SizedBox(
-      width: 185.w,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Avatar & Name Card
-          _buildProfileCard()
-              .animate()
-              .fadeIn(duration: 400.ms)
-              .slideX(begin: -0.2),
+      width: 190.w,
+      child: SingleChildScrollView(
+        physics: const BouncingScrollPhysics(),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Gamer Profile Header
+            _buildGamerProfileCard()
+                .animate()
+                .fadeIn(duration: 400.ms)
+                .slideX(begin: -0.2),
 
-          SizedBox(height: 8.h),
+            SizedBox(height: 6.h),
 
-          // Currency Row
-          Row(
-            children: [
-              Expanded(
-                child: _buildCurrencyBadge(
-                  '🪙',
-                  '${_user!.coins}',
-                  OrientalTheme.primaryGold,
+            // Currency Pill Badges
+            Row(
+              children: [
+                Expanded(
+                  child: _buildCyberCurrencyBadge(
+                    '🪙',
+                    '${_user!.coins}',
+                    OrientalTheme.primaryGold,
+                  ),
                 ),
-              ),
-              SizedBox(width: 6.w),
-              Expanded(
-                child: _buildCurrencyBadge(
-                  '💎',
-                  '${_user!.gems}',
-                  OrientalTheme.accentEmerald,
+                SizedBox(width: 5.w),
+                Expanded(
+                  child: _buildCyberCurrencyBadge(
+                    '💎',
+                    '${_user!.gems}',
+                    OrientalTheme.accentCyan,
+                  ),
                 ),
-              ),
-            ],
-          ),
+              ],
+            ),
 
-          SizedBox(height: 8.h),
+            SizedBox(height: 6.h),
 
-          // XP Progress
-          _buildXpBar().animate().fadeIn(delay: 200.ms),
+            // Level & XP Bar
+            _buildCyberXpBar().animate().fadeIn(delay: 150.ms),
 
-          SizedBox(height: 10.h),
+            SizedBox(height: 6.h),
 
-          // Win Stats Row
-          Row(
-            children: [
-              Expanded(
-                child: _buildMiniStat(
-                  '${_user!.wins}',
-                  'فوز',
-                  OrientalTheme.accentEmerald,
-                  Icons.emoji_events_rounded,
+            // Win Stats Row
+            Row(
+              children: [
+                Expanded(
+                  child: _buildCyberStatCard(
+                    '${_user!.wins}',
+                    'انتصار',
+                    OrientalTheme.accentEmerald,
+                    Icons.emoji_events_rounded,
+                  ),
                 ),
-              ),
-              SizedBox(width: 6.w),
-              Expanded(
-                child: _buildMiniStat(
-                  '${_user!.winRate.toStringAsFixed(0)}%',
-                  'نسبة',
-                  OrientalTheme.primaryGold,
-                  Icons.pie_chart_rounded,
+                SizedBox(width: 5.w),
+                Expanded(
+                  child: _buildCyberStatCard(
+                    '${_user!.winRate.toStringAsFixed(0)}%',
+                    'معدل الفوز',
+                    OrientalTheme.accentPurple,
+                    Icons.bolt_rounded,
+                  ),
                 ),
-              ),
-            ],
-          ),
+              ],
+            ),
 
-          SizedBox(height: 8.h),
+            SizedBox(height: 6.h),
 
-          // Daily Reward compact
-          const DailyRewardWidget().animate().fadeIn(delay: 300.ms),
-        ],
+            // Daily Reward Compact Card
+            const DailyRewardWidget().animate().fadeIn(delay: 250.ms),
+          ],
+        ),
       ),
     );
   }
 
-  Widget _buildProfileCard() {
+  Widget _buildGamerProfileCard() {
     return Container(
       padding: EdgeInsets.all(10.r),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [OrientalTheme.bgCard, OrientalTheme.bgElevated],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
+        color: OrientalTheme.bgCard,
         borderRadius: BorderRadius.circular(16.r),
         border: Border.all(
-          color: OrientalTheme.primaryGold.withValues(alpha: 0.35),
+          color: OrientalTheme.accentCyan.withValues(alpha: 0.3),
           width: 1.w,
         ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.3),
+            blurRadius: 10.r,
+            offset: Offset(0, 4.h),
+          ),
+        ],
       ),
       child: Row(
         children: [
-          // Avatar with glow
+          // Cyber Avatar Frame
           AnimatedBuilder(
             animation: _glowController,
             builder: (_, _) => Container(
+              padding: EdgeInsets.all(2.r),
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
+                gradient: SweepGradient(
+                  colors: const [
+                    OrientalTheme.accentCyan,
+                    OrientalTheme.accentPurple,
+                    OrientalTheme.primaryGold,
+                    OrientalTheme.accentCyan,
+                  ],
+                  transform: GradientRotation(_glowController.value * 6.28),
+                ),
                 boxShadow: [
                   BoxShadow(
-                    color: OrientalTheme.primaryGold.withValues(
-                      alpha: 0.25 + _glowController.value * 0.2,
+                    color: OrientalTheme.accentCyan.withValues(
+                      alpha: 0.3 + _glowController.value * 0.2,
                     ),
-                    blurRadius: 10.r,
-                    spreadRadius: 1.r,
+                    blurRadius: 8.r,
                   ),
                 ],
               ),
               child: CircleAvatar(
-                radius: 22.r,
+                radius: 20.r,
                 backgroundImage: NetworkImage(_user!.avatarUrl),
               ),
             ),
@@ -263,30 +306,31 @@ class _HomeScreenState extends State<HomeScreen>
                 Text(
                   _user!.name,
                   style: GoogleFonts.cairo(
-                    color: Colors.white,
-                    fontSize: 12.sp,
-                    fontWeight: FontWeight.w700,
+                    color: OrientalTheme.textLight,
+                    fontSize: 11.sp,
+                    fontWeight: FontWeight.w800,
                   ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
+                SizedBox(height: 2.h),
                 Container(
-                  padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 1.h),
+                  padding: EdgeInsets.symmetric(horizontal: 7.w, vertical: 1.h),
                   decoration: BoxDecoration(
                     gradient: const LinearGradient(
                       colors: [
-                        OrientalTheme.goldDark,
-                        OrientalTheme.primaryGold,
+                        OrientalTheme.accentPurple,
+                        OrientalTheme.accentCyan,
                       ],
                     ),
-                    borderRadius: BorderRadius.circular(5.r),
+                    borderRadius: BorderRadius.circular(6.r),
                   ),
                   child: Text(
                     _user!.vipTier,
                     style: GoogleFonts.cairo(
                       color: Colors.black,
                       fontSize: 8.sp,
-                      fontWeight: FontWeight.w800,
+                      fontWeight: FontWeight.w900,
                     ),
                   ),
                 ),
@@ -298,24 +342,31 @@ class _HomeScreenState extends State<HomeScreen>
     );
   }
 
-  Widget _buildCurrencyBadge(String emoji, String amount, Color color) {
+  Widget _buildCyberCurrencyBadge(
+    String emoji,
+    String amount,
+    Color accentColor,
+  ) {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 5.h),
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.08),
+        color: accentColor.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(10.r),
-        border: Border.all(color: color.withValues(alpha: 0.3), width: 1.w),
+        border: Border.all(
+          color: accentColor.withValues(alpha: 0.35),
+          width: 1.w,
+        ),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Text(emoji, style: TextStyle(fontSize: 12.sp)),
+          Text(emoji, style: TextStyle(fontSize: 11.sp)),
           SizedBox(width: 4.w),
           Flexible(
             child: Text(
               amount,
               style: GoogleFonts.cairo(
-                color: color,
+                color: accentColor,
                 fontWeight: FontWeight.w800,
                 fontSize: 10.sp,
               ),
@@ -327,7 +378,7 @@ class _HomeScreenState extends State<HomeScreen>
     );
   }
 
-  Widget _buildXpBar() {
+  Widget _buildCyberXpBar() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -336,14 +387,18 @@ class _HomeScreenState extends State<HomeScreen>
           children: [
             Text(
               'المستوى ${_user!.level}',
-              style: GoogleFonts.cairo(color: Colors.white70, fontSize: 9.sp),
+              style: GoogleFonts.cairo(
+                color: OrientalTheme.textMuted,
+                fontSize: 9.sp,
+                fontWeight: FontWeight.w600,
+              ),
             ),
             Text(
               '${(_user!.xpProgress * 100).toInt()}%',
               style: GoogleFonts.cairo(
-                color: OrientalTheme.primaryGold,
+                color: OrientalTheme.accentCyan,
                 fontSize: 9.sp,
-                fontWeight: FontWeight.w700,
+                fontWeight: FontWeight.w800,
               ),
             ),
           ],
@@ -354,7 +409,7 @@ class _HomeScreenState extends State<HomeScreen>
             Container(
               height: 5.h,
               decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.08),
+                color: Colors.white.withValues(alpha: 0.07),
                 borderRadius: BorderRadius.circular(10.r),
               ),
             ),
@@ -364,12 +419,15 @@ class _HomeScreenState extends State<HomeScreen>
                 height: 5.h,
                 decoration: BoxDecoration(
                   gradient: const LinearGradient(
-                    colors: [OrientalTheme.goldDark, OrientalTheme.goldLight],
+                    colors: [
+                      OrientalTheme.accentPurple,
+                      OrientalTheme.accentCyan,
+                    ],
                   ),
                   borderRadius: BorderRadius.circular(10.r),
                   boxShadow: [
                     BoxShadow(
-                      color: OrientalTheme.primaryGold.withValues(alpha: 0.5),
+                      color: OrientalTheme.accentCyan.withValues(alpha: 0.6),
                       blurRadius: 4.r,
                     ),
                   ],
@@ -382,18 +440,18 @@ class _HomeScreenState extends State<HomeScreen>
     );
   }
 
-  Widget _buildMiniStat(
+  Widget _buildCyberStatCard(
     String value,
     String label,
     Color color,
     IconData icon,
   ) {
     return Container(
-      padding: EdgeInsets.symmetric(vertical: 7.h),
+      padding: EdgeInsets.symmetric(vertical: 6.h),
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.07),
+        color: color.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(10.r),
-        border: Border.all(color: color.withValues(alpha: 0.2), width: 1.w),
+        border: Border.all(color: color.withValues(alpha: 0.3), width: 1.w),
       ),
       child: Column(
         children: [
@@ -403,95 +461,55 @@ class _HomeScreenState extends State<HomeScreen>
             value,
             style: GoogleFonts.cairo(
               color: Colors.white,
-              fontWeight: FontWeight.w800,
+              fontWeight: FontWeight.w900,
               fontSize: 11.sp,
             ),
           ),
           Text(
             label,
-            style: GoogleFonts.cairo(color: Colors.white38, fontSize: 8.sp),
+            style: GoogleFonts.cairo(
+              color: OrientalTheme.textMuted,
+              fontSize: 8.sp,
+            ),
           ),
         ],
       ),
     );
   }
 
+  // ───────────────────────────────────────────────
+  // TOP CENTER LOGO & CENTER PANEL
+  // ───────────────────────────────────────────────
   Widget _buildTopCenterLogo() {
-    return Column(
+    return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(Icons.military_tech_rounded, color: OrientalTheme.primaryGold, size: 16.r),
-            SizedBox(width: 5.w),
-            ShaderMask(
-              shaderCallback: (bounds) => const LinearGradient(
-                colors: [
-                  OrientalTheme.goldLight,
-                  OrientalTheme.primaryGold,
-                  OrientalTheme.goldDark,
-                ],
-              ).createShader(bounds),
-              child: Text(
-                'بيت الألعاب العربية',
-                style: GoogleFonts.cairo(
-                  fontSize: 16.sp,
-                  fontWeight: FontWeight.w900,
-                  color: Colors.white,
-                  letterSpacing: 0.5,
-                ),
-              ),
-            ),
-            SizedBox(width: 5.w),
-            Icon(Icons.military_tech_rounded, color: OrientalTheme.primaryGold, size: 16.r),
-          ],
-        ),
-        SizedBox(height: 2.h),
-        Container(
-          padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 2.h),
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [
-                OrientalTheme.accentRuby.withValues(alpha: 0.25),
-                OrientalTheme.primaryGold.withValues(alpha: 0.25),
-                OrientalTheme.accentRuby.withValues(alpha: 0.25),
-              ],
-            ),
-            borderRadius: BorderRadius.circular(12.r),
-            border: Border.all(
-              color: OrientalTheme.primaryGold.withValues(alpha: 0.5),
-              width: 1.w,
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: OrientalTheme.primaryGold.withValues(alpha: 0.15),
-                blurRadius: 6.r,
-              ),
+        Icon(Icons.bolt_rounded, color: OrientalTheme.accentCyan, size: 16.r),
+        SizedBox(width: 5.w),
+        ShaderMask(
+          shaderCallback: (bounds) => const LinearGradient(
+            colors: [
+              OrientalTheme.accentCyan,
+              OrientalTheme.primaryGold,
+              OrientalTheme.accentPurple,
             ],
-          ),
+          ).createShader(bounds),
           child: Text(
-            '🔥 اوووف اااااح 🔥',
+            'بيت الألعاب العربية',
             style: GoogleFonts.cairo(
-              fontSize: 10.sp,
+              fontSize: 16.sp,
               fontWeight: FontWeight.w900,
-              color: OrientalTheme.goldLight,
-              shadows: [
-                Shadow(
-                  color: OrientalTheme.accentRuby,
-                  blurRadius: 8.r,
-                ),
-              ],
+              color: Colors.white,
+              letterSpacing: 0.8,
             ),
           ),
         ),
+        SizedBox(width: 5.w),
+        Icon(Icons.bolt_rounded, color: OrientalTheme.accentCyan, size: 16.r),
       ],
     );
   }
 
-  // ───────────────────────────────────────────────
-  // CENTER PANEL — Featured Game Hero Card
-  // ───────────────────────────────────────────────
   Widget _buildCenterPanel() {
     final games = GameModel.gamesList;
     final selectedGame = games[_selectedGameIndex];
@@ -499,29 +517,32 @@ class _HomeScreenState extends State<HomeScreen>
     return Expanded(
       child: Column(
         children: [
-          // Top Center App Logo
-          _buildTopCenterLogo().animate().fadeIn(duration: 400.ms).slideY(begin: -0.2),
+          // Top Center Logo
+          _buildTopCenterLogo()
+              .animate()
+              .fadeIn(duration: 400.ms)
+              .slideY(begin: -0.2),
 
           SizedBox(height: 6.h),
 
-          // Featured Hero Card
+          // Modern Hero Game Card
           Expanded(
             flex: 7,
             child: _buildHeroGameCard(selectedGame)
                 .animate()
-                .fadeIn(duration: 500.ms)
-                .scale(begin: const Offset(0.95, 0.95)),
+                .fadeIn(duration: 450.ms)
+                .scale(begin: const Offset(0.96, 0.96)),
           ),
 
           SizedBox(height: 8.h),
 
-          // Horizontal Game Selector Tabs
+          // Horizontal Cyber Game Selector Tabs
           SizedBox(
-            height: 46.h,
+            height: 44.h,
             child: ListView.separated(
               scrollDirection: Axis.horizontal,
               itemCount: games.length,
-              separatorBuilder: (_, __) => SizedBox(width: 7.w),
+              separatorBuilder: (_, _) => SizedBox(width: 7.w),
               itemBuilder: (context, index) {
                 final game = games[index];
                 final isSelected = _selectedGameIndex == index;
@@ -538,18 +559,20 @@ class _HomeScreenState extends State<HomeScreen>
                     ),
                     decoration: BoxDecoration(
                       color: isSelected
-                          ? game.primaryColor.withValues(alpha: 0.2)
+                          ? OrientalTheme.accentCyan.withValues(alpha: 0.15)
                           : OrientalTheme.bgCard,
                       borderRadius: BorderRadius.circular(12.r),
                       border: Border.all(
-                        color: isSelected ? game.primaryColor : Colors.white12,
+                        color: isSelected
+                            ? OrientalTheme.accentCyan
+                            : Colors.white.withValues(alpha: 0.08),
                         width: isSelected ? 1.5.w : 1.w,
                       ),
                       boxShadow: isSelected
                           ? [
                               BoxShadow(
-                                color: game.primaryColor.withValues(
-                                  alpha: 0.25,
+                                color: OrientalTheme.accentCyan.withValues(
+                                  alpha: 0.3,
                                 ),
                                 blurRadius: 8.r,
                               ),
@@ -562,7 +585,7 @@ class _HomeScreenState extends State<HomeScreen>
                         Icon(
                           game.icon,
                           color: isSelected
-                              ? game.primaryColor
+                              ? OrientalTheme.accentCyan
                               : Colors.white38,
                           size: 13.r,
                         ),
@@ -571,12 +594,12 @@ class _HomeScreenState extends State<HomeScreen>
                           game.titleAr,
                           style: GoogleFonts.cairo(
                             color: isSelected
-                                ? game.primaryColor
+                                ? OrientalTheme.textLight
                                 : Colors.white54,
                             fontSize: 10.sp,
                             fontWeight: isSelected
                                 ? FontWeight.w800
-                                : FontWeight.w400,
+                                : FontWeight.w500,
                           ),
                         ),
                       ],
@@ -609,25 +632,26 @@ class _HomeScreenState extends State<HomeScreen>
         animation: _glowController,
         builder: (_, _) => Container(
           decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [
-                OrientalTheme.bgCard,
-                game.primaryColor.withValues(alpha: 0.12),
-              ],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
+            color: game.cardGradientColors[0],
+            image: DecorationImage(
+              image: AssetImage(game.cardImagePath),
+              fit: BoxFit.cover,
+              colorFilter: ColorFilter.mode(
+                game.cardGradientColors[0].withValues(alpha: 0.55),
+                BlendMode.multiply,
+              ),
             ),
             borderRadius: BorderRadius.circular(22.r),
             border: Border.all(
               color: game.primaryColor.withValues(
-                alpha: 0.3 + _glowController.value * 0.3,
+                alpha: 0.4 + _glowController.value * 0.4,
               ),
               width: 1.5.w,
             ),
             boxShadow: [
               BoxShadow(
                 color: game.primaryColor.withValues(
-                  alpha: 0.1 + _glowController.value * 0.12,
+                  alpha: 0.2 + _glowController.value * 0.2,
                 ),
                 blurRadius: 20.r,
                 spreadRadius: 2.r,
@@ -636,25 +660,34 @@ class _HomeScreenState extends State<HomeScreen>
           ),
           child: Stack(
             children: [
-              // Background decorative icon
-              Positioned(
-                right: -10.w,
-                bottom: -10.h,
-                child: Icon(
-                  game.icon,
-                  size: 130.r,
-                  color: game.primaryColor.withValues(alpha: 0.06),
+              // Subtle dark gradient overlay at bottom for text legibility
+              Positioned.fill(
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(22.r),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [
+                          Colors.transparent,
+                          game.cardGradientColors[0].withValues(alpha: 0.7),
+                        ],
+                        stops: const [0.3, 1.0],
+                      ),
+                    ),
+                  ),
                 ),
               ),
 
-              // Islamic pattern overlay
+              // Subtle Hex Grid Pattern Overlay
               Positioned.fill(
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(22.r),
                   child: CustomPaint(
                     painter: ArabianPatternPainter(
                       color: game.primaryColor,
-                      opacity: 0.03,
+                      opacity: 0.04,
                     ),
                   ),
                 ),
@@ -662,7 +695,7 @@ class _HomeScreenState extends State<HomeScreen>
 
               // Content
               Padding(
-                padding: EdgeInsets.all(18.r),
+                padding: EdgeInsets.all(16.r),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -671,17 +704,23 @@ class _HomeScreenState extends State<HomeScreen>
                         Container(
                           padding: EdgeInsets.all(8.r),
                           decoration: BoxDecoration(
-                            color: game.primaryColor.withValues(alpha: 0.15),
-                            borderRadius: BorderRadius.circular(10.r),
+                            color: game.primaryColor.withValues(alpha: 0.2),
+                            borderRadius: BorderRadius.circular(12.r),
                             border: Border.all(
-                              color: game.primaryColor.withValues(alpha: 0.4),
+                              color: game.primaryColor.withValues(alpha: 0.5),
                               width: 1.w,
                             ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: game.primaryColor.withValues(alpha: 0.4),
+                                blurRadius: 10.r,
+                              ),
+                            ],
                           ),
                           child: Icon(
                             game.icon,
                             color: game.primaryColor,
-                            size: 22.r,
+                            size: 20.r,
                           ),
                         ),
                         SizedBox(width: 10.w),
@@ -692,42 +731,41 @@ class _HomeScreenState extends State<HomeScreen>
                               game.titleAr,
                               style: GoogleFonts.cairo(
                                 color: Colors.white,
-                                fontSize: 18.sp,
+                                fontSize: 17.sp,
                                 fontWeight: FontWeight.w900,
                               ),
                             ),
                             Text(
                               game.titleEn.toUpperCase(),
                               style: GoogleFonts.cairo(
-                                color: game.primaryColor.withValues(alpha: 0.7),
-                                fontSize: 9.sp,
+                                color: game.primaryColor.withValues(alpha: 0.8),
+                                fontSize: 8.sp,
                                 letterSpacing: 2,
-                                fontWeight: FontWeight.w600,
+                                fontWeight: FontWeight.w700,
                               ),
                             ),
                           ],
                         ),
                         const Spacer(),
-                        // Badge
                         Container(
                           padding: EdgeInsets.symmetric(
-                            horizontal: 8.w,
+                            horizontal: 9.w,
                             vertical: 3.h,
                           ),
                           decoration: BoxDecoration(
                             color: game.primaryColor.withValues(alpha: 0.15),
                             borderRadius: BorderRadius.circular(8.r),
                             border: Border.all(
-                              color: game.primaryColor.withValues(alpha: 0.4),
+                              color: game.primaryColor.withValues(alpha: 0.5),
                               width: 1.w,
                             ),
                           ),
                           child: Text(
                             game.badgeTag,
                             style: GoogleFonts.cairo(
-                              color: game.primaryColor,
+                              color: OrientalTheme.accentCyan,
                               fontSize: 9.sp,
-                              fontWeight: FontWeight.w800,
+                              fontWeight: FontWeight.w900,
                             ),
                           ),
                         ),
@@ -739,18 +777,18 @@ class _HomeScreenState extends State<HomeScreen>
                     Text(
                       game.subtitle,
                       style: GoogleFonts.cairo(
-                        color: Colors.white60,
+                        color: Colors.white70,
                         fontSize: 10.sp,
-                        height: 1.4,
+                        height: 1.3,
                       ),
                       maxLines: 2,
                     ),
 
-                    SizedBox(height: 12.h),
+                    SizedBox(height: 10.h),
 
                     Row(
                       children: [
-                        // Online players badge
+                        // Live Online Players Indicator
                         Container(
                           padding: EdgeInsets.symmetric(
                             horizontal: 10.w,
@@ -763,7 +801,7 @@ class _HomeScreenState extends State<HomeScreen>
                             borderRadius: BorderRadius.circular(8.r),
                             border: Border.all(
                               color: OrientalTheme.accentEmerald.withValues(
-                                alpha: 0.3,
+                                alpha: 0.35,
                               ),
                               width: 1.w,
                             ),
@@ -780,80 +818,14 @@ class _HomeScreenState extends State<HomeScreen>
                               ),
                               SizedBox(width: 5.w),
                               Text(
-                                '${game.onlinePlayers} لاعب الآن',
+                                '${game.onlinePlayers} متصل الآن',
                                 style: GoogleFonts.cairo(
                                   color: OrientalTheme.accentEmerald,
                                   fontSize: 9.sp,
-                                  fontWeight: FontWeight.w700,
+                                  fontWeight: FontWeight.w800,
                                 ),
                               ),
                             ],
-                          ),
-                        ),
-
-                        const Spacer(),
-
-                        // Play Button
-                        Container(
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              colors: [
-                                game.primaryColor,
-                                game.primaryColor.withValues(alpha: 0.7),
-                              ],
-                            ),
-                            borderRadius: BorderRadius.circular(10.r),
-                            boxShadow: [
-                              BoxShadow(
-                                color: game.primaryColor.withValues(
-                                  alpha: 0.35,
-                                ),
-                                blurRadius: 8.r,
-                                offset: Offset(0, 3.h),
-                              ),
-                            ],
-                          ),
-                          child: Material(
-                            color: Colors.transparent,
-                            child: InkWell(
-                              borderRadius: BorderRadius.circular(10.r),
-                              onTap: () {
-                                SoundManager().playCardDeal();
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => BalootGameScreen(
-                                      roomName: 'تحدي ${game.titleAr} 👑',
-                                      betCoins: 5000,
-                                    ),
-                                  ),
-                                );
-                              },
-                              child: Padding(
-                                padding: EdgeInsets.symmetric(
-                                  horizontal: 16.w,
-                                  vertical: 7.h,
-                                ),
-                                child: Row(
-                                  children: [
-                                    Icon(
-                                      Icons.play_arrow_rounded,
-                                      color: Colors.black,
-                                      size: 14.r,
-                                    ),
-                                    SizedBox(width: 4.w),
-                                    Text(
-                                      'العب الآن',
-                                      style: GoogleFonts.cairo(
-                                        color: Colors.black,
-                                        fontSize: 11.sp,
-                                        fontWeight: FontWeight.w900,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
                           ),
                         ),
                       ],
@@ -869,7 +841,7 @@ class _HomeScreenState extends State<HomeScreen>
   }
 
   // ───────────────────────────────────────────────
-  // RIGHT PANEL — Live Game Rooms
+  // RIGHT PANEL — Live Battle Lobbies
   // ───────────────────────────────────────────────
   Widget _buildRightPanel() {
     return SizedBox(
@@ -886,17 +858,22 @@ class _HomeScreenState extends State<HomeScreen>
                     width: 3.w,
                     height: 14.h,
                     decoration: BoxDecoration(
-                      color: OrientalTheme.primaryGold,
+                      gradient: const LinearGradient(
+                        colors: [
+                          OrientalTheme.accentCyan,
+                          OrientalTheme.accentPurple,
+                        ],
+                      ),
                       borderRadius: BorderRadius.circular(2.r),
                     ),
                   ),
                   SizedBox(width: 6.w),
                   Text(
-                    'مجالس مباشر',
+                    'غرف التحدي المباشر',
                     style: GoogleFonts.cairo(
                       color: Colors.white,
-                      fontSize: 13.sp,
-                      fontWeight: FontWeight.w700,
+                      fontSize: 12.sp,
+                      fontWeight: FontWeight.w800,
                     ),
                   ),
                 ],
@@ -909,8 +886,8 @@ class _HomeScreenState extends State<HomeScreen>
                   decoration: BoxDecoration(
                     gradient: const LinearGradient(
                       colors: [
-                        OrientalTheme.goldDark,
-                        OrientalTheme.primaryGold,
+                        OrientalTheme.accentCyan,
+                        OrientalTheme.accentPurple,
                       ],
                     ),
                     borderRadius: BorderRadius.circular(8.r),
@@ -920,10 +897,10 @@ class _HomeScreenState extends State<HomeScreen>
                       Icon(Icons.add, color: Colors.black, size: 11.r),
                       SizedBox(width: 2.w),
                       Text(
-                        'جديد',
+                        'غرفة',
                         style: GoogleFonts.cairo(
                           color: Colors.black,
-                          fontWeight: FontWeight.w800,
+                          fontWeight: FontWeight.w900,
                           fontSize: 9.sp,
                         ),
                       ),
@@ -940,7 +917,7 @@ class _HomeScreenState extends State<HomeScreen>
           Expanded(
             child: ListView.separated(
               itemCount: _activeRooms.length,
-              separatorBuilder: (_, __) => SizedBox(height: 6.h),
+              separatorBuilder: (_, _) => SizedBox(height: 6.h),
               itemBuilder: (context, index) {
                 return _buildRoomCard(_activeRooms[index])
                     .animate()
@@ -980,8 +957,8 @@ class _HomeScreenState extends State<HomeScreen>
           borderRadius: BorderRadius.circular(13.r),
           border: Border.all(
             color: isActive
-                ? OrientalTheme.accentRuby.withValues(alpha: 0.25)
-                : Colors.white.withValues(alpha: 0.07),
+                ? OrientalTheme.accentRuby.withValues(alpha: 0.3)
+                : Colors.white.withValues(alpha: 0.08),
             width: 1.w,
           ),
         ),
@@ -990,7 +967,6 @@ class _HomeScreenState extends State<HomeScreen>
           children: [
             Row(
               children: [
-                // Status dot
                 Container(
                   width: 6.r,
                   height: 6.r,
@@ -1038,7 +1014,7 @@ class _HomeScreenState extends State<HomeScreen>
                   child: Text(
                     room.hostName,
                     style: GoogleFonts.cairo(
-                      color: Colors.white54,
+                      color: OrientalTheme.textMuted,
                       fontSize: 8.sp,
                     ),
                     overflow: TextOverflow.ellipsis,
@@ -1050,7 +1026,6 @@ class _HomeScreenState extends State<HomeScreen>
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                // Bet
                 Row(
                   children: [
                     Text('🪙', style: TextStyle(fontSize: 9.sp)),
@@ -1059,13 +1034,12 @@ class _HomeScreenState extends State<HomeScreen>
                       '${room.betCoins}',
                       style: GoogleFonts.cairo(
                         color: OrientalTheme.primaryGold,
-                        fontWeight: FontWeight.w800,
+                        fontWeight: FontWeight.w900,
                         fontSize: 9.sp,
                       ),
                     ),
                   ],
                 ),
-                // Players count chips
                 _buildPlayerDots(room.currentPlayers, room.maxPlayers),
               ],
             ),
@@ -1086,15 +1060,13 @@ class _HomeScreenState extends State<HomeScreen>
             height: 7.r,
             decoration: BoxDecoration(
               color: filled
-                  ? OrientalTheme.accentEmerald
+                  ? OrientalTheme.accentCyan
                   : Colors.white.withValues(alpha: 0.12),
               shape: BoxShape.circle,
               boxShadow: filled
                   ? [
                       BoxShadow(
-                        color: OrientalTheme.accentEmerald.withValues(
-                          alpha: 0.5,
-                        ),
+                        color: OrientalTheme.accentCyan.withValues(alpha: 0.5),
                         blurRadius: 3.r,
                       ),
                     ]

@@ -3,38 +3,48 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class OrientalTheme {
-  // Color Palette - Imperial Arabian Game House
-  static const Color bgDark = Color(0xFF06150F);
-  static const Color bgCard = Color(0xFF0D251B);
-  static const Color bgElevated = Color(0xFF15382B);
-  
-  static const Color primaryGold = Color(0xFFE5C158);
-  static const Color goldLight = Color(0xFFF7E6AA);
-  static const Color goldDark = Color(0xFFB58E2E);
+  // AAA Modern Gaming Color Palette - Cyber Slate & Neon Luxe
+  static const Color bgDark = Color(0xFF090C15); // Ultra-dark obsidian
+  static const Color bgCard = Color(0xFF131826); // Cyber glassmorphism card
+  static const Color bgElevated = Color(0xFF1C2336); // Elevated surface
 
-  static const Color accentEmerald = Color(0xFF00E676);
-  static const Color accentRuby = Color(0xFFE53935);
-  static const Color accentSapphire = Color(0xFF1E88E5);
-  static const Color accentAmber = Color(0xFFFFB300);
+  static const Color primaryGold = Color(0xFFFFD700); // Cyber Gold
+  static const Color goldLight = Color(0xFFFFF1A8);
+  static const Color goldDark = Color(0xFFC99700);
 
-  static const Color textLight = Color(0xFFF4F7F5);
-  static const Color textMuted = Color(0xFF90A4AE);
-  static const Color textGold = Color(0xFFF1D58A);
+  // Modern Neon Accents
+  static const Color accentCyan = Color(0xFF00F2FE); // Electric Cyan
+  static const Color accentPurple = Color(0xFF9D4EDD); // Neon Purple
+  static const Color accentEmerald = Color(0xFF00E676); // Neon Emerald
+  static const Color accentRuby = Color(0xFFFF2A6D); // Cyber Ruby/Magenta
+  static const Color accentAmber = Color(0xFFFF9E00); // Electric Amber
+  static const Color accentSapphire = Color(0xFF0077FF); // Cobalt Blue
 
+  static const Color textLight = Color(0xFFF8FAFC);
+  static const Color textMuted = Color(0xFF94A3B8);
+  static const Color textGold = Color(0xFFFFE57F);
+
+  // Futuristic Modern Gradients
   static const LinearGradient goldGradient = LinearGradient(
     colors: [goldLight, primaryGold, goldDark],
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );
 
+  static const LinearGradient cyberGradient = LinearGradient(
+    colors: [accentPurple, accentCyan],
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+  );
+
   static const LinearGradient emeraldGradient = LinearGradient(
-    colors: [Color(0xFF0F4432), Color(0xFF09291E)],
+    colors: [Color(0xFF00E676), Color(0xFF00796B)],
     begin: Alignment.topCenter,
     end: Alignment.bottomCenter,
   );
 
   static const LinearGradient rubyGradient = LinearGradient(
-    colors: [Color(0xFFD32F2F), Color(0xFF7B1FA2)],
+    colors: [accentRuby, Color(0xFF7B1FA2)],
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );
@@ -47,7 +57,7 @@ class OrientalTheme {
       primaryColor: primaryGold,
       colorScheme: const ColorScheme.dark(
         primary: primaryGold,
-        secondary: accentEmerald,
+        secondary: accentCyan,
         surface: bgCard,
       ),
       textTheme: baseTextTheme.copyWith(
@@ -67,14 +77,14 @@ class OrientalTheme {
   }
 }
 
-/// Custom painter for rendering intricate Arabian geometric star patterns on backgrounds
+/// Custom painter for rendering modern gaming tech hex/grid backgrounds
 class ArabianPatternPainter extends CustomPainter {
   final Color color;
   final double opacity;
 
   ArabianPatternPainter({
-    this.color = OrientalTheme.primaryGold,
-    this.opacity = 0.05,
+    this.color = OrientalTheme.accentCyan,
+    this.opacity = 0.04,
   });
 
   @override
@@ -84,21 +94,20 @@ class ArabianPatternPainter extends CustomPainter {
       ..strokeWidth = 1.0
       ..style = PaintingStyle.stroke;
 
-    const double step = 60.0;
+    const double step = 50.0;
     for (double x = 0; x < size.width + step; x += step) {
       for (double y = 0; y < size.height + step; y += step) {
-        _drawEightPointStar(canvas, Offset(x, y), 20.0, paint);
+        _drawHexagon(canvas, Offset(x, y), 18.0, paint);
       }
     }
   }
 
-  void _drawEightPointStar(Canvas canvas, Offset center, double radius, Paint paint) {
+  void _drawHexagon(Canvas canvas, Offset center, double radius, Paint paint) {
     final path = Path();
-    for (int i = 0; i < 8; i++) {
-      double angle = i * math.pi / 4;
-      double r = (i % 2 == 0) ? radius : radius * 0.5;
-      double px = center.dx + r * math.cos(angle);
-      double py = center.dy + r * math.sin(angle);
+    for (int i = 0; i < 6; i++) {
+      double angle = i * math.pi / 3;
+      double px = center.dx + radius * math.cos(angle);
+      double py = center.dy + radius * math.sin(angle);
       if (i == 0) {
         path.moveTo(px, py);
       } else {

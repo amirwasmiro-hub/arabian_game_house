@@ -13,7 +13,7 @@ import 'features/game_table/baloot_game_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
+
   // Lock Entire Application to Landscape Mode Globally
   await SystemChrome.setPreferredOrientations([
     DeviceOrientation.landscapeLeft,
@@ -35,7 +35,10 @@ class ArabianGameHouseApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ScreenUtilInit(
-      designSize: const Size(932, 430), // Standard Landscape Screen Dimensions (widescreen)
+      designSize: const Size(
+        932,
+        430,
+      ), // Standard Landscape Screen Dimensions (widescreen)
       minTextAdapt: true,
       splitScreenMode: true,
       builder: (context, child) {
@@ -48,9 +51,7 @@ class ArabianGameHouseApp extends StatelessWidget {
             GlobalWidgetsLocalizations.delegate,
             GlobalCupertinoLocalizations.delegate,
           ],
-          supportedLocales: const [
-            Locale('ar', 'SA'),
-          ],
+          supportedLocales: const [Locale('ar', 'SA')],
           locale: const Locale('ar', 'SA'),
           home: const MainNavigationWrapper(),
         );
@@ -79,32 +80,7 @@ class _MainNavigationWrapperState extends State<MainNavigationWrapper> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: IndexedStack(
-        index: _currentIndex,
-        children: _tabs,
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.startFloat,
-      floatingActionButton: FloatingActionButton.extended(
-        backgroundColor: OrientalTheme.primaryGold,
-        foregroundColor: Colors.black,
-        icon: Icon(Icons.style, size: 20.r),
-        label: Text(
-          'لعب سريع 🃏',
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13.sp),
-        ),
-        onPressed: () {
-          SoundManager().playCardFlip();
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => const BalootGameScreen(
-                roomName: 'طاولة البلوت السريعة ⚡',
-                betCoins: 5000,
-              ),
-            ),
-          );
-        },
-      ),
+      body: IndexedStack(index: _currentIndex, children: _tabs),
       bottomNavigationBar: Container(
         height: 56.h,
         decoration: BoxDecoration(
