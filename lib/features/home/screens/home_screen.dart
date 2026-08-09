@@ -416,6 +416,79 @@ class _HomeScreenState extends State<HomeScreen>
     );
   }
 
+  Widget _buildTopCenterLogo() {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.military_tech_rounded, color: OrientalTheme.primaryGold, size: 16.r),
+            SizedBox(width: 5.w),
+            ShaderMask(
+              shaderCallback: (bounds) => const LinearGradient(
+                colors: [
+                  OrientalTheme.goldLight,
+                  OrientalTheme.primaryGold,
+                  OrientalTheme.goldDark,
+                ],
+              ).createShader(bounds),
+              child: Text(
+                'بيت الألعاب العربية',
+                style: GoogleFonts.cairo(
+                  fontSize: 16.sp,
+                  fontWeight: FontWeight.w900,
+                  color: Colors.white,
+                  letterSpacing: 0.5,
+                ),
+              ),
+            ),
+            SizedBox(width: 5.w),
+            Icon(Icons.military_tech_rounded, color: OrientalTheme.primaryGold, size: 16.r),
+          ],
+        ),
+        SizedBox(height: 2.h),
+        Container(
+          padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 2.h),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [
+                OrientalTheme.accentRuby.withValues(alpha: 0.25),
+                OrientalTheme.primaryGold.withValues(alpha: 0.25),
+                OrientalTheme.accentRuby.withValues(alpha: 0.25),
+              ],
+            ),
+            borderRadius: BorderRadius.circular(12.r),
+            border: Border.all(
+              color: OrientalTheme.primaryGold.withValues(alpha: 0.5),
+              width: 1.w,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: OrientalTheme.primaryGold.withValues(alpha: 0.15),
+                blurRadius: 6.r,
+              ),
+            ],
+          ),
+          child: Text(
+            '🔥 اوووف اااااح 🔥',
+            style: GoogleFonts.cairo(
+              fontSize: 10.sp,
+              fontWeight: FontWeight.w900,
+              color: OrientalTheme.goldLight,
+              shadows: [
+                Shadow(
+                  color: OrientalTheme.accentRuby,
+                  blurRadius: 8.r,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
   // ───────────────────────────────────────────────
   // CENTER PANEL — Featured Game Hero Card
   // ───────────────────────────────────────────────
@@ -426,6 +499,11 @@ class _HomeScreenState extends State<HomeScreen>
     return Expanded(
       child: Column(
         children: [
+          // Top Center App Logo
+          _buildTopCenterLogo().animate().fadeIn(duration: 400.ms).slideY(begin: -0.2),
+
+          SizedBox(height: 6.h),
+
           // Featured Hero Card
           Expanded(
             flex: 7,
