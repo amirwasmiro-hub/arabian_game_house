@@ -19,11 +19,16 @@ class StoreScreen extends StatelessWidget {
             children: [
               Row(
                 children: [
-                  Icon(Icons.shopping_bag_rounded, color: OrientalTheme.accentCyan, size: 20.r),
+                  Icon(Icons.shopping_bag_rounded,
+                      color: OrientalTheme.primaryGold, size: 20.r),
                   SizedBox(width: 6.w),
                   Text(
                     'المتجر الملكي 🛒',
-                    style: GoogleFonts.cairo(color: Colors.white, fontSize: 15.sp, fontWeight: FontWeight.w900),
+                    style: GoogleFonts.cairo(
+                      color: Colors.white,
+                      fontSize: 15.sp,
+                      fontWeight: FontWeight.w900,
+                    ),
                   ),
                 ],
               ),
@@ -32,7 +37,7 @@ class StoreScreen extends StatelessWidget {
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Left Side: Coins Packages
+                    // Coins Packages
                     Expanded(
                       flex: 6,
                       child: Column(
@@ -40,20 +45,25 @@ class StoreScreen extends StatelessWidget {
                         children: [
                           Text(
                             'حزم الكوينز 🪙',
-                            style: GoogleFonts.cairo(color: OrientalTheme.accentCyan, fontSize: 11.sp, fontWeight: FontWeight.w800),
+                            style: GoogleFonts.cairo(
+                              color: OrientalTheme.primaryGold,
+                              fontSize: 11.sp,
+                              fontWeight: FontWeight.w800,
+                            ),
                           ),
                           SizedBox(height: 6.h),
                           Expanded(
                             child: GridView.count(
+                              physics: const NeverScrollableScrollPhysics(),
                               crossAxisCount: 2,
                               crossAxisSpacing: 10.w,
                               mainAxisSpacing: 10.h,
                               childAspectRatio: 1.8,
                               children: [
                                 _buildStoreCard('10,000 ذهبية', '1.99\$', '🪙', OrientalTheme.primaryGold),
-                                _buildStoreCard('50,000 ذهبية', '4.99\$', '💰', OrientalTheme.accentCyan),
-                                _buildStoreCard('150,000 ذهبية', '9.99\$', '👑', OrientalTheme.accentPurple),
-                                _buildStoreCard('500,000 ذهبية', '24.99\$', '🏆', OrientalTheme.accentRuby),
+                                _buildStoreCard('50,000 ذهبية', '4.99\$', '💰', OrientalTheme.accentOrange),
+                                _buildStoreCard('150,000 ذهبية', '9.99\$', '👑', OrientalTheme.primaryRed),
+                                _buildStoreCard('500,000 ذهبية', '24.99\$', '🏆', OrientalTheme.accentPurple),
                               ],
                             ),
                           ),
@@ -62,7 +72,7 @@ class StoreScreen extends StatelessWidget {
                     ),
                     SizedBox(width: 14.w),
 
-                    // Right Side: Customization Loot
+                    // Customizations
                     Expanded(
                       flex: 4,
                       child: Column(
@@ -70,23 +80,27 @@ class StoreScreen extends StatelessWidget {
                         children: [
                           Text(
                             'أوراق وطاولات احترافية 🎴',
-                            style: GoogleFonts.cairo(color: OrientalTheme.accentCyan, fontSize: 11.sp, fontWeight: FontWeight.w800),
+                            style: GoogleFonts.cairo(
+                              color: OrientalTheme.primaryGold,
+                              fontSize: 11.sp,
+                              fontWeight: FontWeight.w800,
+                            ),
                           ),
                           SizedBox(height: 6.h),
                           _buildCustomizationTile(
-                            title: 'ورق لعب سايبر الفاخر',
-                            desc: 'أوراق بتأثيرات النيون التفاعلية',
+                            title: 'ورق لعب الملكي الذهبي',
+                            desc: 'أوراق بتصميم كلاسيكي مذهب',
                             price: '25,000 🪙',
                             icon: Icons.style_rounded,
-                            accentColor: OrientalTheme.accentCyan,
+                            accentColor: OrientalTheme.primaryGold,
                           ),
                           SizedBox(height: 8.h),
                           _buildCustomizationTile(
-                            title: 'طاولة الزمرد الأندلسية',
-                            desc: 'مفرش مخملي بتصميم ساحة eSports',
+                            title: 'طاولة المخمل الاندلسية',
+                            desc: 'مفرش مخملي ملكي فاخر',
                             price: '50,000 🪙',
                             icon: Icons.table_bar_rounded,
-                            accentColor: OrientalTheme.accentPurple,
+                            accentColor: OrientalTheme.accentOrange,
                           ),
                         ],
                       ),
@@ -107,7 +121,10 @@ class StoreScreen extends StatelessWidget {
       decoration: BoxDecoration(
         color: OrientalTheme.bgCard,
         borderRadius: BorderRadius.circular(14.r),
-        border: Border.all(color: accentColor.withValues(alpha: 0.35), width: 1.w),
+        border: Border.all(
+          color: accentColor.withValues(alpha: 0.35),
+          width: 1.w,
+        ),
       ),
       child: Row(
         children: [
@@ -118,7 +135,14 @@ class StoreScreen extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text(title, style: GoogleFonts.cairo(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 10.sp)),
+                Text(
+                  title,
+                  style: GoogleFonts.cairo(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 10.sp,
+                  ),
+                ),
                 SizedBox(height: 2.h),
                 Container(
                   padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 2.h),
@@ -126,7 +150,14 @@ class StoreScreen extends StatelessWidget {
                     color: accentColor.withValues(alpha: 0.2),
                     borderRadius: BorderRadius.circular(6.r),
                   ),
-                  child: Text(price, style: GoogleFonts.cairo(color: accentColor, fontWeight: FontWeight.w900, fontSize: 9.sp)),
+                  child: Text(
+                    price,
+                    style: GoogleFonts.cairo(
+                      color: accentColor,
+                      fontWeight: FontWeight.w900,
+                      fontSize: 9.sp,
+                    ),
+                  ),
                 ),
               ],
             ),
@@ -148,7 +179,10 @@ class StoreScreen extends StatelessWidget {
       decoration: BoxDecoration(
         color: OrientalTheme.bgCard,
         borderRadius: BorderRadius.circular(14.r),
-        border: Border.all(color: accentColor.withValues(alpha: 0.35), width: 1.w),
+        border: Border.all(
+          color: accentColor.withValues(alpha: 0.35),
+          width: 1.w,
+        ),
       ),
       child: Row(
         children: [
@@ -165,8 +199,21 @@ class StoreScreen extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(title, style: GoogleFonts.cairo(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 10.sp)),
-                Text(desc, style: GoogleFonts.cairo(color: OrientalTheme.textMuted, fontSize: 8.sp)),
+                Text(
+                  title,
+                  style: GoogleFonts.cairo(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 10.sp,
+                  ),
+                ),
+                Text(
+                  desc,
+                  style: GoogleFonts.cairo(
+                    color: OrientalTheme.textMuted,
+                    fontSize: 8.sp,
+                  ),
+                ),
               ],
             ),
           ),
@@ -175,10 +222,18 @@ class StoreScreen extends StatelessWidget {
               backgroundColor: accentColor,
               foregroundColor: Colors.black,
               padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.r)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8.r),
+              ),
             ),
             onPressed: () => SoundManager().playButtonClick(),
-            child: Text(price, style: GoogleFonts.cairo(fontWeight: FontWeight.w900, fontSize: 9.sp)),
+            child: Text(
+              price,
+              style: GoogleFonts.cairo(
+                fontWeight: FontWeight.w900,
+                fontSize: 9.sp,
+              ),
+            ),
           ),
         ],
       ),

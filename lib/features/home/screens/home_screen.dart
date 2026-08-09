@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../core/theme/oriental_theme.dart';
@@ -7,9 +6,8 @@ import '../../../core/services/supabase_service.dart';
 import '../../../core/audio/sound_manager.dart';
 import '../../../core/models/user_model.dart';
 import '../../../core/models/game_model.dart';
-import '../../../core/models/room_model.dart';
-import '../widgets/daily_reward_widget.dart';
-import '../widgets/room_creation_modal.dart';
+import '../widgets/lounge_background_painter.dart';
+import '../widgets/game_hero_illustration.dart';
 import '../../game_table/baloot_game_screen.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -19,50 +17,24 @@ class HomeScreen extends StatefulWidget {
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen>
-    with SingleTickerProviderStateMixin {
+class _HomeScreenState extends State<HomeScreen> {
   UserModel? _user;
-  List<RoomModel> _activeRooms = [];
   bool _isLoading = true;
-  int _selectedGameIndex = 0;
-  late AnimationController _glowController;
 
   @override
   void initState() {
     super.initState();
-    _glowController = AnimationController(
-      vsync: this,
-      duration: const Duration(seconds: 3),
-    )..repeat(reverse: true);
     _loadData();
-  }
-
-  @override
-  void dispose() {
-    _glowController.dispose();
-    super.dispose();
   }
 
   Future<void> _loadData() async {
     final user = await SupabaseService().fetchUserProfile();
-    final rooms = await SupabaseService().fetchActiveRooms();
     if (mounted) {
       setState(() {
         _user = user;
-        _activeRooms = rooms;
         _isLoading = false;
       });
     }
-  }
-
-  void _openCreateRoomModal() {
-    SoundManager().playButtonClick();
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (context) => RoomCreationModal(onRoomCreated: _loadData),
-    );
   }
 
   @override
@@ -72,541 +44,52 @@ class _HomeScreenState extends State<HomeScreen>
         backgroundColor: OrientalTheme.bgDark,
         body: Center(
           child: CircularProgressIndicator(
-            color: OrientalTheme.accentCyan,
+            color: OrientalTheme.primaryGold,
             strokeWidth: 2.5.w,
           ),
         ),
       );
     }
 
+    final games = GameModel.gamesList.take(10).toList();
+    final row1Games = games.sublist(0, 5);
+    final row2Games = games.sublist(5, 10);
+
     return Scaffold(
-      backgroundColor: OrientalTheme.bgDark,
       body: Stack(
         children: [
-          // ─── Cyber Tech Grid Background ───────────────
-          Positioned.fill(
+          // ════ 1. ROYAL LOUNGE DECK BACKGROUND ════
+          const Positioned.fill(
             child: CustomPaint(
-              painter: ArabianPatternPainter(
-                color: OrientalTheme.accentCyan,
-                opacity: 0.03,
-              ),
+              painter: LoungeBackgroundPainter(),
             ),
           ),
 
-          // ─── Ambient Neon Backdrop Glows ─────────────
-          Positioned(
-            top: -70.h,
-            left: -50.w,
-            child: AnimatedBuilder(
-              animation: _glowController,
-              builder: (_, _) => Container(
-                width: 320.w,
-                height: 220.h,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  gradient: RadialGradient(
-                    colors: [
-                      OrientalTheme.accentPurple.withValues(
-                        alpha: 0.12 + _glowController.value * 0.08,
-                      ),
-                      Colors.transparent,
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ),
-          Positioned(
-            bottom: -60.h,
-            right: -40.w,
-            child: AnimatedBuilder(
-              animation: _glowController,
-              builder: (_, _) => Container(
-                width: 300.w,
-                height: 200.h,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  gradient: RadialGradient(
-                    colors: [
-                      OrientalTheme.accentCyan.withValues(
-                        alpha: 0.10 + _glowController.value * 0.06,
-                      ),
-                      Colors.transparent,
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ),
-
-          // ─── Main 3-Column Modern Gaming Layout ─────────
+          // ════ 2. MAIN UI LAYOUT ════
           SafeArea(
             child: Padding(
-              padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 6.h),
-              child: Row(
+              padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 6.h),
+              child: Column(
                 children: [
-                  // ════ LEFT PANEL — Gamer Card & Stats ════
-                  _buildLeftPanel(),
+                  // ── Top Header Currency & Profile Bar ──
+                  _buildTopHeaderBar(),
 
-                  SizedBox(width: 12.w),
-
-                  // ════ CENTER PANEL — Logo & Hero Game Card ════
-                  _buildCenterPanel(),
-
-                  SizedBox(width: 12.w),
-
-                  // ════ RIGHT PANEL — Live Battle Lobbies ════
-                  _buildRightPanel(),
-                ],
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  // ───────────────────────────────────────────────
-  // LEFT PANEL — Gamer Card & Stats
-  // ───────────────────────────────────────────────
-  Widget _buildLeftPanel() {
-    return SizedBox(
-      width: 190.w,
-      child: SingleChildScrollView(
-        physics: const BouncingScrollPhysics(),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // Gamer Profile Header
-            _buildGamerProfileCard()
-                .animate()
-                .fadeIn(duration: 400.ms)
-                .slideX(begin: -0.2),
-
-            SizedBox(height: 6.h),
-
-            // Currency Pill Badges
-            Row(
-              children: [
-                Expanded(
-                  child: _buildCyberCurrencyBadge(
-                    '🪙',
-                    '${_user!.coins}',
-                    OrientalTheme.primaryGold,
-                  ),
-                ),
-                SizedBox(width: 5.w),
-                Expanded(
-                  child: _buildCyberCurrencyBadge(
-                    '💎',
-                    '${_user!.gems}',
-                    OrientalTheme.accentCyan,
-                  ),
-                ),
-              ],
-            ),
-
-            SizedBox(height: 6.h),
-
-            // Level & XP Bar
-            _buildCyberXpBar().animate().fadeIn(delay: 150.ms),
-
-            SizedBox(height: 6.h),
-
-            // Win Stats Row
-            Row(
-              children: [
-                Expanded(
-                  child: _buildCyberStatCard(
-                    '${_user!.wins}',
-                    'انتصار',
-                    OrientalTheme.accentEmerald,
-                    Icons.emoji_events_rounded,
-                  ),
-                ),
-                SizedBox(width: 5.w),
-                Expanded(
-                  child: _buildCyberStatCard(
-                    '${_user!.winRate.toStringAsFixed(0)}%',
-                    'معدل الفوز',
-                    OrientalTheme.accentPurple,
-                    Icons.bolt_rounded,
-                  ),
-                ),
-              ],
-            ),
-
-            SizedBox(height: 6.h),
-
-            // Daily Reward Compact Card
-            const DailyRewardWidget().animate().fadeIn(delay: 250.ms),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildGamerProfileCard() {
-    return Container(
-      padding: EdgeInsets.all(10.r),
-      decoration: BoxDecoration(
-        color: OrientalTheme.bgCard,
-        borderRadius: BorderRadius.circular(16.r),
-        border: Border.all(
-          color: OrientalTheme.accentCyan.withValues(alpha: 0.3),
-          width: 1.w,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.3),
-            blurRadius: 10.r,
-            offset: Offset(0, 4.h),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          // Cyber Avatar Frame
-          AnimatedBuilder(
-            animation: _glowController,
-            builder: (_, _) => Container(
-              padding: EdgeInsets.all(2.r),
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                gradient: SweepGradient(
-                  colors: const [
-                    OrientalTheme.accentCyan,
-                    OrientalTheme.accentPurple,
-                    OrientalTheme.primaryGold,
-                    OrientalTheme.accentCyan,
-                  ],
-                  transform: GradientRotation(_glowController.value * 6.28),
-                ),
-                boxShadow: [
-                  BoxShadow(
-                    color: OrientalTheme.accentCyan.withValues(
-                      alpha: 0.3 + _glowController.value * 0.2,
-                    ),
-                    blurRadius: 8.r,
-                  ),
-                ],
-              ),
-              child: CircleAvatar(
-                radius: 20.r,
-                backgroundImage: NetworkImage(_user!.avatarUrl),
-              ),
-            ),
-          ),
-          SizedBox(width: 8.w),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  _user!.name,
-                  style: GoogleFonts.cairo(
-                    color: OrientalTheme.textLight,
-                    fontSize: 11.sp,
-                    fontWeight: FontWeight.w800,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                SizedBox(height: 2.h),
-                Container(
-                  padding: EdgeInsets.symmetric(horizontal: 7.w, vertical: 1.h),
-                  decoration: BoxDecoration(
-                    gradient: const LinearGradient(
-                      colors: [
-                        OrientalTheme.accentPurple,
-                        OrientalTheme.accentCyan,
-                      ],
-                    ),
-                    borderRadius: BorderRadius.circular(6.r),
-                  ),
-                  child: Text(
-                    _user!.vipTier,
-                    style: GoogleFonts.cairo(
-                      color: Colors.black,
-                      fontSize: 8.sp,
-                      fontWeight: FontWeight.w900,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildCyberCurrencyBadge(
-    String emoji,
-    String amount,
-    Color accentColor,
-  ) {
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 5.h),
-      decoration: BoxDecoration(
-        color: accentColor.withValues(alpha: 0.08),
-        borderRadius: BorderRadius.circular(10.r),
-        border: Border.all(
-          color: accentColor.withValues(alpha: 0.35),
-          width: 1.w,
-        ),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Text(emoji, style: TextStyle(fontSize: 11.sp)),
-          SizedBox(width: 4.w),
-          Flexible(
-            child: Text(
-              amount,
-              style: GoogleFonts.cairo(
-                color: accentColor,
-                fontWeight: FontWeight.w800,
-                fontSize: 10.sp,
-              ),
-              overflow: TextOverflow.ellipsis,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildCyberXpBar() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              'المستوى ${_user!.level}',
-              style: GoogleFonts.cairo(
-                color: OrientalTheme.textMuted,
-                fontSize: 9.sp,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            Text(
-              '${(_user!.xpProgress * 100).toInt()}%',
-              style: GoogleFonts.cairo(
-                color: OrientalTheme.accentCyan,
-                fontSize: 9.sp,
-                fontWeight: FontWeight.w800,
-              ),
-            ),
-          ],
-        ),
-        SizedBox(height: 3.h),
-        Stack(
-          children: [
-            Container(
-              height: 5.h,
-              decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.07),
-                borderRadius: BorderRadius.circular(10.r),
-              ),
-            ),
-            FractionallySizedBox(
-              widthFactor: _user!.xpProgress,
-              child: Container(
-                height: 5.h,
-                decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    colors: [
-                      OrientalTheme.accentPurple,
-                      OrientalTheme.accentCyan,
-                    ],
-                  ),
-                  borderRadius: BorderRadius.circular(10.r),
-                  boxShadow: [
-                    BoxShadow(
-                      color: OrientalTheme.accentCyan.withValues(alpha: 0.6),
-                      blurRadius: 4.r,
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-
-  Widget _buildCyberStatCard(
-    String value,
-    String label,
-    Color color,
-    IconData icon,
-  ) {
-    return Container(
-      padding: EdgeInsets.symmetric(vertical: 6.h),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.08),
-        borderRadius: BorderRadius.circular(10.r),
-        border: Border.all(color: color.withValues(alpha: 0.3), width: 1.w),
-      ),
-      child: Column(
-        children: [
-          Icon(icon, color: color, size: 14.r),
-          SizedBox(height: 2.h),
-          Text(
-            value,
-            style: GoogleFonts.cairo(
-              color: Colors.white,
-              fontWeight: FontWeight.w900,
-              fontSize: 11.sp,
-            ),
-          ),
-          Text(
-            label,
-            style: GoogleFonts.cairo(
-              color: OrientalTheme.textMuted,
-              fontSize: 8.sp,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  // ───────────────────────────────────────────────
-  // TOP CENTER LOGO & CENTER PANEL
-  // ───────────────────────────────────────────────
-  Widget _buildTopCenterLogo() {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Icon(Icons.bolt_rounded, color: OrientalTheme.accentCyan, size: 16.r),
-        SizedBox(width: 5.w),
-        ShaderMask(
-          shaderCallback: (bounds) => const LinearGradient(
-            colors: [
-              OrientalTheme.accentCyan,
-              OrientalTheme.primaryGold,
-              OrientalTheme.accentPurple,
-            ],
-          ).createShader(bounds),
-          child: Text(
-            'بيت الألعاب العربية',
-            style: GoogleFonts.cairo(
-              fontSize: 16.sp,
-              fontWeight: FontWeight.w900,
-              color: Colors.white,
-              letterSpacing: 0.8,
-            ),
-          ),
-        ),
-        SizedBox(width: 5.w),
-        Icon(Icons.bolt_rounded, color: OrientalTheme.accentCyan, size: 16.r),
-      ],
-    );
-  }
-
-  Widget _buildCenterPanel() {
-    final games = GameModel.gamesList;
-    final selectedGame = games[_selectedGameIndex];
-
-    return Expanded(
-      child: Column(
-        children: [
-          // Top Center Logo
-          _buildTopCenterLogo()
-              .animate()
-              .fadeIn(duration: 400.ms)
-              .slideY(begin: -0.2),
-
-          SizedBox(height: 6.h),
-
-          // Modern Hero Game Card
-          Expanded(
-            flex: 7,
-            child: _buildHeroGameCard(selectedGame)
-                .animate()
-                .fadeIn(duration: 450.ms)
-                .scale(begin: const Offset(0.96, 0.96)),
-          ),
-
-          SizedBox(height: 8.h),
-
-          // Horizontal Cyber Game Selector Tabs
-          SizedBox(
-            height: 44.h,
-            child: ListView.separated(
-              scrollDirection: Axis.horizontal,
-              itemCount: games.length,
-              separatorBuilder: (_, _) => SizedBox(width: 7.w),
-              itemBuilder: (context, index) {
-                final game = games[index];
-                final isSelected = _selectedGameIndex == index;
-                return GestureDetector(
-                  onTap: () {
-                    SoundManager().playButtonClick();
-                    setState(() => _selectedGameIndex = index);
-                  },
-                  child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 250),
-                    padding: EdgeInsets.symmetric(
-                      horizontal: 14.w,
-                      vertical: 6.h,
-                    ),
-                    decoration: BoxDecoration(
-                      color: isSelected
-                          ? OrientalTheme.accentCyan.withValues(alpha: 0.15)
-                          : OrientalTheme.bgCard,
-                      borderRadius: BorderRadius.circular(12.r),
-                      border: Border.all(
-                        color: isSelected
-                            ? OrientalTheme.accentCyan
-                            : Colors.white.withValues(alpha: 0.08),
-                        width: isSelected ? 1.5.w : 1.w,
-                      ),
-                      boxShadow: isSelected
-                          ? [
-                              BoxShadow(
-                                color: OrientalTheme.accentCyan.withValues(
-                                  alpha: 0.3,
-                                ),
-                                blurRadius: 8.r,
-                              ),
-                            ]
-                          : null,
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
+                  // ── Center 2x5 Grid of Gold Game Tiles (Flexible Expanded) ──
+                  Expanded(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(
-                          game.icon,
-                          color: isSelected
-                              ? OrientalTheme.accentCyan
-                              : Colors.white38,
-                          size: 13.r,
-                        ),
-                        SizedBox(width: 5.w),
-                        Text(
-                          game.titleAr,
-                          style: GoogleFonts.cairo(
-                            color: isSelected
-                                ? OrientalTheme.textLight
-                                : Colors.white54,
-                            fontSize: 10.sp,
-                            fontWeight: isSelected
-                                ? FontWeight.w800
-                                : FontWeight.w500,
-                          ),
-                        ),
+                        _buildGameGridRow(row1Games),
+                        SizedBox(height: 6.h),
+                        _buildGameGridRow(row2Games),
                       ],
                     ),
                   ),
-                );
-              },
+
+                  // ── Bottom Action & Play Now CTA Bar ──
+                  _buildBottomControlBar(),
+                ],
+              ),
             ),
           ),
         ],
@@ -614,7 +97,185 @@ class _HomeScreenState extends State<HomeScreen>
     );
   }
 
-  Widget _buildHeroGameCard(GameModel game) {
+  // ─────────────────────────────────────────────────────
+  // 1. TOP HEADER CURRENCY & PROFILE BAR
+  // ─────────────────────────────────────────────────────
+  Widget _buildTopHeaderBar() {
+    return Row(
+      children: [
+        // UTC Time Tag (Top Left)
+        Container(
+          padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 2.h),
+          decoration: BoxDecoration(
+            color: Colors.black38,
+            borderRadius: BorderRadius.circular(4.r),
+          ),
+          child: Text(
+            'UTC+0 20:32',
+            style: GoogleFonts.cairo(
+              color: Colors.white70,
+              fontSize: 8.sp,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ),
+
+        const Spacer(),
+
+        // Gift Box / Offers Button ( عروض )
+        _buildGiftOffersButton(),
+
+        SizedBox(width: 8.w),
+
+        // Coins Exchange Pill ( 650 🟡 استبدال )
+        _buildCoinsPill('650', 'استبدال'),
+
+        SizedBox(width: 8.w),
+
+        // Tickets Pill ( 500K 🟢 + )
+        _buildTicketsPill('500K'),
+
+        SizedBox(width: 10.w),
+
+        // Pharaoh / Royal Profile Avatar (Top Right)
+        _buildRoyalAvatarFrame(),
+      ],
+    );
+  }
+
+  Widget _buildGiftOffersButton() {
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 3.h),
+      decoration: BoxDecoration(
+        color: const Color(0xFF1B5E20).withValues(alpha: 0.8),
+        borderRadius: BorderRadius.circular(14.r),
+        border: Border.all(color: OrientalTheme.primaryGold, width: 1.w),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Icons.card_giftcard_rounded, color: OrientalTheme.primaryGold, size: 14.r),
+          SizedBox(width: 4.w),
+          Text(
+            'عروض',
+            style: GoogleFonts.cairo(
+              color: Colors.white,
+              fontSize: 8.5.sp,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCoinsPill(String amount, String btnLabel) {
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 2.h),
+      decoration: BoxDecoration(
+        color: Colors.black54,
+        borderRadius: BorderRadius.circular(14.r),
+        border: Border.all(color: OrientalTheme.primaryGold, width: 1.w),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // Exchange Button
+          Container(
+            padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 2.h),
+            decoration: BoxDecoration(
+              color: const Color(0xFF2E7D32),
+              borderRadius: BorderRadius.circular(10.r),
+            ),
+            child: Text(
+              btnLabel,
+              style: GoogleFonts.cairo(
+                color: Colors.white,
+                fontSize: 8.sp,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+          SizedBox(width: 6.w),
+          Text(
+            amount,
+            style: GoogleFonts.cairo(
+              color: OrientalTheme.primaryGold,
+              fontSize: 9.sp,
+              fontWeight: FontWeight.w900,
+            ),
+          ),
+          SizedBox(width: 4.w),
+          Text('🪙', style: TextStyle(fontSize: 10.sp)),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTicketsPill(String amount) {
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 2.h),
+      decoration: BoxDecoration(
+        color: Colors.black54,
+        borderRadius: BorderRadius.circular(14.r),
+        border: Border.all(color: OrientalTheme.primaryGold, width: 1.w),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // Plus Button
+          Container(
+            padding: EdgeInsets.all(2.r),
+            decoration: const BoxDecoration(
+              color: Color(0xFF2E7D32),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(Icons.add_rounded, color: Colors.white, size: 10.r),
+          ),
+          SizedBox(width: 6.w),
+          Text(
+            amount,
+            style: GoogleFonts.cairo(
+              color: Colors.white,
+              fontSize: 9.sp,
+              fontWeight: FontWeight.w900,
+            ),
+          ),
+          SizedBox(width: 4.w),
+          Text('💵', style: TextStyle(fontSize: 10.sp)),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildRoyalAvatarFrame() {
+    return Container(
+      padding: EdgeInsets.all(2.r),
+      decoration: const BoxDecoration(
+        shape: BoxShape.circle,
+        gradient: OrientalTheme.goldCardGradient,
+        boxShadow: [BoxShadow(color: Colors.black54, blurRadius: 6)],
+      ),
+      child: CircleAvatar(
+        radius: 18.r,
+        backgroundImage: NetworkImage(_user!.avatarUrl),
+      ),
+    );
+  }
+
+  // ─────────────────────────────────────────────────────
+  // 2. CENTER 2X5 GRID OF GOLD GAME TILES
+  // ─────────────────────────────────────────────────────
+  Widget _buildGameGridRow(List<GameModel> rowGames) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      children: List.generate(rowGames.length, (index) {
+        return _buildGoldGameTile(rowGames[index]);
+      }),
+    );
+  }
+
+  Widget _buildGoldGameTile(GameModel game) {
     return GestureDetector(
       onTap: () {
         SoundManager().playCardDeal();
@@ -628,420 +289,144 @@ class _HomeScreenState extends State<HomeScreen>
           ),
         );
       },
-      child: AnimatedBuilder(
-        animation: _glowController,
-        builder: (_, _) => Container(
-          decoration: BoxDecoration(
-            color: game.cardGradientColors[0],
-            image: DecorationImage(
-              image: AssetImage(game.cardImagePath),
-              fit: BoxFit.cover,
-              colorFilter: ColorFilter.mode(
-                game.cardGradientColors[0].withValues(alpha: 0.55),
-                BlendMode.multiply,
-              ),
-            ),
-            borderRadius: BorderRadius.circular(22.r),
-            border: Border.all(
-              color: game.primaryColor.withValues(
-                alpha: 0.4 + _glowController.value * 0.4,
-              ),
-              width: 1.5.w,
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: game.primaryColor.withValues(
-                  alpha: 0.2 + _glowController.value * 0.2,
+      child: SizedBox(
+        width: 140.w,
+        child: Column(
+          children: [
+            // Gold Framed Card Container
+            Container(
+              height: 108.h,
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: game.cardGradientColors,
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
                 ),
-                blurRadius: 20.r,
-                spreadRadius: 2.r,
-              ),
-            ],
-          ),
-          child: Stack(
-            children: [
-              // Subtle dark gradient overlay at bottom for text legibility
-              Positioned.fill(
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(22.r),
-                  child: Container(
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        colors: [
-                          Colors.transparent,
-                          game.cardGradientColors[0].withValues(alpha: 0.7),
-                        ],
-                        stops: const [0.3, 1.0],
-                      ),
-                    ),
-                  ),
+                borderRadius: BorderRadius.circular(16.r),
+                border: Border.all(
+                  color: OrientalTheme.primaryGold,
+                  width: 2.w,
                 ),
-              ),
-
-              // Subtle Hex Grid Pattern Overlay
-              Positioned.fill(
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(22.r),
-                  child: CustomPaint(
-                    painter: ArabianPatternPainter(
-                      color: game.primaryColor,
-                      opacity: 0.04,
-                    ),
-                  ),
-                ),
-              ),
-
-              // Content
-              Padding(
-                padding: EdgeInsets.all(16.r),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Container(
-                          padding: EdgeInsets.all(8.r),
-                          decoration: BoxDecoration(
-                            color: game.primaryColor.withValues(alpha: 0.2),
-                            borderRadius: BorderRadius.circular(12.r),
-                            border: Border.all(
-                              color: game.primaryColor.withValues(alpha: 0.5),
-                              width: 1.w,
-                            ),
-                            boxShadow: [
-                              BoxShadow(
-                                color: game.primaryColor.withValues(alpha: 0.4),
-                                blurRadius: 10.r,
-                              ),
-                            ],
-                          ),
-                          child: Icon(
-                            game.icon,
-                            color: game.primaryColor,
-                            size: 20.r,
-                          ),
-                        ),
-                        SizedBox(width: 10.w),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              game.titleAr,
-                              style: GoogleFonts.cairo(
-                                color: Colors.white,
-                                fontSize: 17.sp,
-                                fontWeight: FontWeight.w900,
-                              ),
-                            ),
-                            Text(
-                              game.titleEn.toUpperCase(),
-                              style: GoogleFonts.cairo(
-                                color: game.primaryColor.withValues(alpha: 0.8),
-                                fontSize: 8.sp,
-                                letterSpacing: 2,
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
-                          ],
-                        ),
-                        const Spacer(),
-                        Container(
-                          padding: EdgeInsets.symmetric(
-                            horizontal: 9.w,
-                            vertical: 3.h,
-                          ),
-                          decoration: BoxDecoration(
-                            color: game.primaryColor.withValues(alpha: 0.15),
-                            borderRadius: BorderRadius.circular(8.r),
-                            border: Border.all(
-                              color: game.primaryColor.withValues(alpha: 0.5),
-                              width: 1.w,
-                            ),
-                          ),
-                          child: Text(
-                            game.badgeTag,
-                            style: GoogleFonts.cairo(
-                              color: OrientalTheme.accentCyan,
-                              fontSize: 9.sp,
-                              fontWeight: FontWeight.w900,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-
-                    const Spacer(),
-
-                    Text(
-                      game.subtitle,
-                      style: GoogleFonts.cairo(
-                        color: Colors.white70,
-                        fontSize: 10.sp,
-                        height: 1.3,
-                      ),
-                      maxLines: 2,
-                    ),
-
-                    SizedBox(height: 10.h),
-
-                    Row(
-                      children: [
-                        // Live Online Players Indicator
-                        Container(
-                          padding: EdgeInsets.symmetric(
-                            horizontal: 10.w,
-                            vertical: 5.h,
-                          ),
-                          decoration: BoxDecoration(
-                            color: OrientalTheme.accentEmerald.withValues(
-                              alpha: 0.12,
-                            ),
-                            borderRadius: BorderRadius.circular(8.r),
-                            border: Border.all(
-                              color: OrientalTheme.accentEmerald.withValues(
-                                alpha: 0.35,
-                              ),
-                              width: 1.w,
-                            ),
-                          ),
-                          child: Row(
-                            children: [
-                              Container(
-                                width: 6.r,
-                                height: 6.r,
-                                decoration: const BoxDecoration(
-                                  color: OrientalTheme.accentEmerald,
-                                  shape: BoxShape.circle,
-                                ),
-                              ),
-                              SizedBox(width: 5.w),
-                              Text(
-                                '${game.onlinePlayers} متصل الآن',
-                                style: GoogleFonts.cairo(
-                                  color: OrientalTheme.accentEmerald,
-                                  fontSize: 9.sp,
-                                  fontWeight: FontWeight.w800,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  // ───────────────────────────────────────────────
-  // RIGHT PANEL — Live Battle Lobbies
-  // ───────────────────────────────────────────────
-  Widget _buildRightPanel() {
-    return SizedBox(
-      width: 195.w,
-      child: Column(
-        children: [
-          // Header
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Row(
-                children: [
-                  Container(
-                    width: 3.w,
-                    height: 14.h,
-                    decoration: BoxDecoration(
-                      gradient: const LinearGradient(
-                        colors: [
-                          OrientalTheme.accentCyan,
-                          OrientalTheme.accentPurple,
-                        ],
-                      ),
-                      borderRadius: BorderRadius.circular(2.r),
-                    ),
-                  ),
-                  SizedBox(width: 6.w),
-                  Text(
-                    'غرف التحدي المباشر',
-                    style: GoogleFonts.cairo(
-                      color: Colors.white,
-                      fontSize: 12.sp,
-                      fontWeight: FontWeight.w800,
-                    ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.6),
+                    blurRadius: 10.r,
+                    offset: Offset(0, 4.h),
                   ),
                 ],
               ),
-              InkWell(
-                onTap: _openCreateRoomModal,
-                borderRadius: BorderRadius.circular(8.r),
-                child: Container(
-                  padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 3.h),
-                  decoration: BoxDecoration(
-                    gradient: const LinearGradient(
-                      colors: [
-                        OrientalTheme.accentCyan,
-                        OrientalTheme.accentPurple,
-                      ],
-                    ),
-                    borderRadius: BorderRadius.circular(8.r),
-                  ),
-                  child: Row(
-                    children: [
-                      Icon(Icons.add, color: Colors.black, size: 11.r),
-                      SizedBox(width: 2.w),
-                      Text(
-                        'غرفة',
-                        style: GoogleFonts.cairo(
-                          color: Colors.black,
-                          fontWeight: FontWeight.w900,
-                          fontSize: 9.sp,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(14.r),
+                child: Stack(
+                  children: [
+                    // Background texture
+                    const Positioned.fill(
+                      child: CustomPaint(
+                        painter: CasinoPatternPainter(
+                          color: OrientalTheme.primaryGold,
+                          opacity: 0.03,
                         ),
                       ),
-                    ],
-                  ),
-                ),
-              ),
-            ],
-          ).animate().fadeIn(delay: 100.ms),
-
-          SizedBox(height: 7.h),
-
-          // Rooms List
-          Expanded(
-            child: ListView.separated(
-              itemCount: _activeRooms.length,
-              separatorBuilder: (_, _) => SizedBox(height: 6.h),
-              itemBuilder: (context, index) {
-                return _buildRoomCard(_activeRooms[index])
-                    .animate()
-                    .fadeIn(delay: Duration(milliseconds: 150 + index * 80))
-                    .slideX(begin: 0.1);
-              },
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildRoomCard(RoomModel room) {
-    final bool isActive = room.status == 'جاري اللعب';
-    final Color statusColor = isActive
-        ? OrientalTheme.accentRuby
-        : OrientalTheme.accentEmerald;
-
-    return GestureDetector(
-      onTap: () {
-        SoundManager().playCardFlip();
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => BalootGameScreen(
-              roomName: room.roomName,
-              betCoins: room.betCoins,
-            ),
-          ),
-        );
-      },
-      child: Container(
-        padding: EdgeInsets.all(9.r),
-        decoration: BoxDecoration(
-          color: OrientalTheme.bgCard,
-          borderRadius: BorderRadius.circular(13.r),
-          border: Border.all(
-            color: isActive
-                ? OrientalTheme.accentRuby.withValues(alpha: 0.3)
-                : Colors.white.withValues(alpha: 0.08),
-            width: 1.w,
-          ),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Container(
-                  width: 6.r,
-                  height: 6.r,
-                  decoration: BoxDecoration(
-                    color: statusColor,
-                    shape: BoxShape.circle,
-                    boxShadow: [
-                      BoxShadow(
-                        color: statusColor.withValues(alpha: 0.6),
-                        blurRadius: 4.r,
-                      ),
-                    ],
-                  ),
-                ),
-                SizedBox(width: 5.w),
-                Expanded(
-                  child: Text(
-                    room.roomName,
-                    style: GoogleFonts.cairo(
-                      color: Colors.white,
-                      fontSize: 10.sp,
-                      fontWeight: FontWeight.w700,
                     ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-                if (room.isPrivate)
-                  Icon(
-                    Icons.lock_rounded,
-                    color: OrientalTheme.primaryGold,
-                    size: 10.r,
-                  ),
-              ],
-            ),
-            SizedBox(height: 5.h),
-            Row(
-              children: [
-                CircleAvatar(
-                  radius: 10.r,
-                  backgroundImage: NetworkImage(room.hostAvatar),
-                ),
-                SizedBox(width: 5.w),
-                Expanded(
-                  child: Text(
-                    room.hostName,
-                    style: GoogleFonts.cairo(
-                      color: OrientalTheme.textMuted,
-                      fontSize: 8.sp,
-                    ),
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-              ],
-            ),
-            SizedBox(height: 6.h),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Row(
-                  children: [
-                    Text('🪙', style: TextStyle(fontSize: 9.sp)),
-                    SizedBox(width: 2.w),
-                    Text(
-                      '${room.betCoins}',
-                      style: GoogleFonts.cairo(
-                        color: OrientalTheme.primaryGold,
-                        fontWeight: FontWeight.w900,
-                        fontSize: 9.sp,
+
+                    // 3D Game Graphic Illustration (Center)
+                    Center(
+                      child: Padding(
+                        padding: EdgeInsets.only(bottom: 18.h),
+                        child: GameTileIllustration(
+                          gameId: game.id,
+                          primaryColor: game.primaryColor,
+                        ),
                       ),
                     ),
+
+                    // English Title Ribbon (Bottom Center of Card)
+                    Positioned(
+                      bottom: 4.h,
+                      left: 4.w,
+                      right: 4.w,
+                      child: Center(
+                        child: ShaderMask(
+                          shaderCallback: (bounds) => const LinearGradient(
+                            colors: [
+                              OrientalTheme.goldLight,
+                              OrientalTheme.primaryGold,
+                              OrientalTheme.goldDark,
+                            ],
+                          ).createShader(bounds),
+                          child: Text(
+                            game.titleEn,
+                            style: GoogleFonts.cinzel(
+                              fontSize: 10.sp,
+                              fontWeight: FontWeight.w900,
+                              color: Colors.white,
+                              letterSpacing: 1,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ),
+                    ),
+
+                    // Play / Download Circular Badge (Bottom Right)
+                    Positioned(
+                      bottom: 3.r,
+                      right: 3.r,
+                      child: Container(
+                        padding: EdgeInsets.all(3.r),
+                        decoration: const BoxDecoration(
+                          color: OrientalTheme.primaryGold,
+                          shape: BoxShape.circle,
+                          boxShadow: [BoxShadow(color: Colors.black45, blurRadius: 4)],
+                        ),
+                        child: Icon(
+                          Icons.arrow_downward_rounded,
+                          color: Colors.black,
+                          size: 9.r,
+                        ),
+                      ),
+                    ),
+
+                    // 'New' Green Ribbon Tag (Top Left)
+                    if (game.isNew)
+                      Positioned(
+                        top: 2.h,
+                        left: 2.w,
+                        child: Container(
+                          padding: EdgeInsets.symmetric(horizontal: 5.w, vertical: 1.h),
+                          decoration: BoxDecoration(
+                            color: OrientalTheme.accentGreen,
+                            borderRadius: BorderRadius.circular(4.r),
+                            boxShadow: const [BoxShadow(color: Colors.black45, blurRadius: 4)],
+                          ),
+                          child: Text(
+                            'New',
+                            style: GoogleFonts.poppins(
+                              color: Colors.black,
+                              fontSize: 7.sp,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ),
                   ],
                 ),
-                _buildPlayerDots(room.currentPlayers, room.maxPlayers),
-              ],
+              ),
+            ),
+
+            SizedBox(height: 3.h),
+
+            // Arabic Title Below Card
+            Text(
+              game.titleAr,
+              style: GoogleFonts.cairo(
+                color: OrientalTheme.primaryGold,
+                fontSize: 9.sp,
+                fontWeight: FontWeight.bold,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
             ),
           ],
         ),
@@ -1049,32 +434,164 @@ class _HomeScreenState extends State<HomeScreen>
     );
   }
 
-  Widget _buildPlayerDots(int current, int max) {
+  // ─────────────────────────────────────────────────────
+  // 3. BOTTOM ACTION & PLAY NOW CTA BAR
+  // ─────────────────────────────────────────────────────
+  Widget _buildBottomControlBar() {
     return Row(
-      children: List.generate(max, (i) {
-        final filled = i < current;
-        return Padding(
-          padding: EdgeInsets.only(left: 3.w),
-          child: Container(
-            width: 7.r,
-            height: 7.r,
+      children: [
+        // Action Medallion Buttons (Bottom Left)
+        _buildActionMedallion(Icons.home_rounded, 'الرئيسية'),
+        SizedBox(width: 12.w),
+        _buildActionMedallion(Icons.settings_rounded, 'إعدادات'),
+        SizedBox(width: 12.w),
+        _buildActionMedallion(Icons.email_rounded, 'البريد'),
+        SizedBox(width: 12.w),
+        _buildActionMedallion(Icons.event_available_rounded, 'المهمة'),
+
+        const Spacer(),
+
+        // Store Shopping Cart Oval Button ( المتجر 🛒 )
+        _buildStoreButton(),
+
+        SizedBox(width: 10.w),
+
+        // Play Now Banner Button ( العبها الآن - عادية 🎮 )
+        _buildPlayNowBanner(),
+      ],
+    );
+  }
+
+  Widget _buildActionMedallion(IconData icon, String label) {
+    return GestureDetector(
+      onTap: () => SoundManager().playButtonClick(),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            padding: EdgeInsets.all(7.r),
             decoration: BoxDecoration(
-              color: filled
-                  ? OrientalTheme.accentCyan
-                  : Colors.white.withValues(alpha: 0.12),
+              gradient: const LinearGradient(
+                colors: [Color(0xFFE65100), Color(0xFF8D6E63), Color(0xFF4E342E)],
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+              ),
               shape: BoxShape.circle,
-              boxShadow: filled
-                  ? [
-                      BoxShadow(
-                        color: OrientalTheme.accentCyan.withValues(alpha: 0.5),
-                        blurRadius: 3.r,
-                      ),
-                    ]
-                  : null,
+              border: Border.all(color: OrientalTheme.primaryGold, width: 1.5.w),
+              boxShadow: const [BoxShadow(color: Colors.black54, blurRadius: 6)],
+            ),
+            child: Icon(icon, color: OrientalTheme.primaryGold, size: 16.r),
+          ),
+          SizedBox(height: 2.h),
+          Text(
+            label,
+            style: GoogleFonts.cairo(
+              color: OrientalTheme.primaryGold,
+              fontSize: 7.5.sp,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStoreButton() {
+    return GestureDetector(
+      onTap: () => SoundManager().playButtonClick(),
+      child: Container(
+        padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 6.h),
+        decoration: BoxDecoration(
+          gradient: OrientalTheme.storeBtnGradient,
+          borderRadius: BorderRadius.circular(20.r),
+          border: Border.all(color: OrientalTheme.primaryGold, width: 1.5.w),
+          boxShadow: [
+            BoxShadow(
+              color: const Color(0xFFFF6D00).withValues(alpha: 0.5),
+              blurRadius: 8.r,
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            Icon(Icons.shopping_cart_rounded, color: Colors.white, size: 16.r),
+            SizedBox(width: 4.w),
+            Text(
+              'المتجر',
+              style: GoogleFonts.cairo(
+                color: Colors.white,
+                fontSize: 10.sp,
+                fontWeight: FontWeight.w900,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPlayNowBanner() {
+    return GestureDetector(
+      onTap: () {
+        SoundManager().playCardDeal();
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => const BalootGameScreen(
+              roomName: 'تحدي السلاطين 👑',
+              betCoins: 5000,
             ),
           ),
         );
-      }),
+      },
+      child: Container(
+        padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 6.h),
+        decoration: BoxDecoration(
+          gradient: OrientalTheme.playNowGradient,
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(20.r),
+            bottomLeft: Radius.circular(20.r),
+            topRight: Radius.circular(6.r),
+            bottomRight: Radius.circular(6.r),
+          ),
+          border: Border.all(color: Colors.white, width: 1.5.w),
+          boxShadow: [
+            BoxShadow(
+              color: OrientalTheme.primaryGold.withValues(alpha: 0.5),
+              blurRadius: 10.r,
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            Icon(Icons.sports_esports_rounded, color: Colors.black, size: 20.r),
+            SizedBox(width: 6.w),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  'العبها الآن',
+                  style: GoogleFonts.cairo(
+                    color: Colors.black,
+                    fontSize: 12.sp,
+                    fontWeight: FontWeight.w900,
+                    height: 1.1,
+                  ),
+                ),
+                Text(
+                  'عادية',
+                  style: GoogleFonts.cairo(
+                    color: Colors.black87,
+                    fontSize: 7.5.sp,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

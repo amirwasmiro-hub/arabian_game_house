@@ -9,12 +9,10 @@ import 'features/home/screens/home_screen.dart';
 import 'features/leaderboard/screens/leaderboard_screen.dart';
 import 'features/store/screens/store_screen.dart';
 import 'features/profile/screens/profile_screen.dart';
-import 'features/game_table/baloot_game_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Lock Entire Application to Landscape Mode Globally
   await SystemChrome.setPreferredOrientations([
     DeviceOrientation.landscapeLeft,
     DeviceOrientation.landscapeRight,
@@ -35,10 +33,7 @@ class ArabianGameHouseApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ScreenUtilInit(
-      designSize: const Size(
-        932,
-        430,
-      ), // Standard Landscape Screen Dimensions (widescreen)
+      designSize: const Size(932, 430),
       minTextAdapt: true,
       splitScreenMode: true,
       builder: (context, child) {
@@ -77,6 +72,13 @@ class _MainNavigationWrapperState extends State<MainNavigationWrapper> {
     ProfileScreen(),
   ];
 
+  final List<_NavItem> _navItems = const [
+    _NavItem(icon: Icons.home_filled, label: 'الرئيسية'),
+    _NavItem(icon: Icons.emoji_events, label: 'السلاطين'),
+    _NavItem(icon: Icons.shopping_bag, label: 'المتجر'),
+    _NavItem(icon: Icons.person, label: 'الملف'),
+  ];
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -84,42 +86,80 @@ class _MainNavigationWrapperState extends State<MainNavigationWrapper> {
       bottomNavigationBar: Container(
         height: 56.h,
         decoration: BoxDecoration(
+          color: const Color(0xFF0F0C0A),
           border: Border(
-            top: BorderSide(color: OrientalTheme.primaryGold, width: 1.w),
+            top: BorderSide(
+              color: OrientalTheme.primaryGold.withValues(alpha: 0.3),
+              width: 1.w,
+            ),
           ),
         ),
-        child: BottomNavigationBar(
-          currentIndex: _currentIndex,
-          backgroundColor: OrientalTheme.bgDark,
-          selectedItemColor: OrientalTheme.primaryGold,
-          unselectedItemColor: OrientalTheme.textMuted,
-          selectedFontSize: 11.sp,
-          unselectedFontSize: 10.sp,
-          type: BottomNavigationBarType.fixed,
-          onTap: (index) {
-            SoundManager().playButtonClick();
-            setState(() => _currentIndex = index);
-          },
-          items: [
-            BottomNavigationBarItem(
-              icon: Icon(Icons.home_filled, size: 20.r),
-              label: 'الرئيسية',
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: List.generate(
+            _navItems.length,
+            (index) => _buildNavItem(index),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildNavItem(int index) {
+    final isSelected = _currentIndex == index;
+    final item = _navItems[index];
+
+    return GestureDetector(
+      onTap: () {
+        SoundManager().playButtonClick();
+        setState(() => _currentIndex = index);
+      },
+      child: SizedBox(
+        width: 80.w,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              height: 2.5.h,
+              width: isSelected ? 36.w : 0,
+              decoration: BoxDecoration(
+                color: isSelected
+                    ? OrientalTheme.primaryGold
+                    : Colors.transparent,
+                borderRadius: BorderRadius.vertical(
+                  bottom: Radius.circular(2.r),
+                ),
+              ),
             ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.emoji_events, size: 20.r),
-              label: 'السلاطين',
+            SizedBox(height: 4.h),
+            Icon(
+              item.icon,
+              color: isSelected
+                  ? OrientalTheme.primaryGold
+                  : OrientalTheme.textMuted,
+              size: isSelected ? 19.r : 17.r,
             ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.shopping_bag, size: 20.r),
-              label: 'المتجر',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.person, size: 20.r),
-              label: 'الملف الشخصي',
+            SizedBox(height: 2.h),
+            Text(
+              item.label,
+              style: TextStyle(
+                fontFamily: 'Cairo',
+                color: isSelected
+                    ? OrientalTheme.primaryGold
+                    : OrientalTheme.textMuted,
+                fontSize: isSelected ? 9.sp : 8.sp,
+                fontWeight: isSelected ? FontWeight.w800 : FontWeight.w500,
+              ),
             ),
           ],
         ),
       ),
     );
   }
+}
+
+class _NavItem {
+  final IconData icon;
+  final String label;
+  const _NavItem({required this.icon, required this.label});
 }

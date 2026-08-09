@@ -34,7 +34,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
     if (_user == null) {
       return Scaffold(
         backgroundColor: OrientalTheme.bgDark,
-        body: Center(child: CircularProgressIndicator(color: OrientalTheme.accentCyan, strokeWidth: 2.5.w)),
+        body: Center(
+          child: CircularProgressIndicator(
+            color: OrientalTheme.primaryGold,
+            strokeWidth: 2.5.w,
+          ),
+        ),
       );
     }
 
@@ -50,11 +55,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
             children: [
               Row(
                 children: [
-                  Icon(Icons.person_pin_rounded, color: OrientalTheme.accentCyan, size: 20.r),
+                  Icon(Icons.person_pin_rounded,
+                      color: OrientalTheme.primaryGold, size: 20.r),
                   SizedBox(width: 6.w),
                   Text(
                     'بطاقة المحترف الشخصية 🛡️',
-                    style: GoogleFonts.cairo(color: Colors.white, fontSize: 15.sp, fontWeight: FontWeight.w900),
+                    style: GoogleFonts.cairo(
+                      color: Colors.white,
+                      fontSize: 15.sp,
+                      fontWeight: FontWeight.w900,
+                    ),
                   ),
                 ],
               ),
@@ -63,7 +73,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Left Side: Gamer Profile HUD & Stats
+                    // Profile Info Box
                     Expanded(
                       flex: 5,
                       child: Container(
@@ -71,27 +81,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         decoration: BoxDecoration(
                           color: OrientalTheme.bgCard,
                           borderRadius: BorderRadius.circular(16.r),
-                          border: Border.all(color: OrientalTheme.accentCyan.withValues(alpha: 0.35), width: 1.w),
+                          border: Border.all(
+                            color: OrientalTheme.goldDark.withValues(alpha: 0.35),
+                            width: 1.w,
+                          ),
                         ),
                         child: Column(
                           children: [
                             Row(
                               children: [
-                                Container(
-                                  padding: EdgeInsets.all(2.r),
-                                  decoration: BoxDecoration(
-                                    shape: BoxShape.circle,
-                                    gradient: const LinearGradient(
-                                      colors: [OrientalTheme.accentPurple, OrientalTheme.accentCyan],
-                                    ),
-                                    boxShadow: [
-                                      BoxShadow(color: OrientalTheme.accentCyan.withValues(alpha: 0.4), blurRadius: 8.r),
-                                    ],
-                                  ),
-                                  child: CircleAvatar(
-                                    radius: 26.r,
-                                    backgroundImage: NetworkImage(_user!.avatarUrl),
-                                  ),
+                                CircleAvatar(
+                                  radius: 24.r,
+                                  backgroundImage: NetworkImage(_user!.avatarUrl),
                                 ),
                                 SizedBox(width: 12.w),
                                 Expanded(
@@ -100,11 +101,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                     children: [
                                       Text(
                                         _user!.name,
-                                        style: GoogleFonts.cairo(color: Colors.white, fontSize: 14.sp, fontWeight: FontWeight.w900),
+                                        style: GoogleFonts.cairo(
+                                          color: Colors.white,
+                                          fontSize: 14.sp,
+                                          fontWeight: FontWeight.w900,
+                                        ),
                                       ),
                                       Text(
                                         '${_user!.title} • ${_user!.vipTier}',
-                                        style: GoogleFonts.cairo(color: OrientalTheme.accentCyan, fontSize: 10.sp, fontWeight: FontWeight.w700),
+                                        style: GoogleFonts.cairo(
+                                          color: OrientalTheme.primaryGold,
+                                          fontSize: 10.sp,
+                                          fontWeight: FontWeight.w700,
+                                        ),
                                       ),
                                     ],
                                   ),
@@ -112,6 +121,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               ],
                             ),
                             SizedBox(height: 10.h),
+
                             // Level Progress
                             Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -119,32 +129,47 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 Row(
                                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                   children: [
-                                    Text('المستوى ${_user!.level}', style: GoogleFonts.cairo(color: OrientalTheme.textMuted, fontSize: 9.sp)),
-                                    Text('${(_user!.xpProgress * 100).toInt()}% XP', style: GoogleFonts.cairo(color: OrientalTheme.accentCyan, fontSize: 9.sp, fontWeight: FontWeight.bold)),
+                                    Text(
+                                      'المستوى ${_user!.level}',
+                                      style: GoogleFonts.cairo(
+                                        color: OrientalTheme.textMuted,
+                                        fontSize: 9.sp,
+                                      ),
+                                    ),
+                                    Text(
+                                      '${(_user!.xpProgress * 100).toInt()}% XP',
+                                      style: GoogleFonts.cairo(
+                                        color: OrientalTheme.primaryGold,
+                                        fontSize: 9.sp,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
                                   ],
                                 ),
                                 SizedBox(height: 3.h),
                                 LinearProgressIndicator(
                                   value: _user!.xpProgress,
                                   backgroundColor: Colors.white.withValues(alpha: 0.08),
-                                  color: OrientalTheme.accentCyan,
+                                  color: OrientalTheme.primaryGold,
                                   minHeight: 5.h,
                                 ),
                               ],
                             ),
                             SizedBox(height: 12.h),
+
                             // Detailed Stats Grid
                             Expanded(
                               child: GridView.count(
+                                physics: const NeverScrollableScrollPhysics(),
                                 crossAxisCount: 2,
                                 crossAxisSpacing: 8.w,
                                 mainAxisSpacing: 8.h,
                                 childAspectRatio: 2.2,
                                 children: [
-                                  _buildStatBox('المباريات', '$totalGames', OrientalTheme.accentPurple),
-                                  _buildStatBox('الانتصارات', '${_user!.wins}', OrientalTheme.accentEmerald),
-                                  _buildStatBox('نسبة الفوز', '${_user!.winRate.toStringAsFixed(0)}%', OrientalTheme.primaryGold),
-                                  _buildStatBox('الترتيب', '#4 العالمي', OrientalTheme.accentCyan),
+                                  _buildStatBox('المباريات', '$totalGames', OrientalTheme.primaryRed),
+                                  _buildStatBox('الانتصارات', '${_user!.wins}', OrientalTheme.primaryGold),
+                                  _buildStatBox('نسبة الفوز', '${_user!.winRate.toStringAsFixed(0)}%', OrientalTheme.accentOrange),
+                                  _buildStatBox('الترتيب', '#4 العالمي', OrientalTheme.accentPurple),
                                 ],
                               ),
                             ),
@@ -154,7 +179,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     ),
                     SizedBox(width: 14.w),
 
-                    // Right Side: Sound & Game Settings
+                    // Settings Box
                     Expanded(
                       flex: 5,
                       child: Container(
@@ -162,14 +187,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         decoration: BoxDecoration(
                           color: OrientalTheme.bgCard,
                           borderRadius: BorderRadius.circular(16.r),
-                          border: Border.all(color: Colors.white.withValues(alpha: 0.08), width: 1.w),
+                          border: Border.all(
+                            color: Colors.white.withValues(alpha: 0.08),
+                            width: 1.w,
+                          ),
                         ),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
                               'إعدادات اللعبة والصوت ⚙️',
-                              style: GoogleFonts.cairo(color: OrientalTheme.accentCyan, fontSize: 11.sp, fontWeight: FontWeight.w800),
+                              style: GoogleFonts.cairo(
+                                color: OrientalTheme.primaryGold,
+                                fontSize: 11.sp,
+                                fontWeight: FontWeight.w800,
+                              ),
                             ),
                             SizedBox(height: 8.h),
                             _buildSettingSwitch(
@@ -224,8 +256,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Text(value, style: GoogleFonts.cairo(color: Colors.white, fontWeight: FontWeight.w900, fontSize: 12.sp)),
-          Text(label, style: GoogleFonts.cairo(color: OrientalTheme.textMuted, fontSize: 8.sp)),
+          Text(
+            value,
+            style: GoogleFonts.cairo(
+              color: Colors.white,
+              fontWeight: FontWeight.w900,
+              fontSize: 12.sp,
+            ),
+          ),
+          Text(
+            label,
+            style: GoogleFonts.cairo(
+              color: OrientalTheme.textMuted,
+              fontSize: 8.sp,
+            ),
+          ),
         ],
       ),
     );
@@ -244,14 +289,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
         children: [
           Row(
             children: [
-              Icon(icon, color: OrientalTheme.accentCyan, size: 16.r),
+              Icon(icon, color: OrientalTheme.primaryGold, size: 16.r),
               SizedBox(width: 8.w),
-              Text(title, style: GoogleFonts.cairo(color: Colors.white, fontSize: 10.sp)),
+              Text(
+                title,
+                style: GoogleFonts.cairo(
+                  color: Colors.white,
+                  fontSize: 10.sp,
+                ),
+              ),
             ],
           ),
           Switch(
             value: value,
-            activeThumbColor: OrientalTheme.accentCyan,
+            activeThumbColor: OrientalTheme.primaryGold,
             onChanged: onChanged,
           ),
         ],
