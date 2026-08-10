@@ -5,6 +5,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'core/theme/oriental_theme.dart';
 import 'core/audio/sound_manager.dart';
 import 'core/services/supabase_service.dart';
+import 'features/splash/screens/orodragon_splash_screen.dart';
 import 'features/home/screens/home_screen.dart';
 import 'features/leaderboard/screens/leaderboard_screen.dart';
 import 'features/store/screens/store_screen.dart';
@@ -48,10 +49,36 @@ class ArabianGameHouseApp extends StatelessWidget {
           ],
           supportedLocales: const [Locale('ar', 'SA')],
           locale: const Locale('ar', 'SA'),
-          home: const MainNavigationWrapper(),
+          home: const AppEntryFlow(),
         );
       },
     );
+  }
+}
+
+class AppEntryFlow extends StatefulWidget {
+  const AppEntryFlow({super.key});
+
+  @override
+  State<AppEntryFlow> createState() => _AppEntryFlowState();
+}
+
+class _AppEntryFlowState extends State<AppEntryFlow> {
+  bool _showSplash = true;
+
+  @override
+  Widget build(BuildContext context) {
+    if (_showSplash) {
+      return OrodragonSplashScreen(
+        onFinish: () {
+          setState(() {
+            _showSplash = false;
+          });
+        },
+      );
+    }
+
+    return const MainNavigationWrapper();
   }
 }
 
@@ -63,7 +90,7 @@ class MainNavigationWrapper extends StatefulWidget {
 }
 
 class _MainNavigationWrapperState extends State<MainNavigationWrapper> {
-  int _currentIndex = 0;
+  final int _currentIndex = 0;
 
   final List<Widget> _tabs = const [
     HomeScreen(),
@@ -72,94 +99,8 @@ class _MainNavigationWrapperState extends State<MainNavigationWrapper> {
     ProfileScreen(),
   ];
 
-  final List<_NavItem> _navItems = const [
-    _NavItem(icon: Icons.home_filled, label: 'الرئيسية'),
-    _NavItem(icon: Icons.emoji_events, label: 'السلاطين'),
-    _NavItem(icon: Icons.shopping_bag, label: 'المتجر'),
-    _NavItem(icon: Icons.person, label: 'الملف'),
-  ];
-
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: IndexedStack(index: _currentIndex, children: _tabs),
-      bottomNavigationBar: Container(
-        height: 56.h,
-        decoration: BoxDecoration(
-          color: const Color(0xFF0F0C0A),
-          border: Border(
-            top: BorderSide(
-              color: OrientalTheme.primaryGold.withValues(alpha: 0.3),
-              width: 1.w,
-            ),
-          ),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: List.generate(
-            _navItems.length,
-            (index) => _buildNavItem(index),
-          ),
-        ),
-      ),
-    );
+    return Scaffold(body: _tabs[_currentIndex]);
   }
-
-  Widget _buildNavItem(int index) {
-    final isSelected = _currentIndex == index;
-    final item = _navItems[index];
-
-    return GestureDetector(
-      onTap: () {
-        SoundManager().playButtonClick();
-        setState(() => _currentIndex = index);
-      },
-      child: SizedBox(
-        width: 80.w,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              height: 2.5.h,
-              width: isSelected ? 36.w : 0,
-              decoration: BoxDecoration(
-                color: isSelected
-                    ? OrientalTheme.primaryGold
-                    : Colors.transparent,
-                borderRadius: BorderRadius.vertical(
-                  bottom: Radius.circular(2.r),
-                ),
-              ),
-            ),
-            SizedBox(height: 4.h),
-            Icon(
-              item.icon,
-              color: isSelected
-                  ? OrientalTheme.primaryGold
-                  : OrientalTheme.textMuted,
-              size: isSelected ? 19.r : 17.r,
-            ),
-            SizedBox(height: 2.h),
-            Text(
-              item.label,
-              style: TextStyle(
-                fontFamily: 'Cairo',
-                color: isSelected
-                    ? OrientalTheme.primaryGold
-                    : OrientalTheme.textMuted,
-                fontSize: isSelected ? 9.sp : 8.sp,
-                fontWeight: isSelected ? FontWeight.w800 : FontWeight.w500,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _NavItem {
-  final IconData icon;
-  final String label;
-  const _NavItem({required this.icon, required this.label});
 }

@@ -3,57 +3,96 @@ import 'package:google_fonts/google_fonts.dart';
 
 class OrientalTheme {
   // ══════════════════════════════════════════════
-  // ROYAL LOUNGE DECK — Luxury Casino Colors
+  // BACKGAMMON PLUS & ARABIAN GAME HOUSE THEME
   // ══════════════════════════════════════════════
-  static const Color bgDark = Color(0xFF0F081D);       // Midnight lounge purple-black
-  static const Color bgCard = Color(0xFF1C0D2E);        // Dark velvet purple tile
-  static const Color bgElevated = Color(0xFF2D1645);    // Elevated lounge container
+  static const Color bgDark = Color(0xFF0B061A);       // Deep space purple-black
+  static const Color bgCard = Color(0xFF1D0E38);       // Dark purple tile
+  static const Color bgElevated = Color(0xFF2C164F);   // Elevated container
+
+  // Backgammon Plus Cream Dialog & Card Colors
+  static const Color cardCreamBg = Color(0xFFFFF8EA);   // Cream ivory card background
+  static const Color cardCreamInner = Color(0xFFFFF2DC); // Inner light cream
+  static const Color cardBorderGold = Color(0xFFE5A93B); // Golden border line
 
   // Gold Tokens
   static const Color primaryGold = Color(0xFFFFD700);   // Glistening royal gold
-  static const Color goldLight = Color(0xFFFFF59D);      // Pale gold highlight
-  static const Color goldDark = Color(0xFFC59B27);       // Antique gold
-  static const Color goldBorder = Color(0xFFFFE082);     // Card frame gold
+  static const Color goldLight = Color(0xFFFFF59D);     // Pale gold highlight
+  static const Color goldDark = Color(0xFFC59B27);      // Antique gold
+  static const Color goldBorder = Color(0xFFFFE082);    // Card frame gold
 
-  // Accents
-  static const Color primaryRed = Color(0xFFD32F2F);    // Casino red
-  static const Color redLight = Color(0xFFEF5350);       // Felt red
-  static const Color accentOrange = Color(0xFFFF6D00);  // Store button orange
-  static const Color accentGreen = Color(0xFF00E676);   // 'New' badge green
-  static const Color accentEmerald = Color(0xFF00E676); // Emerald
-  static const Color accentRuby = Color(0xFFD32F2F);    // Ruby
-  static const Color accentCyan = Color(0xFF00F2FE);    // Electric cyan
-  static const Color accentPurple = Color(0xFF9D4EDD);  // Velvet purple
+  // Accents & Buttons
+  static const Color vibrantGreen = Color(0xFF10C044);  // Backgammon Plus ACCEPT / PLAY NOW green
+  static const Color magentaHeader = Color(0xFFD81B60);  // Store banner magenta
+  static const Color facebookBlue = Color(0xFF1877F2);   // Facebook button blue
+  static const Color emailMagenta = Color(0xFFD81B60);   // Email button magenta
+  static const Color guestDark = Color(0xFF2B2D42);      // Guest pill button dark
+
+  // Standard Accents
+  static const Color primaryRed = Color(0xFFD32F2F);    
+  static const Color accentOrange = Color(0xFFFF6D00);  
+  static const Color accentGreen = Color(0xFF00E676);
+  static const Color accentEmerald = Color(0xFF00E676);
+  static const Color accentRuby = Color(0xFFD32F2F);
+  static const Color accentCyan = Color(0xFF00F2FE);    
+  static const Color accentPurple = Color(0xFF9D4EDD);  
 
   // Text Colors
   static const Color textLight = Color(0xFFFFFDF7);     // Warm ivory text
+  static const Color textDark = Color(0xFF2A1C08);      // Dark brownish text for cream cards
   static const Color textMuted = Color(0xFFB0A2C3);     // Muted lavender
   static const Color textGold = Color(0xFFFFECB3);      // Gold text
 
   // ── Gradients ──────────────────────────────────
+  static const LinearGradient spaceCosmicGradient = LinearGradient(
+    colors: [
+      Color(0xFF080314),
+      Color(0xFF14082D),
+      Color(0xFF240A42),
+      Color(0xFF160630),
+      Color(0xFF070211),
+    ],
+    begin: Alignment.topCenter,
+    end: Alignment.bottomCenter,
+  );
+
+  static const LinearGradient vibrantGreenGradient = LinearGradient(
+    colors: [
+      Color(0xFF45F973),
+      Color(0xFF10C044),
+      Color(0xFF067827),
+    ],
+    begin: Alignment.topCenter,
+    end: Alignment.bottomCenter,
+  );
+
+  static const LinearGradient magentaHeaderGradient = LinearGradient(
+    colors: [
+      Color(0xFFEC407A),
+      Color(0xFFD81B60),
+      Color(0xFF880E4F),
+    ],
+    begin: Alignment.topCenter,
+    end: Alignment.bottomCenter,
+  );
+
+  static const LinearGradient gold3DGradient = LinearGradient(
+    colors: [
+      Color(0xFFFFF9C4),
+      Color(0xFFFFD700),
+      Color(0xFFFFB300),
+      Color(0xFFB78103),
+    ],
+    begin: Alignment.topCenter,
+    end: Alignment.bottomCenter,
+  );
+
   static const LinearGradient goldCardGradient = LinearGradient(
     colors: [Color(0xFFFFF59D), Color(0xFFFFD700), Color(0xFFB78103)],
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );
 
-  static const LinearGradient loungeSkyGradient = LinearGradient(
-    colors: [
-      Color(0xFF0A041A),
-      Color(0xFF1A0A3A),
-      Color(0xFF3B1560),
-      Color(0xFF5E1B68),
-      Color(0xFF8B2B64),
-    ],
-    begin: Alignment.topCenter,
-    end: Alignment.bottomCenter,
-  );
-
-  static const LinearGradient playNowGradient = LinearGradient(
-    colors: [Color(0xFFFFD700), Color(0xFFFF6D00), Color(0xFFD84315)],
-    begin: Alignment.centerLeft,
-    end: Alignment.centerRight,
-  );
+  static const LinearGradient playNowGradient = vibrantGreenGradient;
 
   static const LinearGradient storeBtnGradient = LinearGradient(
     colors: [Color(0xFFFF9100), Color(0xFFFF3D00)],
