@@ -12,6 +12,7 @@ import '../../game_table/estimation_game_screen.dart';
 import '../../game_table/ludo_game_screen.dart';
 import '../../game_table/tarneeb_game_screen.dart';
 import '../../game_table/uno_game_screen.dart';
+import '../../rive_flame_effects/screens/rive_flame_showcase_screen.dart';
 import '../../leaderboard/screens/leaderboard_screen.dart';
 import '../../profile/screens/profile_screen.dart';
 import '../../store/screens/store_screen.dart';
@@ -53,6 +54,15 @@ class _HomeScreenState extends State<HomeScreen> {
   int _selectedBottomNavTab = 0;
 
   final List<GameTileData> _allGames = const [
+    GameTileData(
+      titleEn: 'RIVE & FLAME LAB',
+      titleAr: 'مختبر Rive & Flame',
+      icon: Icons.auto_awesome_rounded,
+      cardBgColor: Color(0xFF4A148C),
+      cardBorderColor: Color(0xFFFFD700),
+      isNew: true,
+      targetScreen: RiveFlameShowcaseScreen(),
+    ),
     GameTileData(
       titleEn: 'ESTIMATION',
       titleAr: 'استميشن',
@@ -209,7 +219,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
                 trailing: Switch(
                   value: SoundManager().isSoundEnabled,
-                  activeThumbColor: const Color(0xFFFFD700),
+                  activeColor: const Color(0xFFFFD700),
                   onChanged: (val) {
                     setState(() {
                       SoundManager().toggleSound(val);
@@ -226,7 +236,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
                 trailing: Switch(
                   value: SoundManager().isMusicEnabled,
-                  activeThumbColor: const Color(0xFFFFD700),
+                  activeColor: const Color(0xFFFFD700),
                   onChanged: (val) {
                     setState(() {
                       SoundManager().toggleMusic(val);

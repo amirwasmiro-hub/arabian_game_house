@@ -14,6 +14,7 @@ class SupabaseService {
     if (_isInitialized) return;
     try {
       if (url.isNotEmpty && anonKey.isNotEmpty && !url.contains('YOUR_')) {
+        // ignore: deprecated_member_use
         await Supabase.initialize(url: url, anonKey: anonKey);
         _isInitialized = true;
         debugPrint('Supabase initialized successfully.');

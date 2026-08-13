@@ -38,9 +38,9 @@ class _BalootGameScreenState extends State<BalootGameScreen> with TickerProvider
   final SoundManager _soundManager = SoundManager();
 
   int _ourScore = 0;
-  int _theirScore = 0;
+  final int _theirScore = 0;
   final String _trumpSuit = '♣';
-  int _roundTimer = 7;
+  final int _roundTimer = 7;
 
   final List<PlayingCard> _myHand = [
     PlayingCard(suit: '♦', value: '10', color: OrientalTheme.accentRuby),
