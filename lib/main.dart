@@ -39,7 +39,7 @@ class ArabianGameHouseApp extends StatelessWidget {
       splitScreenMode: true,
       builder: (context, child) {
         return MaterialApp(
-          title: 'بيت الألعاب العربية',
+          title: 'مقهى الألعاب',
           debugShowCheckedModeBanner: false,
           theme: OrientalTheme.themeData,
           localizationsDelegates: const [

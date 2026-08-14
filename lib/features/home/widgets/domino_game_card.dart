@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'star_explosion_overlay.dart';
 
 class DominoGameCard extends StatefulWidget {
   final String titleAr;
@@ -55,7 +56,10 @@ class _DominoGameCardState extends State<DominoGameCard>
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTapDown: (_) => _pressController.forward(),
+      onTapDown: (details) {
+        StarExplosionOverlay.spawnExplosion(context, details.globalPosition);
+        _pressController.forward();
+      },
       onTapUp: (_) {
         _pressController.reverse();
         widget.onTap();
@@ -64,49 +68,54 @@ class _DominoGameCardState extends State<DominoGameCard>
       child: ScaleTransition(
         scale: _scaleAnimation,
         child: Container(
-          width: 140.w,
-          height: 170.h,
-          margin: EdgeInsets.symmetric(horizontal: 6.w),
+          width: 110.w,
+          height: 85.h,
+          margin: EdgeInsets.symmetric(horizontal: 4.w),
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(22.r),
-            color: Colors.black.withValues(alpha: 0.3),
+            borderRadius: BorderRadius.circular(16.r),
+            color: Colors.black.withValues(alpha: 0.35),
             border: Border.all(
               color: widget.cardBorderColor,
-              width: 1.8.w,
+              width: 1.2.w,
             ),
             boxShadow: [
               BoxShadow(
-                color: widget.cardBorderColor.withValues(alpha: 0.35),
-                blurRadius: 14.r,
-                spreadRadius: 1.r,
-                offset: const Offset(0, 4),
+                color: widget.cardBorderColor.withValues(alpha: 0.3),
+                blurRadius: 8.r,
+                spreadRadius: 0.5.r,
+                offset: const Offset(0, 2),
               ),
               BoxShadow(
-                color: Colors.black.withValues(alpha: 0.7),
-                blurRadius: 10.r,
-                offset: const Offset(0, 6),
+                color: Colors.black.withValues(alpha: 0.6),
+                blurRadius: 6.r,
+                offset: const Offset(0, 3),
               ),
             ],
           ),
           child: ClipRRect(
-            borderRadius: BorderRadius.circular(20.r),
+            borderRadius: BorderRadius.circular(14.r),
             child: Stack(
               children: [
-                // 1. GAME ARTWORK WITH SHIMMER & GLOW ANIMATION
+                // 1. GAME ARTWORK (SEMI-TRANSPARENT WITH SHIMMER)
                 if (widget.assetPath != null)
                   Positioned.fill(
-                    child: Image.asset(
-                      widget.assetPath!,
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) =>
-                          _buildFallbackIcon(),
+                    child: Opacity(
+                      opacity: 0.60,
+                      child: Image.asset(
+                        widget.assetPath!,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) =>
+                            _buildFallbackIcon(),
+                      ),
                     )
                         .animate(
-                          onPlay: (controller) => controller.repeat(reverse: true),
+                          onPlay: (controller) =>
+                              controller.repeat(reverse: true),
                         )
                         .shimmer(
                           duration: 2500.ms,
-                          color: const Color(0xFFFFD700).withValues(alpha: 0.25),
+                          color:
+                              const Color(0xFFFFD700).withValues(alpha: 0.25),
                         ),
                   )
                 else
@@ -118,7 +127,7 @@ class _DominoGameCardState extends State<DominoGameCard>
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
                         colors: [
-                          Colors.black.withValues(alpha: 0.2),
+                          Colors.black.withValues(alpha: 0.15),
                           Colors.transparent,
                           Colors.black.withValues(alpha: 0.85),
                         ],
@@ -132,37 +141,38 @@ class _DominoGameCardState extends State<DominoGameCard>
                 // 3. ANIMATED "NEW" BADGE
                 if (widget.isNew)
                   Positioned(
-                    top: 8.h,
-                    right: 8.w,
+                    top: 5.h,
+                    right: 5.w,
                     child: Container(
                       padding: EdgeInsets.symmetric(
-                        horizontal: 8.w,
-                        vertical: 3.h,
+                        horizontal: 6.w,
+                        vertical: 2.h,
                       ),
                       decoration: BoxDecoration(
                         gradient: const LinearGradient(
                           colors: [Color(0xFFFF1744), Color(0xFFFF5252)],
                         ),
-                        borderRadius: BorderRadius.circular(10.r),
-                        border: Border.all(color: Colors.white, width: 1.w),
+                        borderRadius: BorderRadius.circular(8.r),
+                        border: Border.all(color: Colors.white, width: 0.8.w),
                         boxShadow: [
                           BoxShadow(
                             color: Colors.red.withValues(alpha: 0.7),
-                            blurRadius: 8.r,
+                            blurRadius: 6.r,
                           ),
                         ],
                       ),
                       child: Text(
                         'NEW',
                         style: GoogleFonts.montserrat(
-                          fontSize: 8.sp,
+                          fontSize: 7.sp,
                           fontWeight: FontWeight.w900,
                           color: Colors.white,
                         ),
                       ),
                     )
                         .animate(
-                          onPlay: (controller) => controller.repeat(reverse: true),
+                          onPlay: (controller) =>
+                              controller.repeat(reverse: true),
                         )
                         .scale(
                           duration: 800.ms,
@@ -173,28 +183,29 @@ class _DominoGameCardState extends State<DominoGameCard>
 
                 // 4. ANIMATED ARABIC GAME TITLE WITH GLOW
                 Positioned(
-                  bottom: 12.h,
-                  left: 6.w,
-                  right: 6.w,
+                  bottom: 6.h,
+                  left: 4.w,
+                  right: 4.w,
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Text(
                         widget.titleAr,
                         style: GoogleFonts.cairo(
-                          fontSize: 14.sp,
+                          fontSize: 12.sp,
                           fontWeight: FontWeight.w900,
                           color: const Color(0xFFFFD700),
-                          height: 1.1,
+                          height: 1.0,
                           shadows: [
                             Shadow(
                               color: Colors.black,
-                              blurRadius: 6.r,
+                              blurRadius: 5.r,
                               offset: const Offset(1, 1),
                             ),
                             Shadow(
-                              color: const Color(0xFFFFD700).withValues(alpha: 0.8),
-                              blurRadius: 10.r,
+                              color: const Color(0xFFFFD700)
+                                  .withValues(alpha: 0.8),
+                              blurRadius: 8.r,
                             ),
                           ],
                         ),
@@ -202,18 +213,18 @@ class _DominoGameCardState extends State<DominoGameCard>
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
-                      SizedBox(height: 2.h),
+                      SizedBox(height: 1.h),
                       Text(
                         widget.titleEn,
                         style: GoogleFonts.montserrat(
-                          fontSize: 9.sp,
+                          fontSize: 8.sp,
                           fontWeight: FontWeight.w800,
                           color: Colors.white70,
-                          letterSpacing: 1.w,
+                          letterSpacing: 0.8.w,
                           shadows: [
                             Shadow(
                               color: Colors.black,
-                              blurRadius: 4.r,
+                              blurRadius: 3.r,
                               offset: const Offset(1, 1),
                             ),
                           ],

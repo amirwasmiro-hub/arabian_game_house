@@ -8,7 +8,6 @@ plugins {
 android {
     namespace = "com.arabian.gamehouse.arabian_game_house"
     compileSdk = flutter.compileSdkVersion
-    ndkVersion = "27.0.12077973"
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
