@@ -42,7 +42,17 @@ class FlameNavBarParticleGame extends FlameGame {
   }
 }
 
-/// 🌟 Royal Interactive Image Navigation Bar (Design 1 Image Background Overlay)
+class NavItemData {
+  final String label;
+  final String iconAsset;
+
+  const NavItemData({
+    required this.label,
+    required this.iconAsset,
+  });
+}
+
+/// 🌟 Royal Interactive Navigation Bar with Individual 3D Icons
 class RoyalRiveFlameNavBar extends StatefulWidget {
   final int selectedIndex;
   final ValueChanged<int> onTabSelected;
@@ -60,12 +70,15 @@ class RoyalRiveFlameNavBar extends StatefulWidget {
 class _RoyalRiveFlameNavBarState extends State<RoyalRiveFlameNavBar> {
   late final FlameNavBarParticleGame _particleGame;
 
-  final List<String> _tabs = const [
-    'الرئيسية',
-    'الاستبدال',
-    'المسابقات',
-    'البروفايل',
-    'الإعدادات',
+  final List<NavItemData> _navItems = const [
+    NavItemData(label: 'الرئيسية', iconAsset: 'assets/images/icon_home.png'),
+    NavItemData(label: 'التحويل', iconAsset: 'assets/images/icon_exchange.png'),
+    NavItemData(label: 'المسابقات', iconAsset: 'assets/images/icon_trophy.png'),
+    NavItemData(
+        label: 'البروفايل', iconAsset: 'assets/images/icon_profile.png'),
+    NavItemData(
+        label: 'الإعدادات', iconAsset: 'assets/images/icon_settings.png'),
+    NavItemData(label: 'المتجر', iconAsset: 'assets/images/icon_store.png'),
   ];
 
   @override
@@ -96,128 +109,119 @@ class _RoyalRiveFlameNavBarState extends State<RoyalRiveFlameNavBar> {
     return Stack(
       alignment: Alignment.center,
       children: [
-        // 1. Flame Particle Layer (Explosions behind the UI)
+        // 1. Flame Particle Layer
         Positioned.fill(
           child: IgnorePointer(
             child: GameWidget(game: _particleGame),
           ),
         ),
 
-        // 2. High Resolution Image Navigation Bar Graphic Dock
+        // 2. Royal Luxury Glassmorphism Dock
         Container(
-          height: 48.h,
-          margin: EdgeInsets.symmetric(horizontal: 14.w, vertical: 2.h),
+          width: double.infinity,
+          height: 46.h,
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(24.r),
+            gradient: const LinearGradient(
+              colors: [
+                Color(0xF51A0736),
+                Color(0xF5330C59),
+                Color(0xF51A0736),
+              ],
+              begin: Alignment.centerLeft,
+              end: Alignment.centerRight,
+            ),
+            border: Border(
+              top: BorderSide(
+                color: activeGold.withValues(alpha: 0.70),
+                width: 1.2.w,
+              ),
+              bottom: BorderSide(
+                color: activeGold.withValues(alpha: 0.35),
+                width: 0.8.w,
+              ),
+            ),
             boxShadow: [
               BoxShadow(
-                color: activeGold.withValues(alpha: 0.40),
-                blurRadius: 20.r,
+                color: activeGold.withValues(alpha: 0.30),
+                blurRadius: 16.r,
                 spreadRadius: 1.r,
               ),
               BoxShadow(
-                color: const Color(0xFF8E2DE2).withValues(alpha: 0.3),
-                blurRadius: 24.r,
-                spreadRadius: 2.r,
-              ),
-              BoxShadow(
                 color: Colors.black.withValues(alpha: 0.85),
-                blurRadius: 16.r,
-                offset: const Offset(0, 5),
+                blurRadius: 12.r,
+                offset: const Offset(0, 4),
               ),
             ],
           ),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(24.r),
-            child: Stack(
-              children: [
-                // Design 1 Full Graphic Artwork Background Image
-                Positioned.fill(
-                  child: Image.asset(
-                    'assets/images/royal_nav_bar_bg.jpg',
-                    fit: BoxFit.cover,
-                    alignment: Alignment.center,
-                    errorBuilder: (context, error, stackTrace) => Container(
-                      decoration: const BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [
-                            Color(0xF5180B2B),
-                            Color(0xF52E0B54),
-                            Color(0xF5180B2B),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
+          child: Directionality(
+            textDirection: TextDirection.rtl,
+            child: Row(
+              children: List.generate(_navItems.length, (index) {
+                final key = GlobalKey();
+                final isSelected = widget.selectedIndex == index;
+                final item = _navItems[index];
 
-                // Ambient Golden Shimmer Overlay
-                Positioned.fill(
-                  child: Container(
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [
-                          Colors.black.withValues(alpha: 0.15),
-                          Colors.transparent,
-                          Colors.black.withValues(alpha: 0.25),
-                        ],
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                      ),
-                    ),
-                  ),
-                ),
-
-                // 3. Interactive Clickable Button Overlays for Each Icon
-                Directionality(
-                  textDirection: TextDirection.ltr,
-                  child: Row(
-                    children: List.generate(_tabs.length, (index) {
-                      final key = GlobalKey();
-                      final isSelected = widget.selectedIndex == index;
-
-                      return Expanded(
-                        child: GestureDetector(
-                          key: key,
-                          onTap: () => _handleTabTap(index, key),
-                          behavior: HitTestBehavior.opaque,
-                          child: AnimatedContainer(
-                            duration: const Duration(milliseconds: 220),
-                            curve: Curves.easeOutCubic,
-                            margin: EdgeInsets.all(4.r),
+                return Expanded(
+                  child: GestureDetector(
+                    key: key,
+                    onTap: () => _handleTabTap(index, key),
+                    behavior: HitTestBehavior.opaque,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        AnimatedScale(
+                          scale: isSelected ? 1.18 : 0.92,
+                          duration: const Duration(milliseconds: 220),
+                          curve: Curves.easeOutCubic,
+                          child: Container(
+                            padding: EdgeInsets.all(2.r),
                             decoration: isSelected
                                 ? BoxDecoration(
-                                    borderRadius: BorderRadius.circular(18.r),
-                                    border: Border.all(
-                                      color: activeGold,
-                                      width: 1.6.w,
-                                    ),
-                                    gradient: LinearGradient(
-                                      colors: [
-                                        activeGold.withValues(alpha: 0.25),
-                                        const Color(0xFF8E2DE2)
-                                            .withValues(alpha: 0.20),
-                                        activeGold.withValues(alpha: 0.10),
-                                      ],
-                                      begin: Alignment.topCenter,
-                                      end: Alignment.bottomCenter,
-                                    ),
+                                    shape: BoxShape.circle,
                                     boxShadow: [
                                       BoxShadow(
                                         color:
-                                            activeGold.withValues(alpha: 0.5),
-                                        blurRadius: 10.r,
+                                            activeGold.withValues(alpha: 0.6),
+                                        blurRadius: 12.r,
+                                        spreadRadius: 1.r,
                                       ),
                                     ],
                                   )
                                 : null,
+                            child: Image.asset(
+                              item.iconAsset,
+                              height: 30.h,
+                              fit: BoxFit.contain,
+                              errorBuilder: (context, error, stackTrace) =>
+                                  Icon(
+                                Icons.stars_rounded,
+                                color: isSelected ? activeGold : Colors.white60,
+                                size: 24.r,
+                              ),
+                            ),
                           ),
                         ),
-                      );
-                    }),
+                        if (isSelected)
+                          Container(
+                            margin: EdgeInsets.only(top: 2.h),
+                            width: 14.w,
+                            height: 2.h,
+                            decoration: BoxDecoration(
+                              color: activeGold,
+                              borderRadius: BorderRadius.circular(2.r),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: activeGold,
+                                  blurRadius: 6.r,
+                                ),
+                              ],
+                            ),
+                          ),
+                      ],
+                    ),
                   ),
-                ),
-              ],
+                );
+              }),
             ),
           ),
         ),
