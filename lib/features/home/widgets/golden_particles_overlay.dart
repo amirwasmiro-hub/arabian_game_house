@@ -11,7 +11,7 @@ class GoldenParticlesOverlay extends StatefulWidget {
 class _GoldenParticlesOverlayState extends State<GoldenParticlesOverlay>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
-  final List<_Particle> _particles = [];
+  final List<GoldenParticleItem> _particles = [];
   final math.Random _random = math.Random();
 
   @override
@@ -23,7 +23,7 @@ class _GoldenParticlesOverlayState extends State<GoldenParticlesOverlay>
     )..repeat();
 
     for (int i = 0; i < 35; i++) {
-      _particles.add(_Particle(
+      _particles.add(GoldenParticleItem(
         x: _random.nextDouble(),
         y: _random.nextDouble(),
         radius: _random.nextDouble() * 2.5 + 1.0,
@@ -53,14 +53,14 @@ class _GoldenParticlesOverlayState extends State<GoldenParticlesOverlay>
   }
 }
 
-class _Particle {
+class GoldenParticleItem {
   double x;
   double y;
   final double radius;
   final double speed;
   final double alpha;
 
-  _Particle({
+  GoldenParticleItem({
     required this.x,
     required this.y,
     required this.radius,
@@ -70,7 +70,7 @@ class _Particle {
 }
 
 class CustomPainterWidget extends StatelessWidget {
-  final List<_Particle> particles;
+  final List<GoldenParticleItem> particles;
   final double progress;
 
   const CustomPainterWidget({
@@ -94,19 +94,19 @@ class CustomPainterBox extends SingleChildRenderObjectWidget {
 
   @override
   RenderObject createRenderObject(BuildContext context) {
-    return _RenderCustomPainterBox(painter);
+    return RenderCustomPainterBox(painter);
   }
 
   @override
-  void updateRenderObject(BuildContext context, covariant _RenderCustomPainterBox renderObject) {
+  void updateRenderObject(BuildContext context, covariant RenderCustomPainterBox renderObject) {
     renderObject.painter = painter;
   }
 }
 
-class _RenderCustomPainterBox extends RenderBox {
+class RenderCustomPainterBox extends RenderBox {
   CustomPainter _painter;
 
-  _RenderCustomPainterBox(this._painter);
+  RenderCustomPainterBox(this._painter);
 
   set painter(CustomPainter value) {
     if (_painter == value) return;
@@ -129,7 +129,7 @@ class _RenderCustomPainterBox extends RenderBox {
 }
 
 class _ParticlesPainter extends CustomPainter {
-  final List<_Particle> particles;
+  final List<GoldenParticleItem> particles;
   final double progress;
 
   _ParticlesPainter({required this.particles, required this.progress});

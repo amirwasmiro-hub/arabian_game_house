@@ -95,7 +95,9 @@ class BackgammonEngine {
   List<int> availableDice() {
     final used = List<int>.from(_state.usedDice);
     final avail = List<int>.from(_state.dice);
-    for (final u in used) avail.remove(u);
+    for (final u in used) {
+      avail.remove(u);
+    }
     return avail;
   }
 
@@ -135,12 +137,14 @@ class BackgammonEngine {
   bool _canBearOff(BgPlayer p) {
     if (p == BgPlayer.white) {
       if (_state.whiteBar > 0) return false;
-      for (int i = 7; i <= 24; i++)
+      for (int i = 7; i <= 24; i++) {
         if (_state.points[i].owner == BgPlayer.white && !_state.points[i].isEmpty) return false;
+      }
     } else {
       if (_state.blackBar > 0) return false;
-      for (int i = 1; i <= 18; i++)
+      for (int i = 1; i <= 18; i++) {
         if (_state.points[i].owner == BgPlayer.black && !_state.points[i].isEmpty) return false;
+      }
     }
     return true;
   }
@@ -154,7 +158,11 @@ class BackgammonEngine {
 
     // Remove from source
     if (move.from == 0) {
-      if (player == BgPlayer.white) wBar--; else bBar--;
+      if (player == BgPlayer.white) {
+        wBar--;
+      } else {
+        bBar--;
+      }
     } else {
       points[move.from].count--;
       if (points[move.from].count == 0) points[move.from].owner = null;
@@ -162,11 +170,19 @@ class BackgammonEngine {
 
     // Place at destination or bear off
     if (move.to == 25) {
-      if (player == BgPlayer.white) wBorne++; else bBorne++;
+      if (player == BgPlayer.white) {
+        wBorne++;
+      } else {
+        bBorne++;
+      }
     } else {
       if (!points[move.to].isEmpty && points[move.to].owner != player) {
         // Hit the blot
-        if (points[move.to].owner == BgPlayer.white) wBar++; else bBar++;
+        if (points[move.to].owner == BgPlayer.white) {
+          wBar++;
+        } else {
+          bBar++;
+        }
         points[move.to].count = 0; points[move.to].owner = null;
       }
       points[move.to].count++;
@@ -215,8 +231,9 @@ class BackgammonEngine {
     BgMove? best; int bestScore = -999;
     for (final m in moves) {
       int score = 0;
-      if (m.to != 25 && !_state.points[m.to].isEmpty && _state.points[m.to].owner == BgPlayer.white)
+      if (m.to != 25 && !_state.points[m.to].isEmpty && _state.points[m.to].owner == BgPlayer.white) {
         score += 100; // Hit white blot
+      }
       if (m.to == 25) score += 50; // Bear off
       score += m.to; // Advance further (black moves toward 24)
       if (score > bestScore) { best = m; bestScore = score; }

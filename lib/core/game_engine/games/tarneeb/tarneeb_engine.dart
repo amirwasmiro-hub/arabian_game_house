@@ -101,10 +101,15 @@ class TarneebEngine {
   int _botBidValue(List<PlayingCard> hand) {
     int score = 0;
     for (final c in hand) {
-      if (c.rank == CardRank.ace) score += 4;
-      else if (c.rank == CardRank.king) score += 3;
-      else if (c.rank == CardRank.queen) score += 2;
-      else if (c.rank == CardRank.jack) score += 1;
+      if (c.rank == CardRank.ace) {
+        score += 4;
+      } else if (c.rank == CardRank.king) {
+        score += 3;
+      } else if (c.rank == CardRank.queen) {
+        score += 2;
+      } else if (c.rank == CardRank.jack) {
+        score += 1;
+      }
     }
     return (7 + (score / 4)).round().clamp(7, 13);
   }

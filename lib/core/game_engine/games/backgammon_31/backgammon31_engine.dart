@@ -40,7 +40,7 @@ class Backgammon31Engine {
     final sum = _state.playerTotal + d[0] + d[1];
     if (sum > 31) {
       _state = _state.copyWith(dice: d, playerTotal: sum, phase: Bg31Phase.gameOver,
-        message: 'تجاوزت 31 بـ${sum}! البوت فاز!', botWins: _state.botWins + 1);
+        message: 'تجاوزت 31 بـ$sum! البوت فاز!', botWins: _state.botWins + 1);
     } else if (sum == 31) {
       _state = _state.copyWith(dice: d, playerTotal: sum, phase: Bg31Phase.gameOver,
         message: '🎉 وصلت 31 بالضبط! أنت فزت!', playerWins: _state.playerWins + 1);

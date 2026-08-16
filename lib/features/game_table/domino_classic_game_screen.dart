@@ -102,7 +102,7 @@ class _DominoClassicGameScreenState extends State<DominoClassicGameScreen> {
       borderRadius: BorderRadius.circular(6.r),
       border: Border.all(color: c.withValues(alpha: 0.3)),
     ),
-    child: Text('$name: 🏆$wins (${score}ن)', style: GoogleFonts.cairo(color: c, fontSize: 10.sp)),
+    child: Text('$name: 🏆$wins ($scoreن)', style: GoogleFonts.cairo(color: c, fontSize: 10.sp)),
   );
 
   Widget _buildChainArea(DominoState s) {
@@ -212,11 +212,15 @@ class _DominoClassicGameScreenState extends State<DominoClassicGameScreen> {
                   onTap: s.turn != DominoTurn.player || s.phase != DominoPhase.playing ? null : () {
                     if (!isV) return;
                     SoundManager().playButtonClick();
-                    if (isSel) _showPlace(p); else setState(() => _selected = p);
+                    if (isSel) {
+                      _showPlace(p);
+                    } else {
+                      setState(() => _selected = p);
+                    }
                   },
                   child: AnimatedContainer(
                     duration: const Duration(milliseconds: 150),
-                    transform: isSel ? (Matrix4.identity()..translate(0.0, -4.0)) : Matrix4.identity(),
+                    transform: isSel ? Matrix4.translationValues(0.0, -4.0, 0.0) : Matrix4.identity(),
                     child: _tile(p, isValid: isV, isSelected: isSel),
                   ),
                 );

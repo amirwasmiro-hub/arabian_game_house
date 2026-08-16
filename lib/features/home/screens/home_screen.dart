@@ -46,7 +46,14 @@ class GameTileData {
 }
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+  final ValueChanged<int>? onTabChanged;
+  final int currentTab;
+
+  const HomeScreen({
+    super.key,
+    this.onTabChanged,
+    this.currentTab = 0,
+  });
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -160,6 +167,11 @@ class _HomeScreenState extends State<HomeScreen> {
 
   void _onBottomTabSelected(int index) {
     SoundManager().playButtonClick();
+    if (widget.onTabChanged != null) {
+      widget.onTabChanged!(index);
+      return;
+    }
+
     setState(() {
       _selectedBottomNavTab = index;
     });
@@ -226,7 +238,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
                 trailing: Switch(
                   value: SoundManager().isSoundEnabled,
-                  activeColor: const Color(0xFFFFD700),
+                  activeThumbColor: const Color(0xFFFFD700),
                   onChanged: (val) {
                     setState(() {
                       SoundManager().toggleSound(val);
@@ -243,7 +255,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
                 trailing: Switch(
                   value: SoundManager().isMusicEnabled,
-                  activeColor: const Color(0xFFFFD700),
+                  activeThumbColor: const Color(0xFFFFD700),
                   onChanged: (val) {
                     setState(() {
                       SoundManager().toggleMusic(val);

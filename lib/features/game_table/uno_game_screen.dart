@@ -214,7 +214,7 @@ class _UnoGameScreenState extends State<UnoGameScreen> {
             },
             child: AnimatedContainer(
               duration: const Duration(milliseconds: 150),
-              transform: isValid ? (Matrix4.identity()..translate(0.0, -4.0)) : Matrix4.identity(),
+              transform: isValid ? Matrix4.translationValues(0.0, -4.0, 0.0) : Matrix4.identity(),
               child: _unoCard(c, isValid),
             ),
           );

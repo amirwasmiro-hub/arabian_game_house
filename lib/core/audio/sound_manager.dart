@@ -43,35 +43,50 @@ class SoundManager {
     }
   }
 
+  Future<void> _playSfx(String assetPath) async {
+    if (!isSoundEnabled) return;
+    try {
+      await _sfxPlayer.stop();
+      await _sfxPlayer.play(AssetSource(assetPath));
+    } catch (_) {
+      // Audio asset optional/missing fallback
+    }
+  }
+
   void playCardFlip() {
     if (!isSoundEnabled) return;
     HapticFeedback.lightImpact();
-    // Play light sound effect
+    _playSfx('audio/card_flip.mp3');
   }
 
   void playCardDeal() {
     if (!isSoundEnabled) return;
     HapticFeedback.selectionClick();
+    _playSfx('audio/card_deal.mp3');
   }
 
   void playDiceRoll() {
     if (!isSoundEnabled) return;
     HapticFeedback.mediumImpact();
+    _playSfx('audio/dice_roll.mp3');
   }
 
   void playButtonClick() {
     if (!isSoundEnabled) return;
     HapticFeedback.lightImpact();
+    _playSfx('audio/click.mp3');
   }
 
   void playWinFanfare() {
     if (!isSoundEnabled) return;
     HapticFeedback.heavyImpact();
+    _playSfx('audio/win.mp3');
   }
 
   void playCoinsCollect() {
     if (!isSoundEnabled) return;
     HapticFeedback.mediumImpact();
+    _playSfx('audio/coins.mp3');
   }
 
   void dispose() {
@@ -79,3 +94,4 @@ class SoundManager {
     _bgmPlayer.dispose();
   }
 }
+

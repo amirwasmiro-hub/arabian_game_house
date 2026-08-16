@@ -148,7 +148,9 @@ class UnoEngine {
   void _drawCards(int p, int count) {
     final d = List<UnoCard>.from(_state.deck);
     final h = List<UnoCard>.from(_state.hands[p]);
-    for (int i = 0; i < count && d.isNotEmpty; i++) h.add(d.removeLast());
+    for (int i = 0; i < count && d.isNotEmpty; i++) {
+      h.add(d.removeLast());
+    }
     final hands = List<List<UnoCard>>.from(_state.hands); hands[p] = h;
     _state = _state.copyWith(hands: hands, deck: d);
   }
@@ -183,9 +185,13 @@ class UnoEngine {
 
   UnoColor _botBestColor(int p) {
     final counts = List.filled(4, 0);
-    for (final c in _state.hands[p]) if (!c.isWild) counts[c.color.index]++;
+    for (final c in _state.hands[p]) {
+      if (!c.isWild) counts[c.color.index]++;
+    }
     int best = 0;
-    for (int i = 1; i < 4; i++) if (counts[i] > counts[best]) best = i;
+    for (int i = 1; i < 4; i++) {
+      if (counts[i] > counts[best]) best = i;
+    }
     return UnoColor.values[best];
   }
 }

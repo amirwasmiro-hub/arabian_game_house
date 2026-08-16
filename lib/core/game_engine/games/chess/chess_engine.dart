@@ -157,11 +157,13 @@ class ChessEngine {
 
   int _evaluate(List<List<ChessPiece?>> board) {
     int score = 0;
-    for (int r = 0; r < 8; r++) for (int c = 0; c < 8; c++) {
-      final p = board[r][c];
-      if (p == null) continue;
-      final v = p.materialValue;
-      score += p.color == ChessColor.black ? v : -v;
+    for (int r = 0; r < 8; r++) {
+      for (int c = 0; c < 8; c++) {
+        final p = board[r][c];
+        if (p == null) continue;
+        final v = p.materialValue;
+        score += p.color == ChessColor.black ? v : -v;
+      }
     }
     return score;
   }
@@ -174,10 +176,12 @@ class ChessEngine {
 
   List<ChessMove> _allLegalMoves(List<List<ChessPiece?>> board, ChessColor color) {
     final moves = <ChessMove>[];
-    for (int r = 0; r < 8; r++) for (int c = 0; c < 8; c++) {
-      final p = board[r][c];
-      if (p == null || p.color != color) continue;
-      moves.addAll(_pieceMoves(board, r, c, p));
+    for (int r = 0; r < 8; r++) {
+      for (int c = 0; c < 8; c++) {
+        final p = board[r][c];
+        if (p == null || p.color != color) continue;
+        moves.addAll(_pieceMoves(board, r, c, p));
+      }
     }
     return moves.where((m) {
       final b = _copyBoard(board);
@@ -205,47 +209,63 @@ class ChessEngine {
         final start = p.color == ChessColor.white ? 6 : 1;
         final promRow = p.color == ChessColor.white ? 0 : 7;
         if (inBounds(r+dir,c) && b[r+dir][c] == null) {
-          if (r+dir == promRow) moves.add(ChessMove(r,c,r+dir,c,promotion: ChessPieceType.queen));
-          else {
+          if (r+dir == promRow) {
+            moves.add(ChessMove(r,c,r+dir,c,promotion: ChessPieceType.queen));
+          } else {
             moves.add(ChessMove(r,c,r+dir,c));
             if (r == start && b[r+2*dir][c] == null) moves.add(ChessMove(r,c,r+2*dir,c));
           }
         }
         for (final dc in [-1,1]) {
           if (inBounds(r+dir,c+dc) && b[r+dir][c+dc] != null && b[r+dir][c+dc]!.color != p.color) {
-            if (r+dir == promRow) moves.add(ChessMove(r,c,r+dir,c+dc,promotion: ChessPieceType.queen));
-            else moves.add(ChessMove(r,c,r+dir,c+dc));
+            if (r+dir == promRow) {
+              moves.add(ChessMove(r,c,r+dir,c+dc,promotion: ChessPieceType.queen));
+            } else {
+              moves.add(ChessMove(r,c,r+dir,c+dc));
+            }
           }
         }
       case ChessPieceType.knight:
-        for (final d in [[-2,-1],[-2,1],[-1,-2],[-1,2],[1,-2],[1,2],[2,-1],[2,1]])
+        for (final d in [[-2,-1],[-2,1],[-1,-2],[-1,2],[1,-2],[1,2],[2,-1],[2,1]]) {
           if (canCapture(r+d[0],c+d[1])) moves.add(ChessMove(r,c,r+d[0],c+d[1]));
+        }
       case ChessPieceType.bishop:
-        for (final d in [[-1,-1],[-1,1],[1,-1],[1,1]]) addSlide(d[0],d[1]);
+        for (final d in [[-1,-1],[-1,1],[1,-1],[1,1]]) {
+          addSlide(d[0],d[1]);
+        }
       case ChessPieceType.rook:
-        for (final d in [[-1,0],[1,0],[0,-1],[0,1]]) addSlide(d[0],d[1]);
+        for (final d in [[-1,0],[1,0],[0,-1],[0,1]]) {
+          addSlide(d[0],d[1]);
+        }
       case ChessPieceType.queen:
-        for (final d in [[-1,-1],[-1,0],[-1,1],[0,-1],[0,1],[1,-1],[1,0],[1,1]]) addSlide(d[0],d[1]);
+        for (final d in [[-1,-1],[-1,0],[-1,1],[0,-1],[0,1],[1,-1],[1,0],[1,1]]) {
+          addSlide(d[0],d[1]);
+        }
       case ChessPieceType.king:
-        for (final d in [[-1,-1],[-1,0],[-1,1],[0,-1],[0,1],[1,-1],[1,0],[1,1]])
+        for (final d in [[-1,-1],[-1,0],[-1,1],[0,-1],[0,1],[1,-1],[1,0],[1,1]]) {
           if (canCapture(r+d[0],c+d[1])) moves.add(ChessMove(r,c,r+d[0],c+d[1]));
+        }
     }
     return moves;
   }
 
   bool _isInCheck(List<List<ChessPiece?>> board, ChessColor color) {
     int kr = -1, kc = -1;
-    for (int r = 0; r < 8; r++) for (int c = 0; c < 8; c++) {
-      final p = board[r][c];
-      if (p != null && p.type == ChessPieceType.king && p.color == color) { kr = r; kc = c; }
+    for (int r = 0; r < 8; r++) {
+      for (int c = 0; c < 8; c++) {
+        final p = board[r][c];
+        if (p != null && p.type == ChessPieceType.king && p.color == color) { kr = r; kc = c; }
+      }
     }
     if (kr == -1) return false;
     final opp = color == ChessColor.white ? ChessColor.black : ChessColor.white;
-    for (int r = 0; r < 8; r++) for (int c = 0; c < 8; c++) {
-      final p = board[r][c];
-      if (p == null || p.color != opp) continue;
-      for (final m in _pieceMoves(board, r, c, p)) {
-        if (m.toRow == kr && m.toCol == kc) return true;
+    for (int r = 0; r < 8; r++) {
+      for (int c = 0; c < 8; c++) {
+        final p = board[r][c];
+        if (p == null || p.color != opp) continue;
+        for (final m in _pieceMoves(board, r, c, p)) {
+          if (m.toRow == kr && m.toCol == kc) return true;
+        }
       }
     }
     return false;

@@ -222,8 +222,11 @@ class _LudoGameScreenState extends State<LudoGameScreen> {
               SoundManager().playDiceRoll();
               _engine.roll();
               setState(() {});
-              if (_engine.state.phase == LudoPhase.moving && _engine.state.movableTokenIds.isEmpty) _runBots();
-              else if (_engine.state.currentPlayer != 0) _runBots();
+              if (_engine.state.phase == LudoPhase.moving && _engine.state.movableTokenIds.isEmpty) {
+                _runBots();
+              } else if (_engine.state.currentPlayer != 0) {
+                _runBots();
+              }
             },
             icon: const Icon(Icons.casino, color: Colors.white, size: 16),
             label: Text('ارمِ الزهر', style: GoogleFonts.cairo(color: Colors.white, fontSize: 11.sp)),

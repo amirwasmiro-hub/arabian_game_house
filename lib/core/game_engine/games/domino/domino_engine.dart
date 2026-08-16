@@ -79,8 +79,12 @@ class DominoEngine {
 
   DominoTurn _firstPlayer(List<DominoPiece> ph, List<DominoPiece> bh) {
     int pm = -1, bm = -1;
-    for (final p in ph) if (p.isDouble && p.a > pm) pm = p.a;
-    for (final p in bh) if (p.isDouble && p.a > bm) bm = p.a;
+    for (final p in ph) {
+      if (p.isDouble && p.a > pm) pm = p.a;
+    }
+    for (final p in bh) {
+      if (p.isDouble && p.a > bm) bm = p.a;
+    }
     if (pm > bm) return DominoTurn.player;
     if (bm > pm) return DominoTurn.bot;
     return _rng.nextBool() ? DominoTurn.player : DominoTurn.bot;

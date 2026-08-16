@@ -13,7 +13,11 @@ class DominoPiece {
   @override int get hashCode { final mn=a<b?a:b; final mx=a>b?a:b; return mn*7+mx; }
   static List<DominoPiece> fullSet() {
     final p = <DominoPiece>[];
-    for (int i=0; i<=6; i++) for (int j=i; j<=6; j++) p.add(DominoPiece(i,j));
+    for (int i = 0; i <= 6; i++) {
+      for (int j = i; j <= 6; j++) {
+        p.add(DominoPiece(i, j));
+      }
+    }
     return p;
   }
 }

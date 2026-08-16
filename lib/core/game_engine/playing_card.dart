@@ -31,7 +31,7 @@ class PlayingCard implements Comparable<PlayingCard> {
     }
   }
 
-  @override String toString() => '${suitSymbol}';
+  @override String toString() => suitSymbol;
   @override int compareTo(PlayingCard other) {
     if (suit.index != other.suit.index) return suit.index.compareTo(other.suit.index);
     return rank.index.compareTo(other.rank.index);
@@ -46,15 +46,19 @@ class CardDeck {
   CardDeck() { _reset(); }
   void _reset() {
     _cards.clear();
-    for (final suit in CardSuit.values)
-      for (final rank in CardRank.values)
+    for (final suit in CardSuit.values) {
+      for (final rank in CardRank.values) {
         _cards.add(PlayingCard(suit, rank));
+      }
+    }
   }
   void shuffle() => _cards.shuffle(Random());
   PlayingCard? draw() => _cards.isNotEmpty ? _cards.removeLast() : null;
   List<PlayingCard> drawMultiple(int count) {
     final drawn = <PlayingCard>[];
-    for (int i = 0; i < count && _cards.isNotEmpty; i++) drawn.add(_cards.removeLast());
+    for (int i = 0; i < count && _cards.isNotEmpty; i++) {
+      drawn.add(_cards.removeLast());
+    }
     return drawn;
   }
   bool get isEmpty => _cards.isEmpty;

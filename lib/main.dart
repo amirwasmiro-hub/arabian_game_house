@@ -10,6 +10,7 @@ import 'features/home/screens/home_screen.dart';
 import 'features/leaderboard/screens/leaderboard_screen.dart';
 import 'features/store/screens/store_screen.dart';
 import 'features/profile/screens/profile_screen.dart';
+import 'features/home/widgets/rive_flame_nav_bar.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -90,17 +91,125 @@ class MainNavigationWrapper extends StatefulWidget {
 }
 
 class _MainNavigationWrapperState extends State<MainNavigationWrapper> {
-  final int _currentIndex = 0;
+  int _currentIndex = 0;
 
-  final List<Widget> _tabs = const [
-    HomeScreen(),
-    LeaderboardScreen(),
-    StoreScreen(),
-    ProfileScreen(),
-  ];
+  void _onTabSelected(int index) {
+    if (index == 5) {
+      _showSettingsDialog();
+      return;
+    }
+    setState(() {
+      _currentIndex = index;
+    });
+  }
+
+  void _showSettingsDialog() {
+    showDialog(
+      context: context,
+      builder: (ctx) => Directionality(
+        textDirection: TextDirection.rtl,
+        child: AlertDialog(
+          backgroundColor: const Color(0xFF2E1205),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20.r),
+            side: const BorderSide(color: Color(0xFFFFD700), width: 1.5),
+          ),
+          title: const Text(
+            'الإعدادات',
+            style: TextStyle(
+              color: Color(0xFFFFD700),
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                leading: const Icon(Icons.volume_up, color: Color(0xFFFFD700)),
+                title: const Text(
+                  'المؤثرات الصوتية',
+                  style: TextStyle(color: Colors.white),
+                ),
+                trailing: StatefulBuilder(
+                  builder: (context, setTileState) => Switch(
+                    value: SoundManager().isSoundEnabled,
+                    activeThumbColor: const Color(0xFFFFD700),
+                    onChanged: (val) {
+                      SoundManager().toggleSound(val);
+                      setTileState(() {});
+                    },
+                  ),
+                ),
+              ),
+              ListTile(
+                leading: const Icon(Icons.music_note, color: Color(0xFFFFD700)),
+                title: const Text(
+                  'الموسيقى',
+                  style: TextStyle(color: Colors.white),
+                ),
+                trailing: StatefulBuilder(
+                  builder: (context, setTileState) => Switch(
+                    value: SoundManager().isMusicEnabled,
+                    activeThumbColor: const Color(0xFFFFD700),
+                    onChanged: (val) {
+                      SoundManager().toggleMusic(val);
+                      setTileState(() {});
+                    },
+                  ),
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: const Text(
+                'إغلاق',
+                style: TextStyle(color: Color(0xFFFFD700)),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(body: _tabs[_currentIndex]);
+    final List<Widget> tabs = [
+      HomeScreen(
+        onTabChanged: _onTabSelected,
+        currentTab: _currentIndex,
+      ),
+      const StoreScreen(),
+      const LeaderboardScreen(),
+      const ProfileScreen(),
+      const StoreScreen(),
+    ];
+
+    final effectiveIndex = _currentIndex < tabs.length ? _currentIndex : 0;
+
+    return Scaffold(
+      backgroundColor: OrientalTheme.bgDark,
+      body: Directionality(
+        textDirection: TextDirection.rtl,
+        child: Column(
+          children: [
+            Expanded(
+              child: IndexedStack(
+                index: effectiveIndex,
+                children: tabs,
+              ),
+            ),
+            if (effectiveIndex != 0)
+              RoyalRiveFlameNavBar(
+                selectedIndex: _currentIndex,
+                onTabSelected: _onTabSelected,
+              ),
+          ],
+        ),
+      ),
+    );
   }
 }
+
