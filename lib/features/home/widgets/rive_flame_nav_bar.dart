@@ -1,5 +1,7 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:flame/game.dart';
 import 'package:flame/components.dart';
 import 'package:flame/particles.dart';
@@ -14,25 +16,27 @@ class FlameNavBarParticleGame extends FlameGame {
     add(
       ParticleSystemComponent(
         particle: Particle.generate(
-          count: 36,
-          lifespan: 1.1,
+          count: 24,
+          lifespan: 0.8,
           generator: (i) {
-            final speed = _random.nextDouble() * 90 + 35;
+            final speed = _random.nextDouble() * 70 + 25;
             final angle = _random.nextDouble() * 2 * math.pi;
             return AcceleratedParticle(
               position: position.clone(),
               speed: Vector2(
-                  math.cos(angle) * speed, math.sin(angle) * speed - 30),
-              acceleration: Vector2(0, 40),
+                math.cos(angle) * speed,
+                math.sin(angle) * speed - 20,
+              ),
+              acceleration: Vector2(0, 30),
               child: CircleParticle(
-                radius: _random.nextDouble() * 3.8 + 1.2,
+                radius: _random.nextDouble() * 2.5 + 1.0,
                 paint: Paint()
                   ..color = Color.lerp(
                     const Color(0xFFFFD700), // 24k Gold
-                    const Color(0xFFE040FB), // Royal Purple Sparkle
+                    const Color(0xFF00E676), // Emerald Sparkle
                     _random.nextDouble(),
                   )!
-                      .withValues(alpha: 0.95),
+                      .withValues(alpha: 0.9),
               ),
             );
           },
@@ -44,15 +48,17 @@ class FlameNavBarParticleGame extends FlameGame {
 
 class NavItemData {
   final String label;
-  final String iconAsset;
+  final IconData icon;
+  final List<Color> gradientColors;
 
   const NavItemData({
     required this.label,
-    required this.iconAsset,
+    required this.icon,
+    required this.gradientColors,
   });
 }
 
-/// 🌟 Royal Interactive Navigation Bar with Individual 3D Icons
+/// 🌟 Royal Interactive Navigation Bar with Sleek Transparent Glassmorphism
 class RoyalRiveFlameNavBar extends StatefulWidget {
   final int selectedIndex;
   final ValueChanged<int> onTabSelected;
@@ -71,14 +77,36 @@ class _RoyalRiveFlameNavBarState extends State<RoyalRiveFlameNavBar> {
   late final FlameNavBarParticleGame _particleGame;
 
   final List<NavItemData> _navItems = const [
-    NavItemData(label: 'الرئيسية', iconAsset: 'assets/images/icon_home.png'),
-    NavItemData(label: 'التحويل', iconAsset: 'assets/images/icon_exchange.png'),
-    NavItemData(label: 'المسابقات', iconAsset: 'assets/images/icon_trophy.png'),
     NavItemData(
-        label: 'البروفايل', iconAsset: 'assets/images/icon_profile.png'),
+      label: 'الرئيسية',
+      icon: Icons.home_rounded,
+      gradientColors: [Color(0xFFFFE082), Color(0xFFFFB300), Color(0xFFFF8F00)],
+    ),
     NavItemData(
-        label: 'الإعدادات', iconAsset: 'assets/images/icon_settings.png'),
-    NavItemData(label: 'المتجر', iconAsset: 'assets/images/icon_store.png'),
+      label: 'التحويل',
+      icon: Icons.currency_exchange_rounded,
+      gradientColors: [Color(0xFF80E8FF), Color(0xFF00B0FF), Color(0xFF0091EA)],
+    ),
+    NavItemData(
+      label: 'المسابقات',
+      icon: Icons.emoji_events_rounded,
+      gradientColors: [Color(0xFFFFE082), Color(0xFFFFD700), Color(0xFFFFA000)],
+    ),
+    NavItemData(
+      label: 'البروفايل',
+      icon: Icons.account_circle_rounded,
+      gradientColors: [Color(0xFFE1BEE7), Color(0xFFBA68C8), Color(0xFF8E24AA)],
+    ),
+    NavItemData(
+      label: 'المتجر',
+      icon: Icons.storefront_rounded,
+      gradientColors: [Color(0xFFFFAB91), Color(0xFFFF7043), Color(0xFFF4511E)],
+    ),
+    NavItemData(
+      label: 'الإعدادات',
+      icon: Icons.tune_rounded,
+      gradientColors: [Color(0xFFB0BEC5), Color(0xFF78909C), Color(0xFF546E7A)],
+    ),
   ];
 
   @override
@@ -91,7 +119,6 @@ class _RoyalRiveFlameNavBarState extends State<RoyalRiveFlameNavBar> {
     SoundManager().playButtonClick();
     widget.onTabSelected(index);
 
-    // Trigger Flame particle burst at exact tapped button position
     final RenderBox? box = key.currentContext?.findRenderObject() as RenderBox?;
     if (box != null) {
       final pos = box.localToGlobal(Offset.zero);
@@ -107,7 +134,7 @@ class _RoyalRiveFlameNavBarState extends State<RoyalRiveFlameNavBar> {
     const activeGold = Color(0xFFFFD700);
 
     return Stack(
-      alignment: Alignment.center,
+      alignment: Alignment.bottomCenter,
       children: [
         // 1. Flame Particle Layer
         Positioned.fill(
@@ -116,112 +143,109 @@ class _RoyalRiveFlameNavBarState extends State<RoyalRiveFlameNavBar> {
           ),
         ),
 
-        // 2. Royal Luxury Glassmorphism Dock
-        Container(
-          width: double.infinity,
-          height: 46.h,
-          decoration: BoxDecoration(
-            gradient: const LinearGradient(
-              colors: [
-                Color(0xF51A0736),
-                Color(0xF5330C59),
-                Color(0xF51A0736),
-              ],
-              begin: Alignment.centerLeft,
-              end: Alignment.centerRight,
-            ),
-            border: Border(
-              top: BorderSide(
-                color: activeGold.withValues(alpha: 0.70),
-                width: 1.2.w,
+        // 2. Ultra-Sleek Transparent Glassmorphism Dock (Lower Height: 33.h)
+        ClipRRect(
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+            child: Container(
+              width: double.infinity,
+              height: 33.h,
+              decoration: BoxDecoration(
+                // Transparent sleek background
+                color: Colors.black.withValues(alpha: 0.28),
+                border: Border(
+                  top: BorderSide(
+                    color: activeGold.withValues(alpha: 0.35),
+                    width: 1.0,
+                  ),
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.3),
+                    blurRadius: 10,
+                    offset: const Offset(0, -2),
+                  ),
+                ],
               ),
-              bottom: BorderSide(
-                color: activeGold.withValues(alpha: 0.35),
-                width: 0.8.w,
-              ),
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: activeGold.withValues(alpha: 0.30),
-                blurRadius: 16.r,
-                spreadRadius: 1.r,
-              ),
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.85),
-                blurRadius: 12.r,
-                offset: const Offset(0, 4),
-              ),
-            ],
-          ),
-          child: Directionality(
-            textDirection: TextDirection.rtl,
-            child: Row(
-              children: List.generate(_navItems.length, (index) {
-                final key = GlobalKey();
-                final isSelected = widget.selectedIndex == index;
-                final item = _navItems[index];
+              child: Directionality(
+                textDirection: TextDirection.rtl,
+                child: Row(
+                  children: List.generate(_navItems.length, (index) {
+                    final key = GlobalKey();
+                    final isSelected = widget.selectedIndex == index;
+                    final item = _navItems[index];
 
-                return Expanded(
-                  child: GestureDetector(
-                    key: key,
-                    onTap: () => _handleTabTap(index, key),
-                    behavior: HitTestBehavior.opaque,
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        AnimatedScale(
-                          scale: isSelected ? 1.18 : 0.92,
-                          duration: const Duration(milliseconds: 220),
-                          curve: Curves.easeOutCubic,
-                          child: Container(
-                            padding: EdgeInsets.all(2.r),
-                            decoration: isSelected
-                                ? BoxDecoration(
-                                    shape: BoxShape.circle,
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color:
-                                            activeGold.withValues(alpha: 0.6),
-                                        blurRadius: 12.r,
-                                        spreadRadius: 1.r,
-                                      ),
+                    return Expanded(
+                      child: GestureDetector(
+                        key: key,
+                        onTap: () => _handleTabTap(index, key),
+                        behavior: HitTestBehavior.opaque,
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 200),
+                          decoration: isSelected
+                              ? BoxDecoration(
+                                  gradient: RadialGradient(
+                                    center: Alignment.bottomCenter,
+                                    radius: 1.2,
+                                    colors: [
+                                      activeGold.withValues(alpha: 0.18),
+                                      Colors.transparent,
                                     ],
-                                  )
-                                : null,
-                            child: Image.asset(
-                              item.iconAsset,
-                              height: 30.h,
-                              fit: BoxFit.contain,
-                              errorBuilder: (context, error, stackTrace) =>
-                                  Icon(
-                                Icons.stars_rounded,
-                                color: isSelected ? activeGold : Colors.white60,
-                                size: 24.r,
+                                  ),
+                                )
+                              : null,
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              AnimatedScale(
+                                scale: isSelected ? 1.15 : 0.95,
+                                duration: const Duration(milliseconds: 200),
+                                curve: Curves.easeOutCubic,
+                                child: ShaderMask(
+                                  shaderCallback: (bounds) => LinearGradient(
+                                    colors: isSelected
+                                        ? item.gradientColors
+                                        : [Colors.white70, Colors.white38],
+                                    begin: Alignment.topCenter,
+                                    end: Alignment.bottomCenter,
+                                  ).createShader(bounds),
+                                  child: Icon(
+                                    item.icon,
+                                    size: 17.r,
+                                    color: Colors.white,
+                                  ),
+                                ),
                               ),
-                            ),
+                              SizedBox(height: 1.h),
+                              Text(
+                                item.label,
+                                style: GoogleFonts.cairo(
+                                  fontSize: 8.5.sp,
+                                  fontWeight: isSelected
+                                      ? FontWeight.bold
+                                      : FontWeight.w500,
+                                  color: isSelected
+                                      ? activeGold
+                                      : Colors.white.withValues(alpha: 0.55),
+                                  shadows: isSelected
+                                      ? [
+                                          Shadow(
+                                            color: activeGold
+                                                .withValues(alpha: 0.6),
+                                            blurRadius: 6,
+                                          )
+                                        ]
+                                      : null,
+                                ),
+                              ),
+                            ],
                           ),
                         ),
-                        if (isSelected)
-                          Container(
-                            margin: EdgeInsets.only(top: 2.h),
-                            width: 14.w,
-                            height: 2.h,
-                            decoration: BoxDecoration(
-                              color: activeGold,
-                              borderRadius: BorderRadius.circular(2.r),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: activeGold,
-                                  blurRadius: 6.r,
-                                ),
-                              ],
-                            ),
-                          ),
-                      ],
-                    ),
-                  ),
-                );
-              }),
+                      ),
+                    );
+                  }),
+                ),
+              ),
             ),
           ),
         ),

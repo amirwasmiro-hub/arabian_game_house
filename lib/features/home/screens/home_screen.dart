@@ -186,6 +186,12 @@ class _HomeScreenState extends State<HomeScreen> {
         );
         break;
       case 4:
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => const StoreScreen()),
+        );
+        break;
+      case 5:
         _showSettingsDialog();
         break;
     }
