@@ -89,6 +89,18 @@ class SoundManager {
     _playSfx('audio/coins.mp3');
   }
 
+  void playTilePlace() {
+    if (!isSoundEnabled) return;
+    HapticFeedback.mediumImpact();
+    _playSfx('audio/tile_place.mp3');
+  }
+
+  void playTileDraw() {
+    if (!isSoundEnabled) return;
+    HapticFeedback.lightImpact();
+    _playSfx('audio/tile_draw.mp3');
+  }
+
   void dispose() {
     _sfxPlayer.dispose();
     _bgmPlayer.dispose();

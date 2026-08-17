@@ -5,15 +5,15 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 
 import '../../../core/audio/sound_manager.dart';
-import '../../game_table/backgammon_31_game_screen.dart';
-import '../../game_table/backgammon_classic_game_screen.dart';
-import '../../game_table/chess_game_screen.dart';
-import '../../game_table/domino_american_game_screen.dart';
-import '../../game_table/domino_classic_game_screen.dart';
-import '../../game_table/estimation_game_screen.dart';
-import '../../game_table/ludo_game_screen.dart';
-import '../../game_table/tarneeb_game_screen.dart';
-import '../../game_table/uno_game_screen.dart';
+import '../../games/backgammon_31/screens/backgammon_31_game_screen.dart';
+import '../../games/backgammon_classic/screens/backgammon_classic_game_screen.dart';
+import '../../games/chess/screens/chess_game_screen.dart';
+import '../../games/domino_american/screens/domino_american_game_screen.dart';
+import '../../games/domino_classic/screens/domino_classic_game_screen.dart';
+import '../../games/estimation/screens/estimation_game_screen.dart';
+import '../../games/ludo/screens/ludo_game_screen.dart';
+import '../../games/tarneeb/screens/tarneeb_game_screen.dart';
+import '../../games/uno/screens/uno_game_screen.dart';
 import '../../leaderboard/screens/leaderboard_screen.dart';
 import '../../profile/screens/profile_screen.dart';
 import '../../store/screens/store_screen.dart';
@@ -291,10 +291,11 @@ class _HomeScreenState extends State<HomeScreen> {
         textDirection: TextDirection.rtl,
         child: Stack(
           children: [
+            // 1. Fullscreen Cafe Background Image
             Positioned.fill(
               child: Image.asset(
                 'assets/images/arabian_cafe_bg.png',
-                fit: BoxFit.fill,
+                fit: BoxFit.cover,
                 alignment: Alignment.center,
                 errorBuilder: (context, error, stackTrace) {
                   return Container(
@@ -309,10 +310,15 @@ class _HomeScreenState extends State<HomeScreen> {
                 },
               ),
             ),
+
+            // 2. Golden Particles Overlay
             const Positioned.fill(
               child: GoldenParticlesOverlay(),
             ),
+
+            // 3. Main Content: Compact Header & TWO ROWS of Game Cards
             SafeArea(
+              bottom: false,
               child: Column(
                 children: [
                   CompactTopHeader(
@@ -325,98 +331,97 @@ class _HomeScreenState extends State<HomeScreen> {
                   Expanded(
                     child: Align(
                       alignment: Alignment.center,
-                      child: Padding(
-                        padding: EdgeInsets.only(top: 4.h),
-                        child: Directionality(
-                          textDirection: TextDirection.rtl,
-                          child: SingleChildScrollView(
-                            controller: _cardsScrollController,
-                            scrollDirection: Axis.horizontal,
-                            physics: const BouncingScrollPhysics(),
-                            padding: EdgeInsets.symmetric(horizontal: 14.w),
-                            child: FittedBox(
-                              fit: BoxFit.scaleDown,
-                              alignment: Alignment.centerRight,
-                              child: Column(
-                                mainAxisSize: MainAxisSize.min,
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  // Row 1
-                                  Row(
-                                    children: firstRowGames
-                                        .asMap()
-                                        .entries
-                                        .map((entry) {
-                                      final index = entry.key;
-                                      final game = entry.value;
-                                      return DominoGameCard(
-                                        titleAr: game.titleAr,
-                                        titleEn: game.titleEn,
-                                        icon: game.icon,
-                                        assetPath: game.assetPath,
-                                        cardBgColor: game.cardBgColor,
-                                        cardBorderColor: game.cardBorderColor,
-                                        isNew: game.isNew,
-                                        onTap: () => _onGameSelected(game),
-                                      )
-                                          .animate()
-                                          .fadeIn(
-                                            duration: 350.ms,
-                                            delay: (index * 50).ms,
-                                          )
-                                          .slideX(
-                                            begin: 0.15,
-                                            curve: Curves.easeOutQuad,
-                                          );
-                                    }).toList(),
-                                  ),
-                                  SizedBox(height: 4.h),
-                                  // Row 2
-                                  Row(
-                                    children: secondRowGames
-                                        .asMap()
-                                        .entries
-                                        .map((entry) {
-                                      final index =
-                                          entry.key + firstRowGames.length;
-                                      final game = entry.value;
-                                      return DominoGameCard(
-                                        titleAr: game.titleAr,
-                                        titleEn: game.titleEn,
-                                        icon: game.icon,
-                                        assetPath: game.assetPath,
-                                        cardBgColor: game.cardBgColor,
-                                        cardBorderColor: game.cardBorderColor,
-                                        isNew: game.isNew,
-                                        onTap: () => _onGameSelected(game),
-                                      )
-                                          .animate()
-                                          .fadeIn(
-                                            duration: 350.ms,
-                                            delay: (index * 50).ms,
-                                          )
-                                          .slideX(
-                                            begin: 0.15,
-                                            curve: Curves.easeOutQuad,
-                                          );
-                                    }).toList(),
-                                  ),
-                                ],
-                              ),
+                      child: SingleChildScrollView(
+                        controller: _cardsScrollController,
+                        scrollDirection: Axis.horizontal,
+                        physics: const BouncingScrollPhysics(),
+                        padding: EdgeInsets.symmetric(horizontal: 14.w),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            // Row 1
+                            Row(
+                              children: firstRowGames
+                                  .asMap()
+                                  .entries
+                                  .map((entry) {
+                                final index = entry.key;
+                                final game = entry.value;
+                                return DominoGameCard(
+                                  titleAr: game.titleAr,
+                                  titleEn: game.titleEn,
+                                  icon: game.icon,
+                                  assetPath: game.assetPath,
+                                  cardBgColor: game.cardBgColor,
+                                  cardBorderColor: game.cardBorderColor,
+                                  isNew: game.isNew,
+                                  onTap: () => _onGameSelected(game),
+                                )
+                                    .animate()
+                                    .fadeIn(
+                                      duration: 350.ms,
+                                      delay: (index * 50).ms,
+                                    )
+                                    .slideX(
+                                      begin: 0.15,
+                                      curve: Curves.easeOutQuad,
+                                    );
+                              }).toList(),
                             ),
-                          ),
+                            SizedBox(height: 4.h),
+                            // Row 2
+                            Row(
+                              children: secondRowGames
+                                  .asMap()
+                                  .entries
+                                  .map((entry) {
+                                final index =
+                                    entry.key + firstRowGames.length;
+                                final game = entry.value;
+                                return DominoGameCard(
+                                  titleAr: game.titleAr,
+                                  titleEn: game.titleEn,
+                                  icon: game.icon,
+                                  assetPath: game.assetPath,
+                                  cardBgColor: game.cardBgColor,
+                                  cardBorderColor: game.cardBorderColor,
+                                  isNew: game.isNew,
+                                  onTap: () => _onGameSelected(game),
+                                )
+                                    .animate()
+                                    .fadeIn(
+                                      duration: 350.ms,
+                                      delay: (index * 50).ms,
+                                    )
+                                    .slideX(
+                                      begin: 0.15,
+                                      curve: Curves.easeOutQuad,
+                                    );
+                              }).toList(),
+                            ),
+                          ],
                         ),
                       ),
                     ),
                   ),
-                  RoyalRiveFlameNavBar(
-                    selectedIndex: _selectedBottomNavTab,
-                    onTabSelected: _onBottomTabSelected,
-                  ),
-                  SizedBox(height: 2.h),
+                  SizedBox(height: 42.h), // Clearance for floating navigation bar
                 ],
               ),
             ),
+
+            // 4. Floating Navigation Bar sitting at bottom:0 over cafe background
+            Positioned(
+              left: 0,
+              right: 0,
+              bottom: 0,
+              child: RoyalRiveFlameNavBar(
+                selectedIndex: _selectedBottomNavTab,
+                onTabSelected: _onBottomTabSelected,
+              ),
+            ),
+
+            // 5. Star Explosion Overlay
             const Positioned.fill(
               child: StarExplosionOverlay(),
             ),

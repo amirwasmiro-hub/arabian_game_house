@@ -12,6 +12,9 @@ import '../../../core/audio/sound_manager.dart';
 class FlameNavBarParticleGame extends FlameGame {
   final math.Random _random = math.Random();
 
+  @override
+  Color backgroundColor() => const Color(0x00000000);
+
   void triggerParticleBurst(Vector2 position) {
     add(
       ParticleSystemComponent(
@@ -19,7 +22,7 @@ class FlameNavBarParticleGame extends FlameGame {
           count: 24,
           lifespan: 0.8,
           generator: (i) {
-            final speed = _random.nextDouble() * 70 + 25;
+            final speed = _random.nextDouble() * 75 + 25;
             final angle = _random.nextDouble() * 2 * math.pi;
             return AcceleratedParticle(
               position: position.clone(),
@@ -29,14 +32,14 @@ class FlameNavBarParticleGame extends FlameGame {
               ),
               acceleration: Vector2(0, 30),
               child: CircleParticle(
-                radius: _random.nextDouble() * 2.5 + 1.0,
+                radius: _random.nextDouble() * 2.8 + 1.0,
                 paint: Paint()
                   ..color = Color.lerp(
                     const Color(0xFFFFD700), // 24k Gold
                     const Color(0xFF00E676), // Emerald Sparkle
                     _random.nextDouble(),
                   )!
-                      .withValues(alpha: 0.9),
+                      .withValues(alpha: 0.95),
               ),
             );
           },
@@ -58,7 +61,7 @@ class NavItemData {
   });
 }
 
-/// 🌟 Royal Interactive Navigation Bar with Sleek Transparent Glassmorphism
+/// 🌟 Royal Curved Navigation Bar Dock
 class RoyalRiveFlameNavBar extends StatefulWidget {
   final int selectedIndex;
   final ValueChanged<int> onTabSelected;
@@ -143,25 +146,34 @@ class _RoyalRiveFlameNavBarState extends State<RoyalRiveFlameNavBar> {
           ),
         ),
 
-        // 2. Ultra-Sleek Transparent Glassmorphism Dock (Lower Height: 33.h)
+        // 2. Sleek Curved Dock: Top Curved Corners, NO Side or Bottom Borders
         ClipRRect(
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(36.r),
+            topRight: Radius.circular(36.r),
+          ),
           child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+            filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
             child: Container(
               width: double.infinity,
-              height: 33.h,
+              height: 37.h, // Sleek reduced height
               decoration: BoxDecoration(
-                // Transparent sleek background
-                color: Colors.black.withValues(alpha: 0.28),
+                // Ultra-transparent crystal glass (5% alpha)
+                color: Colors.white.withValues(alpha: 0.01),
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(36.r),
+                  topRight: Radius.circular(36.r),
+                ),
+                // Top border only — NO side borders or bottom borders
                 border: Border(
                   top: BorderSide(
                     color: activeGold.withValues(alpha: 0.35),
-                    width: 1.0,
+                    width: 1.2,
                   ),
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.3),
+                    color: Colors.black.withValues(alpha: 0.4),
                     blurRadius: 10,
                     offset: const Offset(0, -2),
                   ),
@@ -188,7 +200,7 @@ class _RoyalRiveFlameNavBarState extends State<RoyalRiveFlameNavBar> {
                                     center: Alignment.bottomCenter,
                                     radius: 1.2,
                                     colors: [
-                                      activeGold.withValues(alpha: 0.18),
+                                      activeGold.withValues(alpha: 0.22),
                                       Colors.transparent,
                                     ],
                                   ),
@@ -211,7 +223,7 @@ class _RoyalRiveFlameNavBarState extends State<RoyalRiveFlameNavBar> {
                                   ).createShader(bounds),
                                   child: Icon(
                                     item.icon,
-                                    size: 17.r,
+                                    size: 20.r,
                                     color: Colors.white,
                                   ),
                                 ),
@@ -220,18 +232,18 @@ class _RoyalRiveFlameNavBarState extends State<RoyalRiveFlameNavBar> {
                               Text(
                                 item.label,
                                 style: GoogleFonts.cairo(
-                                  fontSize: 8.5.sp,
+                                  fontSize: 10.5.sp,
                                   fontWeight: isSelected
                                       ? FontWeight.bold
-                                      : FontWeight.w500,
+                                      : FontWeight.w600,
                                   color: isSelected
                                       ? activeGold
-                                      : Colors.white.withValues(alpha: 0.55),
+                                      : Colors.white.withValues(alpha: 0.6),
                                   shadows: isSelected
                                       ? [
                                           Shadow(
-                                            color: activeGold
-                                                .withValues(alpha: 0.6),
+                                            color: activeGold.withValues(
+                                                alpha: 0.7),
                                             blurRadius: 6,
                                           )
                                         ]

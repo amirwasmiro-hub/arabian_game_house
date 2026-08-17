@@ -17,18 +17,20 @@ class _GoldenParticlesOverlayState extends State<GoldenParticlesOverlay>
   @override
   void initState() {
     super.initState();
+    // Lifespan set to 1 hour (3600 seconds) so it never cuts off or stutters
     _controller = AnimationController(
       vsync: this,
-      duration: const Duration(seconds: 15),
+      duration: const Duration(hours: 1),
     )..repeat();
 
-    for (int i = 0; i < 35; i++) {
+    for (int i = 0; i < 40; i++) {
       _particles.add(GoldenParticleItem(
         x: _random.nextDouble(),
         y: _random.nextDouble(),
-        radius: _random.nextDouble() * 2.5 + 1.0,
-        speed: _random.nextDouble() * 0.0008 + 0.0003,
-        alpha: _random.nextDouble() * 0.6 + 0.2,
+        radius: _random.nextDouble() * 2.8 + 1.2,
+        speed: _random.nextDouble() * 0.05 + 0.02,
+        alpha: _random.nextDouble() * 0.65 + 0.25,
+        phaseOffset: _random.nextDouble() * math.pi * 2,
       ));
     }
   }
@@ -59,6 +61,7 @@ class GoldenParticleItem {
   final double radius;
   final double speed;
   final double alpha;
+  final double phaseOffset;
 
   GoldenParticleItem({
     required this.x,
@@ -66,6 +69,7 @@ class GoldenParticleItem {
     required this.radius,
     required this.speed,
     required this.alpha,
+    required this.phaseOffset,
   });
 }
 
@@ -137,11 +141,13 @@ class _ParticlesPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()..style = PaintingStyle.fill;
+    final totalSeconds = progress * 3600.0; // Smooth continuous time
 
     for (final particle in particles) {
-      final currentY = (particle.y - progress * particle.speed * 100) % 1.0;
+      // Continuous upward drift without sudden jumps
+      final currentY = (particle.y - totalSeconds * particle.speed * 0.05) % 1.0;
       final yPos = (currentY < 0 ? currentY + 1.0 : currentY) * size.height;
-      final xPos = (particle.x + math.sin(progress * math.pi * 2 + particle.y * 10) * 0.03) * size.width;
+      final xPos = (particle.x + math.sin(totalSeconds * 0.5 + particle.phaseOffset) * 0.04) * size.width;
 
       paint.color = const Color(0xFFFFD700).withValues(alpha: particle.alpha);
       canvas.drawCircle(Offset(xPos, yPos), particle.radius, paint);

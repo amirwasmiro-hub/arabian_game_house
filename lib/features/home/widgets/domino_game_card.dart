@@ -68,8 +68,8 @@ class _DominoGameCardState extends State<DominoGameCard>
       child: ScaleTransition(
         scale: _scaleAnimation,
         child: Container(
-          width: 110.w,
-          height: 85.h,
+          width: 105.w,
+          height: 75.h,
           margin: EdgeInsets.symmetric(horizontal: 4.w),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(16.r),

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -18,6 +19,7 @@ class _OrodragonSplashScreenState extends State<OrodragonSplashScreen>
     with SingleTickerProviderStateMixin {
   late AnimationController _fadeController;
   late Animation<double> _fadeAnimation;
+  Timer? _timer;
 
   @override
   void initState() {
@@ -34,7 +36,7 @@ class _OrodragonSplashScreenState extends State<OrodragonSplashScreen>
 
     _fadeController.forward();
 
-    Future.delayed(const Duration(seconds: 3), () {
+    _timer = Timer(const Duration(seconds: 3), () {
       if (mounted) {
         widget.onFinish();
       }
@@ -43,6 +45,7 @@ class _OrodragonSplashScreenState extends State<OrodragonSplashScreen>
 
   @override
   void dispose() {
+    _timer?.cancel();
     _fadeController.dispose();
     super.dispose();
   }
