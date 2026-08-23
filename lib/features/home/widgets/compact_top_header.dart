@@ -153,24 +153,27 @@ class CompactTopHeader extends StatelessWidget {
                       ),
                     ],
                   ),
-                  child: Text(
-                    title!,
-                    style: GoogleFonts.cairo(
-                      fontSize: 13.sp,
-                      fontWeight: FontWeight.w900,
-                      color: const Color(0xFFFFD700),
-                      letterSpacing: 1.w,
-                      shadows: [
-                        Shadow(
-                          color: const Color(0xFFFFD700),
-                          blurRadius: 8.r,
-                        ),
-                        Shadow(
-                          color: Colors.black,
-                          blurRadius: 4.r,
-                          offset: const Offset(1, 1),
-                        ),
-                      ],
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Text(
+                      title!,
+                      style: GoogleFonts.cairo(
+                        fontSize: 13.sp,
+                        fontWeight: FontWeight.w900,
+                        color: const Color(0xFFFFD700),
+                        letterSpacing: 1.w,
+                        shadows: [
+                          Shadow(
+                            color: const Color(0xFFFFD700),
+                            blurRadius: 8.r,
+                          ),
+                          Shadow(
+                            color: Colors.black,
+                            blurRadius: 4.r,
+                            offset: const Offset(1, 1),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),

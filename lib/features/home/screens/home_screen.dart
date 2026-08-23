@@ -238,7 +238,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
                 trailing: Switch(
                   value: SoundManager().isSoundEnabled,
-                  activeThumbColor: const Color(0xFFFFD700),
+                  activeColor: const Color(0xFFFFD700),
                   onChanged: (val) {
                     setState(() {
                       SoundManager().toggleSound(val);
@@ -255,7 +255,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
                 trailing: Switch(
                   value: SoundManager().isMusicEnabled,
-                  activeThumbColor: const Color(0xFFFFD700),
+                  activeColor: const Color(0xFFFFD700),
                   onChanged: (val) {
                     setState(() {
                       SoundManager().toggleMusic(val);
@@ -336,71 +336,75 @@ class _HomeScreenState extends State<HomeScreen> {
                         scrollDirection: Axis.horizontal,
                         physics: const BouncingScrollPhysics(),
                         padding: EdgeInsets.symmetric(horizontal: 14.w),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            // Row 1
-                            Row(
-                              children: firstRowGames
-                                  .asMap()
-                                  .entries
-                                  .map((entry) {
-                                final index = entry.key;
-                                final game = entry.value;
-                                return DominoGameCard(
-                                  titleAr: game.titleAr,
-                                  titleEn: game.titleEn,
-                                  icon: game.icon,
-                                  assetPath: game.assetPath,
-                                  cardBgColor: game.cardBgColor,
-                                  cardBorderColor: game.cardBorderColor,
-                                  isNew: game.isNew,
-                                  onTap: () => _onGameSelected(game),
-                                )
-                                    .animate()
-                                    .fadeIn(
-                                      duration: 350.ms,
-                                      delay: (index * 50).ms,
-                                    )
-                                    .slideX(
-                                      begin: 0.15,
-                                      curve: Curves.easeOutQuad,
-                                    );
-                              }).toList(),
-                            ),
-                            SizedBox(height: 4.h),
-                            // Row 2
-                            Row(
-                              children: secondRowGames
-                                  .asMap()
-                                  .entries
-                                  .map((entry) {
-                                final index =
-                                    entry.key + firstRowGames.length;
-                                final game = entry.value;
-                                return DominoGameCard(
-                                  titleAr: game.titleAr,
-                                  titleEn: game.titleEn,
-                                  icon: game.icon,
-                                  assetPath: game.assetPath,
-                                  cardBgColor: game.cardBgColor,
-                                  cardBorderColor: game.cardBorderColor,
-                                  isNew: game.isNew,
-                                  onTap: () => _onGameSelected(game),
-                                )
-                                    .animate()
-                                    .fadeIn(
-                                      duration: 350.ms,
-                                      delay: (index * 50).ms,
-                                    )
-                                    .slideX(
-                                      begin: 0.15,
-                                      curve: Curves.easeOutQuad,
-                                    );
-                              }).toList(),
-                            ),
-                          ],
+                        child: FittedBox(
+                          fit: BoxFit.scaleDown,
+                          alignment: Alignment.center,
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              // Row 1
+                              Row(
+                                children: firstRowGames
+                                    .asMap()
+                                    .entries
+                                    .map((entry) {
+                                  final index = entry.key;
+                                  final game = entry.value;
+                                  return DominoGameCard(
+                                    titleAr: game.titleAr,
+                                    titleEn: game.titleEn,
+                                    icon: game.icon,
+                                    assetPath: game.assetPath,
+                                    cardBgColor: game.cardBgColor,
+                                    cardBorderColor: game.cardBorderColor,
+                                    isNew: game.isNew,
+                                    onTap: () => _onGameSelected(game),
+                                  )
+                                      .animate()
+                                      .fadeIn(
+                                        duration: 350.ms,
+                                        delay: (index * 50).ms,
+                                      )
+                                      .slideX(
+                                        begin: 0.15,
+                                        curve: Curves.easeOutQuad,
+                                      );
+                                }).toList(),
+                              ),
+                              SizedBox(height: 4.h),
+                              // Row 2
+                              Row(
+                                children: secondRowGames
+                                    .asMap()
+                                    .entries
+                                    .map((entry) {
+                                  final index =
+                                      entry.key + firstRowGames.length;
+                                  final game = entry.value;
+                                  return DominoGameCard(
+                                    titleAr: game.titleAr,
+                                    titleEn: game.titleEn,
+                                    icon: game.icon,
+                                    assetPath: game.assetPath,
+                                    cardBgColor: game.cardBgColor,
+                                    cardBorderColor: game.cardBorderColor,
+                                    isNew: game.isNew,
+                                    onTap: () => _onGameSelected(game),
+                                  )
+                                      .animate()
+                                      .fadeIn(
+                                        duration: 350.ms,
+                                        delay: (index * 50).ms,
+                                      )
+                                      .slideX(
+                                        begin: 0.15,
+                                        curve: Curves.easeOutQuad,
+                                      );
+                                }).toList(),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     ),
