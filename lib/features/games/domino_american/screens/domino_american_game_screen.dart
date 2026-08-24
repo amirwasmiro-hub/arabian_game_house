@@ -9,7 +9,7 @@ import '../../../../core/providers/game_user_provider.dart';
 import '../../../home/widgets/interactive_throw_overlay.dart';
 import '../../../home/widgets/mega_win_dialog.dart';
 import '../logic/domino_american_engine.dart';
-import '../models/domino_piece.dart';
+import '../../domino_classic/models/domino_piece.dart';
 import '../widgets/domino_board_layout.dart';
 import '../../domino_classic/widgets/domino_tile_rack.dart';
 import '../../domino_classic/widgets/domino_player_hud.dart';
@@ -128,13 +128,19 @@ class _DominoAmericanGameScreenState extends State<DominoAmericanGameScreen> {
     final validEdges = _engine.getValidEdgesFor(piece);
     if (validEdges.isEmpty) return;
 
-    if (validEdges.length == 1) {
-      _onPlacePiece(piece, validEdges.first);
-    } else {
-      setState(() {
-        _selectedPiece = (_selectedPiece == piece) ? null : piece;
-      });
-    }
+    SoundManager().playButtonClick();
+
+    setState(() {
+      if (_selectedPiece == piece) {
+        if (validEdges.length == 1) {
+          _onPlacePiece(piece, validEdges.first);
+        } else {
+          _selectedPiece = null;
+        }
+      } else {
+        _selectedPiece = piece;
+      }
+    });
   }
 
   void _onPlacePiece(DominoPiece piece, DominoEdgeLocation edge) {

@@ -26,9 +26,9 @@ class DominoCafeBoard extends StatelessWidget {
         ? engine.getValidEdgesFor(selectedPiece!)
         : <DominoEdgeLocation>[];
 
-    final isFirstMove = engine.spinnerTile == null &&
-        engine.rowWest.isEmpty &&
-        engine.rowEast.isEmpty;
+    final isFirstMove = engine.board.isEmpty;
+    final leftVal = engine.leftEnd;
+    final rightVal = engine.rightEnd;
 
     return Container(
       width: double.infinity,
@@ -125,7 +125,7 @@ class DominoCafeBoard extends StatelessWidget {
               child: DragTarget<DominoPiece>(
                 onWillAcceptWithDetails: (details) => true,
                 onAcceptWithDetails: (details) {
-                  onPlacePiece?.call(details.data, DominoEdgeLocation.east);
+                  onPlacePiece?.call(details.data, DominoEdgeLocation.right);
                 },
                 builder: (context, candidateData, rejectedData) {
                   final isHovered = candidateData.isNotEmpty;
@@ -134,7 +134,7 @@ class DominoCafeBoard extends StatelessWidget {
                   return GestureDetector(
                     onTap: () {
                       if (selectedPiece != null) {
-                        onPlacePiece?.call(selectedPiece!, DominoEdgeLocation.east);
+                        onPlacePiece?.call(selectedPiece!, DominoEdgeLocation.right);
                       }
                     },
                     child: Container(
@@ -163,9 +163,9 @@ class DominoCafeBoard extends StatelessWidget {
                           ),
                           SizedBox(height: 6.h),
                           Text(
-                            isHovered
-                                ? 'اترك الحجر هنا للنزول الأول! 🀄'
-                                : 'اضغط أو اسحب قطعة الدومينو للنزول الأول 🀄',
+                            selectedPiece != null
+                                ? 'اضغط هنا للنزول بـ [${selectedPiece!.a}:${selectedPiece!.b}] 🀄'
+                                : 'اختر قطعتك للنزول الأول 🀄',
                             style: GoogleFonts.cairo(
                               color: Colors.white,
                               fontSize: 11.sp,
@@ -181,70 +181,53 @@ class DominoCafeBoard extends StatelessWidget {
                 },
               ),
             )
-          // 4. Live Serpentine Domino Chain (سلسلة الدومينو النشطة)
+          // 4. Live Domino Chain in Strict LTR Direction (أطراف الدومينو من اليسار لليمين)
           else
             Center(
-              child: SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                physics: const BouncingScrollPhysics(),
-                padding: EdgeInsets.symmetric(horizontal: 40.w, vertical: 20.h),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    // West Drop Target (طرف الغرب)
-                    if (validEdges.contains(DominoEdgeLocation.west) || selectedPiece == null)
-                      _buildDropTarget('طرف اليسار ⬅️', DominoEdgeLocation.west),
-
-                    // West Row Tiles
-                    Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: engine.rowWest.map((bt) {
-                        return Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 1.w),
-                          child: Domino3DTile(
-                            top: bt.piece.top,
-                            bottom: bt.piece.bottom,
-                            isHorizontal: !bt.isVertical,
-                            onTable: true,
-                          ),
-                        );
-                      }).toList(),
-                    ),
-
-                    // Center Spinner Double Tile
-                    if (engine.spinnerTile != null)
-                      Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 2.w),
-                        child: Domino3DTile(
-                          top: engine.spinnerTile!.piece.top,
-                          bottom: engine.spinnerTile!.piece.bottom,
-                          isHorizontal: false, // Perpendicular Double
-                          onTable: true,
-                        ),
+              child: Directionality(
+                textDirection: TextDirection.ltr,
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  physics: const BouncingScrollPhysics(),
+                  padding: EdgeInsets.symmetric(horizontal: 30.w, vertical: 20.h),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      // Physical Left Drop Target (طرف اليسار)
+                      _buildDropTarget(
+                        edge: DominoEdgeLocation.left,
+                        openValue: leftVal ?? 0,
+                        isValid: validEdges.contains(DominoEdgeLocation.left),
+                        isHoverable: selectedPiece != null,
                       ),
 
-                    // East Row Tiles
-                    Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: engine.rowEast.map((bt) {
-                        return Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 1.w),
-                          child: Domino3DTile(
-                            top: bt.piece.top,
-                            bottom: bt.piece.bottom,
-                            isHorizontal: !bt.isVertical,
-                            onTable: true,
-                          ),
-                        );
-                      }).toList(),
-                    ),
+                      // Chain of placed tiles strictly from Left (0) to Right (N)
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: engine.board.map((placed) {
+                          return Padding(
+                            padding: EdgeInsets.symmetric(horizontal: 1.w),
+                            child: Domino3DTile(
+                              top: placed.leftValue,
+                              bottom: placed.rightValue,
+                              isHorizontal: !placed.isDouble,
+                              onTable: true,
+                            ),
+                          );
+                        }).toList(),
+                      ),
 
-                    // East Drop Target (طرف الشرق)
-                    if (validEdges.contains(DominoEdgeLocation.east) || selectedPiece == null)
-                      _buildDropTarget('طرف اليمين ➡️', DominoEdgeLocation.east),
-                  ],
+                      // Physical Right Drop Target (طرف اليمين)
+                      _buildDropTarget(
+                        edge: DominoEdgeLocation.right,
+                        openValue: rightVal ?? 0,
+                        isValid: validEdges.contains(DominoEdgeLocation.right),
+                        isHoverable: selectedPiece != null,
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -253,62 +236,82 @@ class DominoCafeBoard extends StatelessWidget {
     );
   }
 
-  Widget _buildDropTarget(String label, DominoEdgeLocation edge) {
+  Widget _buildDropTarget({
+    required DominoEdgeLocation edge,
+    required int openValue,
+    required bool isValid,
+    required bool isHoverable,
+  }) {
     return DragTarget<DominoPiece>(
-      onWillAcceptWithDetails: (details) => engine.getValidEdgesFor(details.data).contains(edge),
+      onWillAcceptWithDetails: (details) =>
+          engine.getValidEdgesFor(details.data).contains(edge),
       onAcceptWithDetails: (details) {
         onPlacePiece?.call(details.data, edge);
       },
       builder: (context, candidateData, rejectedData) {
         final isHovered = candidateData.isNotEmpty;
-        final isValidSelected = selectedPiece != null &&
-            engine.getValidEdgesFor(selectedPiece!).contains(edge);
 
         Color targetColor = const Color(0xFFFFD700);
         if (isHovered) {
           targetColor = const Color(0xFF00E676);
-        } else if (isValidSelected) {
+        } else if (isValid) {
           targetColor = const Color(0xFF00E5FF);
         }
 
+        final isLeft = edge == DominoEdgeLocation.left;
+
         return GestureDetector(
           onTap: () {
-            if (isValidSelected && selectedPiece != null) {
+            if (isValid && selectedPiece != null) {
               onPlacePiece?.call(selectedPiece!, edge);
             }
           },
-          child: Container(
-            width: 32.w,
-            height: 52.h,
-            margin: EdgeInsets.symmetric(horizontal: 4.w),
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 180),
+            padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 8.h),
+            margin: EdgeInsets.symmetric(horizontal: 6.w),
             decoration: BoxDecoration(
-              color: targetColor.withValues(alpha: isHovered ? 0.4 : 0.18),
-              borderRadius: BorderRadius.circular(8.r),
+              color: targetColor.withValues(alpha: isHovered ? 0.5 : (isValid ? 0.35 : 0.12)),
+              borderRadius: BorderRadius.circular(10.r),
               border: Border.all(
                 color: targetColor,
-                width: isHovered ? 2.5.w : 1.5.w,
+                width: isValid ? 2.5.w : 1.2.w,
               ),
-              boxShadow: [
-                BoxShadow(
-                  color: targetColor.withValues(alpha: 0.5),
-                  blurRadius: 8.r,
+              boxShadow: isValid
+                  ? [
+                      BoxShadow(
+                        color: targetColor.withValues(alpha: 0.6),
+                        blurRadius: 10.r,
+                        spreadRadius: 1.r,
+                      ),
+                    ]
+                  : null,
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  isHovered
+                      ? Icons.check_circle_rounded
+                      : (isLeft ? Icons.arrow_back_rounded : Icons.arrow_forward_rounded),
+                  color: Colors.white,
+                  size: 18.r,
+                ),
+                SizedBox(height: 2.h),
+                // Show exposed required number clearly in Arabic
+                Text(
+                  isLeft ? '⬅️ طرف ($openValue)' : 'طرف ($openValue) ➡️',
+                  style: GoogleFonts.cairo(
+                    color: Colors.white,
+                    fontSize: 8.sp,
+                    fontWeight: FontWeight.w900,
+                  ),
                 ),
               ],
             ),
-            child: Center(
-              child: Icon(
-                isHovered
-                    ? Icons.download_done_rounded
-                    : (edge == DominoEdgeLocation.west
-                        ? Icons.arrow_back_rounded
-                        : Icons.arrow_forward_rounded),
-                color: Colors.white,
-                size: 18.r,
-              ),
-            ),
           )
-              .animate(onPlay: (c) => c.repeat(reverse: true))
-              .scale(duration: 800.ms, begin: const Offset(0.95, 0.95), end: const Offset(1.05, 1.05)),
+              .animate(target: isValid ? 1 : 0)
+              .scale(duration: 500.ms, begin: const Offset(0.95, 0.95), end: const Offset(1.08, 1.08)),
         );
       },
     );

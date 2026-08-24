@@ -132,13 +132,20 @@ class _DominoClassicGameScreenState extends State<DominoClassicGameScreen> {
     final validEdges = _engine.getValidEdgesFor(piece);
     if (validEdges.isEmpty) return;
 
-    if (validEdges.length == 1) {
-      _onPlacePiece(piece, validEdges.first);
-    } else {
-      setState(() {
-        _selectedPiece = (_selectedPiece == piece) ? null : piece;
-      });
-    }
+    SoundManager().playButtonClick();
+
+    setState(() {
+      if (_selectedPiece == piece) {
+        // If already selected and only 1 valid edge, second tap quick-plays it!
+        if (validEdges.length == 1) {
+          _onPlacePiece(piece, validEdges.first);
+        } else {
+          _selectedPiece = null;
+        }
+      } else {
+        _selectedPiece = piece;
+      }
+    });
   }
 
   void _onPlacePiece(DominoPiece piece, DominoEdgeLocation edge) {

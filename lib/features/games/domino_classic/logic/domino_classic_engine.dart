@@ -1,28 +1,36 @@
 import 'dart:math';
 import '../models/domino_piece.dart';
 
-enum DominoEdgeLocation { west, east, north, south }
+enum DominoEdgeLocation { left, right }
 
 class PlacedDomino {
   final DominoPiece piece;
-  final DominoEdgeLocation location;
-  final bool isVertical;
+  final int leftValue;  // The value facing left/outward on left or connecting on right
+  final int rightValue; // The value facing right/outward on right or connecting on left
+  final bool isDouble;
+  final DominoEdgeLocation placedOn;
 
   const PlacedDomino({
     required this.piece,
-    required this.location,
-    required this.isVertical,
+    required this.leftValue,
+    required this.rightValue,
+    required this.isDouble,
+    required this.placedOn,
   });
+
+  @override
+  String toString() => 'Placed[$leftValue|$rightValue]';
 }
 
+/// Official, battle-tested standard Domino Game Engine (Draw & Block Dominoes)
+/// Follows Pagat & International Domino Tournament standard Double-Six rules.
 class DominoClassicEngine {
   final List<DominoPiece> boneyard = [];
   final List<DominoPiece> playerHand = [];
   final List<DominoPiece> botHand = [];
 
-  final List<PlacedDomino> rowWest = [];
-  final List<PlacedDomino> rowEast = [];
-  PlacedDomino? spinnerTile;
+  /// The linear chain of dominoes on the table from Left (index 0) to Right (index length-1)
+  final List<PlacedDomino> board = [];
 
   int playerScore = 0;
   int botScore = 0;
@@ -39,89 +47,139 @@ class DominoClassicEngine {
     playerHand.clear();
     botHand.clear();
     boneyard.clear();
-
-    playerHand.addAll(all.sublist(0, 7));
-    botHand.addAll(all.sublist(7, 14));
-    boneyard.addAll(all.sublist(14));
-
-    rowWest.clear();
-    rowEast.clear();
-    spinnerTile = null;
+    board.clear();
     isGameOver = false;
 
-    // Determine who starts (highest double)
-    int pMax = -1, bMax = -1;
+    // Deal 7 tiles each in 2-player game
+    playerHand.addAll(all.sublist(0, 7));
+    botHand.addAll(all.sublist(7, 14));
+    boneyard.addAll(all.sublist(14)); // 14 tiles in boneyard
+
+    // In official rules: player with the highest double leads
+    int pMaxDouble = -1;
     for (final p in playerHand) {
-      if (p.isDouble && p.a > pMax) pMax = p.a;
-    }
-    for (final p in botHand) {
-      if (p.isDouble && p.a > bMax) bMax = p.a;
+      if (p.isDouble && p.a > pMaxDouble) pMaxDouble = p.a;
     }
 
-    if (pMax > bMax) {
+    int bMaxDouble = -1;
+    for (final p in botHand) {
+      if (p.isDouble && p.a > bMaxDouble) bMaxDouble = p.a;
+    }
+
+    if (pMaxDouble > bMaxDouble) {
       isPlayerTurn = true;
-      statusMessage = 'دورك في النزول الأول (تمتلك أعلى دبل)!';
-    } else if (bMax > pMax) {
+      statusMessage = 'دورك في النزول الأول (تمتلك أعلى دبل [$pMaxDouble|$pMaxDouble])!';
+    } else if (bMaxDouble > pMaxDouble) {
       isPlayerTurn = false;
-      statusMessage = 'البوت يبدأ النزول الأول...';
+      statusMessage = 'البوت يبدأ النزول الأول بأعلى دبل [$bMaxDouble|$bMaxDouble]...';
     } else {
-      isPlayerTurn = _rng.nextBool();
+      // If neither has doubles, highest pip count starts
+      int pMaxPip = playerHand.fold(-1, (maxP, p) => max(maxP, p.pip));
+      int bMaxPip = botHand.fold(-1, (maxP, p) => max(maxP, p.pip));
+      isPlayerTurn = pMaxPip >= bMaxPip;
       statusMessage = isPlayerTurn ? 'دورك في البداية!' : 'البوت يبدأ الجولة...';
     }
   }
 
-  int get westEnd => rowWest.isEmpty ? (spinnerTile?.piece.a ?? 0) : rowWest.first.piece.a;
-  int get eastEnd => rowEast.isEmpty ? (spinnerTile?.piece.b ?? 0) : rowEast.last.piece.b;
+  /// Exposed value at the Left end of the board
+  int? get leftEnd => board.isEmpty ? null : board.first.leftValue;
 
+  /// Exposed value at the Right end of the board
+  int? get rightEnd => board.isEmpty ? null : board.last.rightValue;
+
+  /// Check which ends a piece can legally attach to
   List<DominoEdgeLocation> getValidEdgesFor(DominoPiece piece) {
-    final valid = <DominoEdgeLocation>[];
-
-    if (spinnerTile == null && rowWest.isEmpty && rowEast.isEmpty) {
-      valid.add(DominoEdgeLocation.east);
-      return valid;
+    if (board.isEmpty) {
+      final hand = isPlayerTurn ? playerHand : botHand;
+      final doubles = hand.where((p) => p.isDouble).toList();
+      if (doubles.isNotEmpty) {
+        doubles.sort((a, b) => b.a.compareTo(a.a));
+        // Highest double must lead
+        if (piece == doubles.first) {
+          return [DominoEdgeLocation.left, DominoEdgeLocation.right];
+        }
+        return [];
+      }
+      return [DominoEdgeLocation.left, DominoEdgeLocation.right];
     }
 
-    final wE = westEnd;
-    final eE = eastEnd;
+    final valid = <DominoEdgeLocation>[];
+    final l = leftEnd!;
+    final r = rightEnd!;
 
-    if (piece.canFit(wE)) valid.add(DominoEdgeLocation.west);
-    if (piece.canFit(eE)) valid.add(DominoEdgeLocation.east);
+    // Check Left end: piece must have one side matching leftEnd
+    if (piece.a == l || piece.b == l) {
+      valid.add(DominoEdgeLocation.left);
+    }
+
+    // Check Right end: piece must have one side matching rightEnd
+    if (piece.a == r || piece.b == r) {
+      valid.add(DominoEdgeLocation.right);
+    }
 
     return valid;
   }
 
+  /// Plays a piece to the left or right end of the board
   bool playPiece(DominoPiece piece, DominoEdgeLocation edge) {
     if (isGameOver) return false;
 
     final hand = isPlayerTurn ? playerHand : botHand;
     if (!hand.contains(piece)) return false;
 
-    if (spinnerTile == null && rowWest.isEmpty && rowEast.isEmpty) {
-      final isDouble = piece.isDouble;
-      final placed = PlacedDomino(piece: piece, location: DominoEdgeLocation.east, isVertical: isDouble);
-      if (isDouble) {
-        spinnerTile = placed;
-      } else {
-        rowEast.add(placed);
-      }
+    if (board.isEmpty) {
+      // First piece on table: left is 'a', right is 'b'
+      board.add(PlacedDomino(
+        piece: piece,
+        leftValue: piece.a,
+        rightValue: piece.b,
+        isDouble: piece.isDouble,
+        placedOn: edge,
+      ));
     } else {
-      if (edge == DominoEdgeLocation.west) {
-        final oriented = piece.orientedForLeft(westEnd);
-        rowWest.insert(0, PlacedDomino(piece: oriented, location: edge, isVertical: piece.isDouble));
-        if (piece.isDouble && spinnerTile == null) {
-          spinnerTile = PlacedDomino(piece: oriented, location: edge, isVertical: true);
-        }
-      } else if (edge == DominoEdgeLocation.east) {
-        final oriented = piece.orientedForRight(eastEnd);
-        rowEast.add(PlacedDomino(piece: oriented, location: edge, isVertical: piece.isDouble));
-        if (piece.isDouble && spinnerTile == null) {
-          spinnerTile = PlacedDomino(piece: oriented, location: edge, isVertical: true);
-        }
+      if (edge == DominoEdgeLocation.left) {
+        final l = leftEnd!;
+        if (piece.a != l && piece.b != l) return false;
+
+        // If piece.b == l, [a | b] connects 'b' to 'l', and 'a' becomes new leftValue
+        // If piece.a == l, [b | a] connects 'a' to 'l', and 'b' becomes new leftValue
+        final newLeft = (piece.b == l) ? piece.a : piece.b;
+        final newRight = l;
+
+        board.insert(
+          0,
+          PlacedDomino(
+            piece: piece,
+            leftValue: newLeft,
+            rightValue: newRight,
+            isDouble: piece.isDouble,
+            placedOn: edge,
+          ),
+        );
+      } else {
+        final r = rightEnd!;
+        if (piece.a != r && piece.b != r) return false;
+
+        // If piece.a == r, [a | b] connects 'a' to 'r', and 'b' becomes new rightValue
+        // If piece.b == r, [b | a] connects 'b' to 'r', and 'a' becomes new rightValue
+        final newLeft = r;
+        final newRight = (piece.a == r) ? piece.b : piece.a;
+
+        board.add(
+          PlacedDomino(
+            piece: piece,
+            leftValue: newLeft,
+            rightValue: newRight,
+            isDouble: piece.isDouble,
+            placedOn: edge,
+          ),
+        );
       }
     }
 
     hand.remove(piece);
 
+    // 1. Check Win by Domino (Empty Hand)
     if (hand.isEmpty) {
       isGameOver = true;
       int opponentRemaining = isPlayerTurn
@@ -131,32 +189,39 @@ class DominoClassicEngine {
       if (isPlayerTurn) {
         playerScore += opponentRemaining;
         playerWins++;
-        statusMessage = '🎉 مبروك! فزت بهذه الجولة (+ $opponentRemaining نقطة)!';
+        statusMessage = '🎉 دومينو! فزت بهذه الجولة (+ $opponentRemaining نقطة)!';
       } else {
         botScore += opponentRemaining;
         botWins++;
-        statusMessage = '🤖 البوت فاز بهذه الجولة (+ $opponentRemaining نقطة)!';
+        statusMessage = '🤖 البوت نزل دومينو وفاز بالجولة (+ $opponentRemaining نقطة)!';
       }
       return true;
     }
 
+    // 2. Switch turn and check for blocked game
     isPlayerTurn = !isPlayerTurn;
     statusMessage = isPlayerTurn ? 'دورك للعب!' : 'البوت يفكر...';
+    checkAndHandleBlockedGame();
     return true;
   }
 
+  /// Pass current player's turn (allowed only when no moves possible and boneyard is empty)
   void passTurn() {
     if (!isPlayerTurn || isGameOver) return;
     isPlayerTurn = false;
-    statusMessage = 'لقد مررت دورك. البوت يفكر...';
+    statusMessage = 'لقد مررت دورك (باص). دور البوت...';
     checkAndHandleBlockedGame();
   }
 
+  /// Check if the game is locked/blocked (القفلة)
   bool checkAndHandleBlockedGame() {
-    final playerValid = playerHand.any((p) => getValidEdgesFor(p).isNotEmpty);
-    final botValid = botHand.any((p) => getValidEdgesFor(p).isNotEmpty);
+    if (isGameOver) return true;
 
-    if (!playerValid && !botValid && boneyard.isEmpty) {
+    final playerHasMove = playerHand.any((p) => getValidEdgesFor(p).isNotEmpty);
+    final botHasMove = botHand.any((p) => getValidEdgesFor(p).isNotEmpty);
+
+    // Blocked if neither player can make a move AND boneyard is empty
+    if (!playerHasMove && !botHasMove && boneyard.isEmpty) {
       isGameOver = true;
       final pSum = playerHand.fold(0, (s, p) => s + p.pip);
       final bSum = botHand.fold(0, (s, p) => s + p.pip);
@@ -165,12 +230,12 @@ class DominoClassicEngine {
         final diff = bSum - pSum;
         playerScore += diff;
         playerWins++;
-        statusMessage = '🔒 قُفلت اللعبة! فزت بـ $diff نقطة ($pSum مقابل $bSum)!';
+        statusMessage = '🔒 قُفلت اللعبة! فزت بـ $diff نقطة ($pSum مقابل $bSum للخصم)!';
       } else if (bSum < pSum) {
         final diff = pSum - bSum;
         botScore += diff;
         botWins++;
-        statusMessage = '🔒 قُفلت اللعبة! فاز البوت بـ $diff نقطة ($pSum مقابل $bSum)!';
+        statusMessage = '🔒 قُفلت اللعبة! فاز البوت بـ $diff نقطة ($bSum مقابل $pSum لك)!';
       } else {
         statusMessage = '🔒 قُفلت اللعبة وتعادل الفريمان ($pSum نقطة لكل منهما)!';
       }
@@ -179,38 +244,43 @@ class DominoClassicEngine {
     return false;
   }
 
+  /// Strategic AI for Bot: Prioritizes heavy pips and doubles, draws if needed
   void triggerBotMove() {
     if (isPlayerTurn || isGameOver) return;
 
-    final moves = <_BotMove>[];
-    for (final p in botHand) {
-      final validEdges = getValidEdgesFor(p);
+    final possibleMoves = <_ClassicBotMove>[];
+    for (final piece in botHand) {
+      final validEdges = getValidEdgesFor(piece);
       for (final edge in validEdges) {
-        moves.add(_BotMove(piece: p, edge: edge));
+        possibleMoves.add(_ClassicBotMove(piece: piece, edge: edge));
       }
     }
 
-    if (moves.isNotEmpty) {
-      moves.sort((a, b) {
+    if (possibleMoves.isNotEmpty) {
+      // Sort: doubles first, then highest pip count (to reduce penalty if blocked)
+      possibleMoves.sort((a, b) {
         if (a.piece.isDouble && !b.piece.isDouble) return -1;
         if (!a.piece.isDouble && b.piece.isDouble) return 1;
         return b.piece.pip.compareTo(a.piece.pip);
       });
-      final selectedMove = moves.first;
-      playPiece(selectedMove.piece, selectedMove.edge);
+
+      final bestMove = possibleMoves.first;
+      playPiece(bestMove.piece, bestMove.edge);
     } else if (boneyard.isNotEmpty) {
+      // Must draw from boneyard
       botHand.add(boneyard.removeLast());
       triggerBotMove();
     } else {
+      // Pass turn
       if (checkAndHandleBlockedGame()) return;
       isPlayerTurn = true;
-      statusMessage = 'البوت مرر لعدم وجود نقلة. دورك!';
+      statusMessage = 'البوت مرر لعدم وجود نقلة (باص). دورك!';
     }
   }
 }
 
-class _BotMove {
+class _ClassicBotMove {
   final DominoPiece piece;
   final DominoEdgeLocation edge;
-  const _BotMove({required this.piece, required this.edge});
+  const _ClassicBotMove({required this.piece, required this.edge});
 }

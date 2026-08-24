@@ -23,17 +23,6 @@ void main() {
       expect(piece.canFit(4), isTrue);
       expect(piece.canFit(3), isFalse);
     });
-
-    test('orienting tiles for left and right ends', () {
-      const piece = DominoPiece(6, 4);
-      final leftOriented = piece.orientedForLeft(4);
-      expect(leftOriented.a, equals(6));
-      expect(leftOriented.b, equals(4));
-
-      final rightOriented = piece.orientedForRight(4);
-      expect(rightOriented.a, equals(4));
-      expect(rightOriented.b, equals(6));
-    });
   });
 
   group('DominoClassicEngine Tests', () {
@@ -43,11 +32,57 @@ void main() {
       expect(engine.playerHand.length, equals(7));
       expect(engine.botHand.length, equals(7));
       expect(engine.boneyard.length, equals(14));
-      expect(engine.rowWest, isEmpty);
-      expect(engine.rowEast, isEmpty);
+      expect(engine.board, isEmpty);
     });
 
-    test('Bot turn executes successfully without error', () {
+    test('First move places tile on board and sets left/right exposed ends', () {
+      final engine = DominoClassicEngine();
+      engine.startNewGame();
+      engine.isPlayerTurn = true;
+
+      const piece = DominoPiece(6, 4);
+      engine.playerHand.add(piece);
+
+      final success = engine.playPiece(piece, DominoEdgeLocation.right);
+      expect(success, isTrue);
+      expect(engine.board.length, equals(1));
+      expect(engine.leftEnd, equals(6));
+      expect(engine.rightEnd, equals(4));
+    });
+
+    test('Subsequent moves connect matching values accurately on Left and Right', () {
+      final engine = DominoClassicEngine();
+      engine.startNewGame();
+      engine.isPlayerTurn = true;
+
+      const first = DominoPiece(6, 4);
+      const rightPiece = DominoPiece(4, 2);
+      const leftPiece = DominoPiece(1, 6);
+      const extra = DominoPiece(0, 0); // Keep hand non-empty
+
+      engine.playerHand.clear();
+      engine.playerHand.addAll([first, rightPiece, leftPiece, extra]);
+
+      // Play [6|4]
+      final ok1 = engine.playPiece(first, DominoEdgeLocation.right);
+      expect(ok1, isTrue);
+
+      // Play [4|2] on Right
+      engine.isPlayerTurn = true;
+      final okRight = engine.playPiece(rightPiece, DominoEdgeLocation.right);
+      expect(okRight, isTrue);
+      expect(engine.rightEnd, equals(2));
+      expect(engine.leftEnd, equals(6));
+
+      // Play [1|6] on Left
+      engine.isPlayerTurn = true;
+      final okLeft = engine.playPiece(leftPiece, DominoEdgeLocation.left);
+      expect(okLeft, isTrue);
+      expect(engine.leftEnd, equals(1));
+      expect(engine.rightEnd, equals(2));
+    });
+
+    test('Bot turn executes moves intelligently', () {
       final engine = DominoClassicEngine();
       engine.startNewGame();
       engine.isPlayerTurn = false;
