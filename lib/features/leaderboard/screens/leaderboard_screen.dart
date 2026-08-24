@@ -66,19 +66,33 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
                     ),
                     SizedBox(height: 8.h),
                     Expanded(
-                      child: Row(
-                        children: [
-                          if (_topSultans.length >= 3)
-                            Expanded(
-                              flex: 4,
-                              child: _buildPodium(),
-                            ),
-                          SizedBox(width: 14.w),
-                          Expanded(
-                            flex: 6,
-                            child: _buildRankingsList(),
-                          ),
-                        ],
+                      child: LayoutBuilder(
+                        builder: (context, constraints) {
+                          return Row(
+                            children: [
+                              if (_topSultans.length >= 3)
+                                Expanded(
+                                  flex: 4,
+                                  child: Align(
+                                    alignment: Alignment.bottomCenter,
+                                    child: FittedBox(
+                                      fit: BoxFit.scaleDown,
+                                      alignment: Alignment.bottomCenter,
+                                      child: SizedBox(
+                                        width: 220.w,
+                                        child: _buildPodium(),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              SizedBox(width: 14.w),
+                              Expanded(
+                                flex: 6,
+                                child: _buildRankingsList(),
+                              ),
+                            ],
+                          );
+                        },
                       ),
                     ),
                   ],

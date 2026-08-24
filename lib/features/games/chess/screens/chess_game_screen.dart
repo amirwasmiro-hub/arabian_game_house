@@ -26,19 +26,28 @@ class _ChessGameScreenState extends State<ChessGameScreen> {
               Expanded(
                 child: Row(
                   children: [
-                    SizedBox(
-                      width: 280.w,
+                    Expanded(
+                      flex: 4,
                       child: Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            _buildPlayerTag('البوت (أسود)', Icons.smart_toy, Colors.white54, s.turn == ChessColor.black),
-                            _buildStatusCard(s),
-                            _buildPlayerTag('أنت (أبيض)', Icons.person, const Color(0xFFFFD700), s.turn == ChessColor.white),
-                            _buildActions(s),
-                          ],
+                        padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
+                        child: FittedBox(
+                          fit: BoxFit.scaleDown,
+                          child: SizedBox(
+                            width: 240.w,
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                _buildPlayerTag('البوت (أسود)', Icons.smart_toy, Colors.white54, s.turn == ChessColor.black),
+                                SizedBox(height: 6.h),
+                                _buildStatusCard(s),
+                                SizedBox(height: 6.h),
+                                _buildPlayerTag('أنت (أبيض)', Icons.person, const Color(0xFFFFD700), s.turn == ChessColor.white),
+                                SizedBox(height: 8.h),
+                                _buildActions(s),
+                              ],
+                            ),
+                          ),
                         ),
                       ),
                     ),

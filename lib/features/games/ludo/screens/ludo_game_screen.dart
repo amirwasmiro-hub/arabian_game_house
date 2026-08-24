@@ -30,16 +30,25 @@ class _LudoGameScreenState extends State<LudoGameScreen> {
               Expanded(
                 child: Row(
                   children: [
-                    Container(
-                      width: 200.w,
-                      padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 6.h),
-                      color: Colors.black26,
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: [
-                          _buildPlayersList(s),
-                          _buildDiceSection(s),
-                        ],
+                    Expanded(
+                      flex: 4,
+                      child: Container(
+                        padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 6.h),
+                        color: Colors.black26,
+                        child: FittedBox(
+                          fit: BoxFit.scaleDown,
+                          child: SizedBox(
+                            width: 180.w,
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                              children: [
+                                _buildPlayersList(s),
+                                SizedBox(height: 8.h),
+                                _buildDiceSection(s),
+                              ],
+                            ),
+                          ),
+                        ),
                       ),
                     ),
                     VerticalDivider(color: Colors.white12, width: 1),

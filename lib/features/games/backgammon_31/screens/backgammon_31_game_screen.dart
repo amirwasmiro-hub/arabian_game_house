@@ -28,45 +28,50 @@ class _Backgammon31GameScreenState extends State<Backgammon31GameScreen> {
                   children: [
                     Expanded(
                       flex: 4,
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Container(
-                            width: 90.h,
-                            height: 90.h,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              gradient: RadialGradient(colors: [
-                                const Color(0xFFFFD700).withValues(alpha: 0.25),
-                                const Color(0xFFE65100).withValues(alpha: 0.05),
-                              ]),
-                              border: Border.all(color: const Color(0xFFFFD700), width: 2),
-                              boxShadow: [BoxShadow(color: const Color(0xFFFFD700).withValues(alpha: 0.3), blurRadius: 15)],
-                            ),
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Text('الهدف', style: GoogleFonts.cairo(color: Colors.white54, fontSize: 10.sp)),
-                                Text('31', style: GoogleFonts.montserrat(color: const Color(0xFFFFD700), fontSize: 26.sp, fontWeight: FontWeight.bold)),
-                              ],
-                            ),
+                      child: Center(
+                        child: FittedBox(
+                          fit: BoxFit.scaleDown,
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Container(
+                                width: 85.h,
+                                height: 85.h,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  gradient: RadialGradient(colors: [
+                                    const Color(0xFFFFD700).withValues(alpha: 0.25),
+                                    const Color(0xFFE65100).withValues(alpha: 0.05),
+                                  ]),
+                                  border: Border.all(color: const Color(0xFFFFD700), width: 2),
+                                  boxShadow: [BoxShadow(color: const Color(0xFFFFD700).withValues(alpha: 0.3), blurRadius: 15)],
+                                ),
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Text('الهدف', style: GoogleFonts.cairo(color: Colors.white54, fontSize: 10.sp)),
+                                    Text('31', style: GoogleFonts.montserrat(color: const Color(0xFFFFD700), fontSize: 24.sp, fontWeight: FontWeight.bold)),
+                                  ],
+                                ),
+                              ),
+                              SizedBox(height: 8.h),
+                              Container(
+                                margin: EdgeInsets.symmetric(horizontal: 12.w),
+                                padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
+                                decoration: BoxDecoration(
+                                  color: Colors.white10,
+                                  borderRadius: BorderRadius.circular(8.r),
+                                  border: Border.all(color: Colors.amber.withValues(alpha: 0.4)),
+                                ),
+                                child: Text(
+                                  s.message,
+                                  style: GoogleFonts.cairo(color: Colors.amber, fontSize: 11.sp),
+                                  textAlign: TextAlign.center,
+                                ),
+                              ),
+                            ],
                           ),
-                          SizedBox(height: 8.h),
-                          Container(
-                            margin: EdgeInsets.symmetric(horizontal: 16.w),
-                            padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
-                            decoration: BoxDecoration(
-                              color: Colors.white10,
-                              borderRadius: BorderRadius.circular(8.r),
-                              border: Border.all(color: Colors.amber.withValues(alpha: 0.4)),
-                            ),
-                            child: Text(
-                              s.message,
-                              style: GoogleFonts.cairo(color: Colors.amber, fontSize: 11.sp),
-                              textAlign: TextAlign.center,
-                            ),
-                          ),
-                        ],
+                        ),
                       ),
                     ),
                     VerticalDivider(color: Colors.white12, width: 1),

@@ -34,78 +34,90 @@ class StoreScreen extends StatelessWidget {
               ),
               SizedBox(height: 8.h),
               Expanded(
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Coins Packages
-                    Expanded(
-                      flex: 6,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'حزم الكوينز 🪙',
-                            style: GoogleFonts.cairo(
-                              color: OrientalTheme.primaryGold,
-                              fontSize: 11.sp,
-                              fontWeight: FontWeight.w800,
+                child: LayoutBuilder(
+                  builder: (context, constraints) {
+                    final isSmallScreen = constraints.maxHeight < 300;
+                    return SingleChildScrollView(
+                      physics: const BouncingScrollPhysics(),
+                      child: ConstrainedBox(
+                        constraints: BoxConstraints(minHeight: constraints.maxHeight),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            // Coins Packages
+                            Expanded(
+                              flex: 6,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text(
+                                    'حزم الكوينز 🪙',
+                                    style: GoogleFonts.cairo(
+                                      color: OrientalTheme.primaryGold,
+                                      fontSize: isSmallScreen ? 10.sp : 11.sp,
+                                      fontWeight: FontWeight.w800,
+                                    ),
+                                  ),
+                                  SizedBox(height: 6.h),
+                                  GridView.count(
+                                    shrinkWrap: true,
+                                    physics: const NeverScrollableScrollPhysics(),
+                                    crossAxisCount: 2,
+                                    crossAxisSpacing: 10.w,
+                                    mainAxisSpacing: 10.h,
+                                    childAspectRatio: isSmallScreen ? 2.2 : 1.8,
+                                    children: [
+                                      _buildStoreCard('10,000 ذهبية', '1.99\$', '🪙', OrientalTheme.primaryGold),
+                                      _buildStoreCard('50,000 ذهبية', '4.99\$', '💰', OrientalTheme.accentOrange),
+                                      _buildStoreCard('150,000 ذهبية', '9.99\$', '👑', OrientalTheme.primaryRed),
+                                      _buildStoreCard('500,000 ذهبية', '24.99\$', '🏆', OrientalTheme.accentPurple),
+                                    ],
+                                  ),
+                                ],
+                              ),
                             ),
-                          ),
-                          SizedBox(height: 6.h),
-                          Expanded(
-                            child: GridView.count(
-                              physics: const NeverScrollableScrollPhysics(),
-                              crossAxisCount: 2,
-                              crossAxisSpacing: 10.w,
-                              mainAxisSpacing: 10.h,
-                              childAspectRatio: 1.8,
-                              children: [
-                                _buildStoreCard('10,000 ذهبية', '1.99\$', '🪙', OrientalTheme.primaryGold),
-                                _buildStoreCard('50,000 ذهبية', '4.99\$', '💰', OrientalTheme.accentOrange),
-                                _buildStoreCard('150,000 ذهبية', '9.99\$', '👑', OrientalTheme.primaryRed),
-                                _buildStoreCard('500,000 ذهبية', '24.99\$', '🏆', OrientalTheme.accentPurple),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    SizedBox(width: 14.w),
+                            SizedBox(width: 14.w),
 
-                    // Customizations
-                    Expanded(
-                      flex: 4,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'أوراق وطاولات احترافية 🎴',
-                            style: GoogleFonts.cairo(
-                              color: OrientalTheme.primaryGold,
-                              fontSize: 11.sp,
-                              fontWeight: FontWeight.w800,
+                            // Customizations
+                            Expanded(
+                              flex: 4,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text(
+                                    'أوراق وطاولات احترافية 🎴',
+                                    style: GoogleFonts.cairo(
+                                      color: OrientalTheme.primaryGold,
+                                      fontSize: isSmallScreen ? 10.sp : 11.sp,
+                                      fontWeight: FontWeight.w800,
+                                    ),
+                                  ),
+                                  SizedBox(height: 6.h),
+                                  _buildCustomizationTile(
+                                    title: 'ورق لعب الملكي الذهبي',
+                                    desc: 'أوراق بتصميم كلاسيكي مذهب',
+                                    price: '25,000 🪙',
+                                    icon: Icons.style_rounded,
+                                    accentColor: OrientalTheme.primaryGold,
+                                  ),
+                                  SizedBox(height: 8.h),
+                                  _buildCustomizationTile(
+                                    title: 'طاولة المخمل الاندلسية',
+                                    desc: 'مفرش مخملي ملكي فاخر',
+                                    price: '50,000 🪙',
+                                    icon: Icons.table_bar_rounded,
+                                    accentColor: OrientalTheme.accentOrange,
+                                  ),
+                                ],
+                              ),
                             ),
-                          ),
-                          SizedBox(height: 6.h),
-                          _buildCustomizationTile(
-                            title: 'ورق لعب الملكي الذهبي',
-                            desc: 'أوراق بتصميم كلاسيكي مذهب',
-                            price: '25,000 🪙',
-                            icon: Icons.style_rounded,
-                            accentColor: OrientalTheme.primaryGold,
-                          ),
-                          SizedBox(height: 8.h),
-                          _buildCustomizationTile(
-                            title: 'طاولة المخمل الاندلسية',
-                            desc: 'مفرش مخملي ملكي فاخر',
-                            price: '50,000 🪙',
-                            icon: Icons.table_bar_rounded,
-                            accentColor: OrientalTheme.accentOrange,
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
-                    ),
-                  ],
+                    );
+                  },
                 ),
               ),
             ],

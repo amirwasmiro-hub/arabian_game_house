@@ -29,11 +29,19 @@ class _BackgammonClassicGameScreenState extends State<BackgammonClassicGameScree
                 child: Row(
                   children: [
                     Expanded(child: _buildBoard(s)),
-                    Container(
-                      width: 140.w,
-                      padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
-                      color: Colors.black38,
-                      child: _buildSideControls(s),
+                    Expanded(
+                      flex: 3,
+                      child: Container(
+                        padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 4.h),
+                        color: Colors.black38,
+                        child: FittedBox(
+                          fit: BoxFit.scaleDown,
+                          child: SizedBox(
+                            width: 130.w,
+                            child: _buildSideControls(s),
+                          ),
+                        ),
+                      ),
                     ),
                   ],
                 ),

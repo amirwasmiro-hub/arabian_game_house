@@ -70,172 +70,184 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ),
               SizedBox(height: 8.h),
               Expanded(
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Profile Info Box
-                    Expanded(
-                      flex: 5,
-                      child: Container(
-                        padding: EdgeInsets.all(12.r),
-                        decoration: BoxDecoration(
-                          color: OrientalTheme.bgCard,
-                          borderRadius: BorderRadius.circular(16.r),
-                          border: Border.all(
-                            color: OrientalTheme.goldDark.withValues(alpha: 0.35),
-                            width: 1.w,
-                          ),
-                        ),
-                        child: Column(
+                child: LayoutBuilder(
+                  builder: (context, constraints) {
+                    final isSmallScreen = constraints.maxHeight < 300;
+                    return SingleChildScrollView(
+                      physics: const BouncingScrollPhysics(),
+                      child: ConstrainedBox(
+                        constraints: BoxConstraints(minHeight: constraints.maxHeight),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Row(
-                              children: [
-                                CircleAvatar(
-                                  radius: 24.r,
-                                  backgroundImage: NetworkImage(_user!.avatarUrl),
-                                ),
-                                SizedBox(width: 12.w),
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        _user!.name,
-                                        style: GoogleFonts.cairo(
-                                          color: Colors.white,
-                                          fontSize: 14.sp,
-                                          fontWeight: FontWeight.w900,
-                                        ),
-                                      ),
-                                      Text(
-                                        '${_user!.title} • ${_user!.vipTier}',
-                                        style: GoogleFonts.cairo(
-                                          color: OrientalTheme.primaryGold,
-                                          fontSize: 10.sp,
-                                          fontWeight: FontWeight.w700,
-                                        ),
-                                      ),
-                                    ],
+                            // Profile Info Box
+                            Expanded(
+                              flex: 5,
+                              child: Container(
+                                padding: EdgeInsets.all(12.r),
+                                decoration: BoxDecoration(
+                                  color: OrientalTheme.bgCard,
+                                  borderRadius: BorderRadius.circular(16.r),
+                                  border: Border.all(
+                                    color: OrientalTheme.goldDark.withValues(alpha: 0.35),
+                                    width: 1.w,
                                   ),
                                 ),
-                              ],
-                            ),
-                            SizedBox(height: 10.h),
-
-                            // Level Progress
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
                                   children: [
-                                    Text(
-                                      'المستوى ${_user!.level}',
-                                      style: GoogleFonts.cairo(
-                                        color: OrientalTheme.textMuted,
-                                        fontSize: 9.sp,
-                                      ),
+                                    Row(
+                                      children: [
+                                        CircleAvatar(
+                                          radius: isSmallScreen ? 18.r : 24.r,
+                                          backgroundImage: NetworkImage(_user!.avatarUrl),
+                                        ),
+                                        SizedBox(width: 12.w),
+                                        Expanded(
+                                          child: Column(
+                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                _user!.name,
+                                                style: GoogleFonts.cairo(
+                                                  color: Colors.white,
+                                                  fontSize: isSmallScreen ? 12.sp : 14.sp,
+                                                  fontWeight: FontWeight.w900,
+                                                ),
+                                              ),
+                                              Text(
+                                                '${_user!.title} • ${_user!.vipTier}',
+                                                style: GoogleFonts.cairo(
+                                                  color: OrientalTheme.primaryGold,
+                                                  fontSize: isSmallScreen ? 8.sp : 10.sp,
+                                                  fontWeight: FontWeight.w700,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ],
                                     ),
-                                    Text(
-                                      '${(_user!.xpProgress * 100).toInt()}% XP',
-                                      style: GoogleFonts.cairo(
-                                        color: OrientalTheme.primaryGold,
-                                        fontSize: 9.sp,
-                                        fontWeight: FontWeight.bold,
-                                      ),
+                                    SizedBox(height: 8.h),
+
+                                    // Level Progress
+                                    Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Row(
+                                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            Text(
+                                              'المستوى ${_user!.level}',
+                                              style: GoogleFonts.cairo(
+                                                color: OrientalTheme.textMuted,
+                                                fontSize: 9.sp,
+                                              ),
+                                            ),
+                                            Text(
+                                              '${(_user!.xpProgress * 100).toInt()}% XP',
+                                              style: GoogleFonts.cairo(
+                                                color: OrientalTheme.primaryGold,
+                                                fontSize: 9.sp,
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                        SizedBox(height: 3.h),
+                                        LinearProgressIndicator(
+                                          value: _user!.xpProgress,
+                                          backgroundColor: Colors.white.withValues(alpha: 0.08),
+                                          color: OrientalTheme.primaryGold,
+                                          minHeight: 5.h,
+                                        ),
+                                      ],
+                                    ),
+                                    SizedBox(height: 10.h),
+
+                                    // Detailed Stats Grid
+                                    GridView.count(
+                                      shrinkWrap: true,
+                                      physics: const NeverScrollableScrollPhysics(),
+                                      crossAxisCount: 2,
+                                      crossAxisSpacing: 8.w,
+                                      mainAxisSpacing: 8.h,
+                                      childAspectRatio: isSmallScreen ? 2.5 : 2.2,
+                                      children: [
+                                        _buildStatBox('المباريات', '$totalGames', OrientalTheme.primaryRed),
+                                        _buildStatBox('الانتصارات', '${_user!.wins}', OrientalTheme.primaryGold),
+                                        _buildStatBox('نسبة الفوز', '${_user!.winRate.toStringAsFixed(0)}%', OrientalTheme.accentOrange),
+                                        _buildStatBox('الترتيب', '#4 العالمي', OrientalTheme.accentPurple),
+                                      ],
                                     ),
                                   ],
                                 ),
-                                SizedBox(height: 3.h),
-                                LinearProgressIndicator(
-                                  value: _user!.xpProgress,
-                                  backgroundColor: Colors.white.withValues(alpha: 0.08),
-                                  color: OrientalTheme.primaryGold,
-                                  minHeight: 5.h,
-                                ),
-                              ],
+                              ),
                             ),
-                            SizedBox(height: 12.h),
+                            SizedBox(width: 14.w),
 
-                            // Detailed Stats Grid
+                            // Settings Box
                             Expanded(
-                              child: GridView.count(
-                                physics: const NeverScrollableScrollPhysics(),
-                                crossAxisCount: 2,
-                                crossAxisSpacing: 8.w,
-                                mainAxisSpacing: 8.h,
-                                childAspectRatio: 2.2,
-                                children: [
-                                  _buildStatBox('المباريات', '$totalGames', OrientalTheme.primaryRed),
-                                  _buildStatBox('الانتصارات', '${_user!.wins}', OrientalTheme.primaryGold),
-                                  _buildStatBox('نسبة الفوز', '${_user!.winRate.toStringAsFixed(0)}%', OrientalTheme.accentOrange),
-                                  _buildStatBox('الترتيب', '#4 العالمي', OrientalTheme.accentPurple),
-                                ],
+                              flex: 5,
+                              child: Container(
+                                padding: EdgeInsets.all(12.r),
+                                decoration: BoxDecoration(
+                                  color: OrientalTheme.bgCard,
+                                  borderRadius: BorderRadius.circular(16.r),
+                                  border: Border.all(
+                                    color: Colors.white.withValues(alpha: 0.08),
+                                    width: 1.w,
+                                  ),
+                                ),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Text(
+                                      'إعدادات اللعبة والصوت ⚙️',
+                                      style: GoogleFonts.cairo(
+                                        color: OrientalTheme.primaryGold,
+                                        fontSize: 11.sp,
+                                        fontWeight: FontWeight.w800,
+                                      ),
+                                    ),
+                                    SizedBox(height: 8.h),
+                                    _buildSettingSwitch(
+                                      title: 'المؤثرات الصوتية والبطاقات',
+                                      value: _soundManager.isSoundEnabled,
+                                      onChanged: (val) {
+                                        setState(() => _soundManager.toggleSound(val));
+                                        _soundManager.playButtonClick();
+                                      },
+                                      icon: Icons.volume_up_rounded,
+                                    ),
+                                    _buildSettingSwitch(
+                                      title: 'الموسيقى والتأثيرات المحيطية',
+                                      value: _soundManager.isMusicEnabled,
+                                      onChanged: (val) {
+                                        setState(() => _soundManager.toggleMusic(val));
+                                        _soundManager.playButtonClick();
+                                      },
+                                      icon: Icons.music_note_rounded,
+                                    ),
+                                    _buildSettingSwitch(
+                                      title: 'اهتزاز اللمس والتفاعل (Haptics)',
+                                      value: _hapticsEnabled,
+                                      onChanged: (val) {
+                                        setState(() => _hapticsEnabled = val);
+                                        _soundManager.playButtonClick();
+                                      },
+                                      icon: Icons.vibration_rounded,
+                                    ),
+                                  ],
+                                ),
                               ),
                             ),
                           ],
                         ),
                       ),
-                    ),
-                    SizedBox(width: 14.w),
-
-                    // Settings Box
-                    Expanded(
-                      flex: 5,
-                      child: Container(
-                        padding: EdgeInsets.all(12.r),
-                        decoration: BoxDecoration(
-                          color: OrientalTheme.bgCard,
-                          borderRadius: BorderRadius.circular(16.r),
-                          border: Border.all(
-                            color: Colors.white.withValues(alpha: 0.08),
-                            width: 1.w,
-                          ),
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'إعدادات اللعبة والصوت ⚙️',
-                              style: GoogleFonts.cairo(
-                                color: OrientalTheme.primaryGold,
-                                fontSize: 11.sp,
-                                fontWeight: FontWeight.w800,
-                              ),
-                            ),
-                            SizedBox(height: 8.h),
-                            _buildSettingSwitch(
-                              title: 'المؤثرات الصوتية والبطاقات',
-                              value: _soundManager.isSoundEnabled,
-                              onChanged: (val) {
-                                setState(() => _soundManager.toggleSound(val));
-                                _soundManager.playButtonClick();
-                              },
-                              icon: Icons.volume_up_rounded,
-                            ),
-                            _buildSettingSwitch(
-                              title: 'الموسيقى والتأثيرات المحيطية',
-                              value: _soundManager.isMusicEnabled,
-                              onChanged: (val) {
-                                setState(() => _soundManager.toggleMusic(val));
-                                _soundManager.playButtonClick();
-                              },
-                              icon: Icons.music_note_rounded,
-                            ),
-                            _buildSettingSwitch(
-                              title: 'اهتزاز اللمس والتفاعل (Haptics)',
-                              value: _hapticsEnabled,
-                              onChanged: (val) {
-                                setState(() => _hapticsEnabled = val);
-                                _soundManager.playButtonClick();
-                              },
-                              icon: Icons.vibration_rounded,
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ],
+                    );
+                  },
                 ),
               ),
             ],
