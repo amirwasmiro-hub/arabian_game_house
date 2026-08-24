@@ -47,6 +47,22 @@ dependencies:
   flame: ^1.30.1
   flame_rive: ^1.10.17
 
+  # --- Dynamic Game Asset Bundles & Storage ---
+  dio: ^5.7.0
+  path_provider: ^2.1.5
+  archive: ^4.0.2
+
+  # --- State Management & Architecture ---
+  provider: ^6.1.2
+
+  # --- Real-Time Sockets & Network Connectivity ---
+  connectivity_plus: ^6.1.0
+  web_socket_channel: ^3.0.1
+
+  # --- UI Effects & Image Caching ---
+  cached_network_image: ^3.4.1
+  lottie: ^3.1.3
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
