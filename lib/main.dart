@@ -133,7 +133,8 @@ class _MainNavigationWrapperState extends State<MainNavigationWrapper> {
                 trailing: StatefulBuilder(
                   builder: (context, setTileState) => Switch(
                     value: SoundManager().isSoundEnabled,
-                    activeColor: const Color(0xFFFFD700),
+                    activeThumbColor: const Color(0xFFFFD700),
+                    activeTrackColor: const Color(0xFF8B6B14),
                     onChanged: (val) {
                       SoundManager().toggleSound(val);
                       setTileState(() {});
@@ -144,13 +145,14 @@ class _MainNavigationWrapperState extends State<MainNavigationWrapper> {
               ListTile(
                 leading: const Icon(Icons.music_note, color: Color(0xFFFFD700)),
                 title: const Text(
-                  'الموسيقى',
+                  'الموسيقى الشرقية',
                   style: TextStyle(color: Colors.white),
                 ),
                 trailing: StatefulBuilder(
                   builder: (context, setTileState) => Switch(
                     value: SoundManager().isMusicEnabled,
-                    activeColor: const Color(0xFFFFD700),
+                    activeThumbColor: const Color(0xFFFFD700),
+                    activeTrackColor: const Color(0xFF8B6B14),
                     onChanged: (val) {
                       SoundManager().toggleMusic(val);
                       setTileState(() {});

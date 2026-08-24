@@ -238,7 +238,8 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
                 trailing: Switch(
                   value: SoundManager().isSoundEnabled,
-                  activeColor: const Color(0xFFFFD700),
+                  activeThumbColor: const Color(0xFFFFD700),
+                  activeTrackColor: const Color(0xFF8B6B14),
                   onChanged: (val) {
                     setState(() {
                       SoundManager().toggleSound(val);
@@ -250,12 +251,13 @@ class _HomeScreenState extends State<HomeScreen> {
               ListTile(
                 leading: const Icon(Icons.music_note, color: Color(0xFFFFD700)),
                 title: Text(
-                  'الموسيقى',
+                  'الموسيقى الشرقية',
                   style: GoogleFonts.cairo(color: Colors.white),
                 ),
                 trailing: Switch(
                   value: SoundManager().isMusicEnabled,
-                  activeColor: const Color(0xFFFFD700),
+                  activeThumbColor: const Color(0xFFFFD700),
+                  activeTrackColor: const Color(0xFF8B6B14),
                   onChanged: (val) {
                     setState(() {
                       SoundManager().toggleMusic(val);

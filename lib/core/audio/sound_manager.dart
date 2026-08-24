@@ -23,9 +23,29 @@ class SoundManager {
       isMusicEnabled = prefs.getBool('music_enabled') ?? true;
       await _sfxPlayer.setVolume(sfxVolume);
       await _bgmPlayer.setVolume(bgmVolume);
+      if (isMusicEnabled) {
+        await startBgm();
+      }
     } catch (e) {
       debugPrint('SoundManager init error: $e');
     }
+  }
+
+  Future<void> startBgm() async {
+    if (!isMusicEnabled) return;
+    try {
+      await _bgmPlayer.setReleaseMode(ReleaseMode.loop);
+      await _bgmPlayer.setVolume(bgmVolume);
+      await _bgmPlayer.play(AssetSource('audio/oriental_bgm.mp3'));
+    } catch (e) {
+      debugPrint('BGM play error: $e');
+    }
+  }
+
+  Future<void> stopBgm() async {
+    try {
+      await _bgmPlayer.stop();
+    } catch (_) {}
   }
 
   Future<void> toggleSound(bool enabled) async {
@@ -38,8 +58,10 @@ class SoundManager {
     isMusicEnabled = enabled;
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('music_enabled', enabled);
-    if (!enabled) {
-      await _bgmPlayer.stop();
+    if (enabled) {
+      await startBgm();
+    } else {
+      await stopBgm();
     }
   }
 
