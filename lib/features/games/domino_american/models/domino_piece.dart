@@ -6,6 +6,8 @@ class DominoPiece {
 
   bool get isDouble => a == b;
   int get pip => a + b;
+  int get top => a;
+  int get bottom => b;
 
   bool canFit(int end) => a == end || b == end;
 

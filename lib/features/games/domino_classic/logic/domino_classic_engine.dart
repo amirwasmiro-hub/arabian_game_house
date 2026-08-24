@@ -145,6 +145,13 @@ class DominoClassicEngine {
     return true;
   }
 
+  void passTurn() {
+    if (!isPlayerTurn || isGameOver) return;
+    isPlayerTurn = false;
+    statusMessage = 'لقد مررت دورك. البوت يفكر...';
+    checkAndHandleBlockedGame();
+  }
+
   bool checkAndHandleBlockedGame() {
     final playerValid = playerHand.any((p) => getValidEdgesFor(p).isNotEmpty);
     final botValid = botHand.any((p) => getValidEdgesFor(p).isNotEmpty);

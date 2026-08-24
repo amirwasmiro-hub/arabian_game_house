@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:provider/provider.dart';
 import 'core/theme/oriental_theme.dart';
 import 'core/audio/sound_manager.dart';
 import 'core/services/supabase_service.dart';
+import 'core/providers/game_user_provider.dart';
 import 'features/splash/screens/orodragon_splash_screen.dart';
 import 'features/home/screens/home_screen.dart';
 import 'features/leaderboard/screens/leaderboard_screen.dart';
@@ -26,7 +28,12 @@ void main() async {
     url: 'https://xyzcompany.supabase.co',
     anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
   );
-  runApp(const ArabianGameHouseApp());
+  runApp(
+    ChangeNotifierProvider(
+      create: (_) => GameUserProvider(),
+      child: const ArabianGameHouseApp(),
+    ),
+  );
 }
 
 class ArabianGameHouseApp extends StatelessWidget {

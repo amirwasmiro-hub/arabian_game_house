@@ -3,19 +3,17 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../logic/domino_american_engine.dart';
 import '../models/domino_piece.dart';
-import 'domino_tile_widget.dart';
+import '../../domino_classic/widgets/domino_3d_tile.dart';
 
 class DominoBoardLayout extends StatelessWidget {
   final DominoAmericanEngine engine;
   final DominoPiece? selectedPiece;
-  final DominoTileStyle style;
   final Function(DominoPiece piece, DominoEdgeLocation edge)? onPlacePiece;
 
   const DominoBoardLayout({
     super.key,
     required this.engine,
     this.selectedPiece,
-    this.style = DominoTileStyle.classicIvory,
     this.onPlacePiece,
   });
 
@@ -27,26 +25,22 @@ class DominoBoardLayout extends StatelessWidget {
       width: double.infinity,
       height: double.infinity,
       decoration: BoxDecoration(
-        color: const Color(0xFF0D3B1E),
-        borderRadius: BorderRadius.circular(20.r),
-        border: Border.all(color: const Color(0xFFFFD700).withValues(alpha: 0.4), width: 3),
-        boxShadow: const [BoxShadow(color: Colors.black54, blurRadius: 12, offset: Offset(0, 6))],
+        gradient: const RadialGradient(
+          center: Alignment.center,
+          radius: 1.1,
+          colors: [
+            Color(0xFF0F4D2A),
+            Color(0xFF0A331C),
+            Color(0xFF04180C),
+          ],
+        ),
+        borderRadius: BorderRadius.circular(22.r),
+        border: Border.all(color: const Color(0xFFFFD700).withValues(alpha: 0.6), width: 2.5.w),
+        boxShadow: const [BoxShadow(color: Colors.black87, blurRadius: 16, offset: Offset(0, 6))],
       ),
       child: Stack(
         alignment: Alignment.center,
         children: [
-          Positioned.fill(
-            child: Opacity(
-              opacity: 0.05,
-              child: GridView.builder(
-                physics: const NeverScrollableScrollPhysics(),
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 20),
-                itemBuilder: (context, index) => Container(
-                  decoration: BoxDecoration(border: Border.all(color: Colors.white12, width: 0.5)),
-                ),
-              ),
-            ),
-          ),
           if (engine.spinnerTile == null && engine.rowWest.isEmpty && engine.rowEast.isEmpty)
             Center(
               child: DragTarget<DominoPiece>(
@@ -56,7 +50,7 @@ class DominoBoardLayout extends StatelessWidget {
                 },
                 builder: (context, candidateData, rejectedData) {
                   final isHovered = candidateData.isNotEmpty;
-                  final borderCol = isHovered ? Colors.greenAccent : const Color(0xFFFFD700);
+                  final borderCol = isHovered ? const Color(0xFF00E676) : const Color(0xFFFFD700);
 
                   return GestureDetector(
                     onTap: () {
@@ -64,29 +58,28 @@ class DominoBoardLayout extends StatelessWidget {
                         onPlacePiece!(selectedPiece!, DominoEdgeLocation.east);
                       }
                     },
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          isHovered ? Icons.system_update_alt_rounded : Icons.grid_on_rounded,
-                          size: 48.r,
-                          color: borderCol.withValues(alpha: isHovered ? 0.9 : 0.4),
-                        ),
-                        SizedBox(height: 8.h),
-                        AnimatedContainer(
-                          duration: const Duration(milliseconds: 150),
-                          padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
-                          decoration: BoxDecoration(
-                            color: borderCol.withValues(alpha: isHovered ? 0.35 : 0.2),
-                            borderRadius: BorderRadius.circular(12.r),
-                            border: Border.all(color: borderCol, width: isHovered ? 2.5 : 1.5),
+                    child: Container(
+                      padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 12.h),
+                      decoration: BoxDecoration(
+                        color: borderCol.withValues(alpha: isHovered ? 0.35 : 0.15),
+                        borderRadius: BorderRadius.circular(16.r),
+                        border: Border.all(color: borderCol, width: isHovered ? 2.5.w : 1.5.w),
+                      ),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            isHovered ? Icons.touch_app_rounded : Icons.casino_rounded,
+                            size: 32.r,
+                            color: borderCol,
                           ),
-                          child: Text(
-                            isHovered ? 'اترك الحجر هنا للنزول الأول! 🀄' : 'اسحب أو اضغط لوضع النقلة الأولى 🀄',
-                            style: GoogleFonts.cairo(color: Colors.white, fontSize: 13.sp, fontWeight: FontWeight.bold),
+                          SizedBox(height: 6.h),
+                          Text(
+                            isHovered ? 'اترك الحجر هنا للنزول الأول! 🀄' : 'اضغط أو اسحب الحجر للنزول الأول 🀄',
+                            style: GoogleFonts.cairo(color: Colors.white, fontSize: 11.sp, fontWeight: FontWeight.bold),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   );
                 },
@@ -99,22 +92,23 @@ class DominoBoardLayout extends StatelessWidget {
                 physics: const BouncingScrollPhysics(),
                 padding: EdgeInsets.symmetric(horizontal: 30.w, vertical: 16.h),
                 child: Row(
+                  mainAxisSize: MainAxisSize.min,
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     if (validEdges.contains(DominoEdgeLocation.west) || selectedPiece == null)
-                      _buildDropTarget('الغرْب', DominoEdgeLocation.west, Colors.amberAccent),
+                      _buildDropTarget('الغرْب', DominoEdgeLocation.west),
 
                     Row(
                       mainAxisSize: MainAxisSize.min,
                       children: engine.rowWest.map((bt) {
                         return Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 1.5.w),
-                          child: DominoTileWidget(
-                            piece: bt.piece,
+                          padding: EdgeInsets.symmetric(horizontal: 1.w),
+                          child: Domino3DTile(
+                            top: bt.piece.top,
+                            bottom: bt.piece.bottom,
+                            isHorizontal: !bt.isVertical,
                             onTable: true,
-                            isVerticalOnTable: bt.isVertical,
-                            style: style,
                           ),
                         );
                       }).toList(),
@@ -124,31 +118,31 @@ class DominoBoardLayout extends StatelessWidget {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         if (validEdges.contains(DominoEdgeLocation.north))
-                          _buildDropTarget('الشمال', DominoEdgeLocation.north, Colors.cyanAccent),
+                          _buildDropTarget('الشمال', DominoEdgeLocation.north),
 
                         Column(
                           mainAxisSize: MainAxisSize.min,
                           children: engine.colNorth.map((bt) {
                             return Padding(
-                              padding: EdgeInsets.symmetric(vertical: 1.5.h),
-                              child: DominoTileWidget(
-                                piece: bt.piece,
+                              padding: EdgeInsets.symmetric(vertical: 1.h),
+                              child: Domino3DTile(
+                                top: bt.piece.top,
+                                bottom: bt.piece.bottom,
+                                isHorizontal: !bt.isVertical,
                                 onTable: true,
-                                isVerticalOnTable: bt.isVertical,
-                                style: style,
                               ),
                             );
                           }).toList(),
                         ),
 
                         if (engine.spinnerTile != null)
-                          Container(
+                          Padding(
                             padding: EdgeInsets.all(2.r),
-                            child: DominoTileWidget(
-                              piece: engine.spinnerTile!.piece,
+                            child: Domino3DTile(
+                              top: engine.spinnerTile!.piece.top,
+                              bottom: engine.spinnerTile!.piece.bottom,
+                              isHorizontal: false,
                               onTable: true,
-                              isVerticalOnTable: true,
-                              style: style,
                             ),
                           ),
 
@@ -156,19 +150,19 @@ class DominoBoardLayout extends StatelessWidget {
                           mainAxisSize: MainAxisSize.min,
                           children: engine.colSouth.map((bt) {
                             return Padding(
-                              padding: EdgeInsets.symmetric(vertical: 1.5.h),
-                              child: DominoTileWidget(
-                                piece: bt.piece,
+                              padding: EdgeInsets.symmetric(vertical: 1.h),
+                              child: Domino3DTile(
+                                top: bt.piece.top,
+                                bottom: bt.piece.bottom,
+                                isHorizontal: !bt.isVertical,
                                 onTable: true,
-                                isVerticalOnTable: bt.isVertical,
-                                style: style,
                               ),
                             );
                           }).toList(),
                         ),
 
                         if (validEdges.contains(DominoEdgeLocation.south))
-                          _buildDropTarget('الجنوب', DominoEdgeLocation.south, Colors.cyanAccent),
+                          _buildDropTarget('الجنوب', DominoEdgeLocation.south),
                       ],
                     ),
 
@@ -176,19 +170,19 @@ class DominoBoardLayout extends StatelessWidget {
                       mainAxisSize: MainAxisSize.min,
                       children: engine.rowEast.map((bt) {
                         return Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 1.5.w),
-                          child: DominoTileWidget(
-                            piece: bt.piece,
+                          padding: EdgeInsets.symmetric(horizontal: 1.w),
+                          child: Domino3DTile(
+                            top: bt.piece.top,
+                            bottom: bt.piece.bottom,
+                            isHorizontal: !bt.isVertical,
                             onTable: true,
-                            isVerticalOnTable: bt.isVertical,
-                            style: style,
                           ),
                         );
                       }).toList(),
                     ),
 
                     if (validEdges.contains(DominoEdgeLocation.east) || selectedPiece == null)
-                      _buildDropTarget('الشرْق', DominoEdgeLocation.east, Colors.amberAccent),
+                      _buildDropTarget('الشرْق', DominoEdgeLocation.east),
                   ],
                 ),
               ),
@@ -198,7 +192,7 @@ class DominoBoardLayout extends StatelessWidget {
     );
   }
 
-  Widget _buildDropTarget(String label, DominoEdgeLocation edge, Color color) {
+  Widget _buildDropTarget(String label, DominoEdgeLocation edge) {
     return DragTarget<DominoPiece>(
       onWillAcceptWithDetails: (details) => engine.getValidEdgesFor(details.data).contains(edge),
       onAcceptWithDetails: (details) {
@@ -206,7 +200,10 @@ class DominoBoardLayout extends StatelessWidget {
       },
       builder: (context, candidateData, rejectedData) {
         final isHovered = candidateData.isNotEmpty;
-        final activeColor = isHovered ? Colors.greenAccent : color;
+        final isValidSelected = selectedPiece != null && engine.getValidEdgesFor(selectedPiece!).contains(edge);
+        final activeColor = isHovered
+            ? Colors.greenAccent
+            : (isValidSelected ? const Color(0xFF00E5FF) : const Color(0xFFFFD700));
 
         return GestureDetector(
           onTap: () {

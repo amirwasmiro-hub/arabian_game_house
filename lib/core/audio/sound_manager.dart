@@ -105,11 +105,15 @@ class SoundManager {
     _playSfx('audio/win.mp3');
   }
 
+  void playVictorySound() => playWinFanfare();
+
   void playCoinsCollect() {
     if (!isSoundEnabled) return;
     HapticFeedback.mediumImpact();
     _playSfx('audio/coins.mp3');
   }
+
+  void playCoinSound() => playCoinsCollect();
 
   void playTilePlace() {
     if (!isSoundEnabled) return;
