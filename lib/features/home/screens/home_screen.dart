@@ -345,10 +345,8 @@ class _HomeScreenState extends State<HomeScreen> {
                             children: [
                               // Row 1
                               Row(
-                                children: firstRowGames
-                                    .asMap()
-                                    .entries
-                                    .map((entry) {
+                                children:
+                                    firstRowGames.asMap().entries.map((entry) {
                                   final index = entry.key;
                                   final game = entry.value;
                                   return DominoGameCard(
@@ -375,10 +373,8 @@ class _HomeScreenState extends State<HomeScreen> {
                               SizedBox(height: 4.h),
                               // Row 2
                               Row(
-                                children: secondRowGames
-                                    .asMap()
-                                    .entries
-                                    .map((entry) {
+                                children:
+                                    secondRowGames.asMap().entries.map((entry) {
                                   final index =
                                       entry.key + firstRowGames.length;
                                   final game = entry.value;
@@ -409,7 +405,8 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                     ),
                   ),
-                  SizedBox(height: 42.h), // Clearance for floating navigation bar
+                  SizedBox(
+                      height: 42.h), // Clearance for floating navigation bar
                 ],
               ),
             ),

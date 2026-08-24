@@ -73,40 +73,24 @@ class _DominoGameCardState extends State<DominoGameCard>
           margin: EdgeInsets.symmetric(horizontal: 4.w),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(16.r),
-            color: Colors.black.withValues(alpha: 0.35),
+            color: widget.cardBgColor,
             border: Border.all(
               color: widget.cardBorderColor,
               width: 1.2.w,
             ),
-            boxShadow: [
-              BoxShadow(
-                color: widget.cardBorderColor.withValues(alpha: 0.3),
-                blurRadius: 8.r,
-                spreadRadius: 0.5.r,
-                offset: const Offset(0, 2),
-              ),
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.6),
-                blurRadius: 6.r,
-                offset: const Offset(0, 3),
-              ),
-            ],
           ),
           child: ClipRRect(
             borderRadius: BorderRadius.circular(14.r),
             child: Stack(
               children: [
-                // 1. GAME ARTWORK (SEMI-TRANSPARENT WITH SHIMMER)
+                // 1. GAME ARTWORK (SOLID 100% OPAQUE)
                 if (widget.assetPath != null)
                   Positioned.fill(
-                    child: Opacity(
-                      opacity: 0.60,
-                      child: Image.asset(
-                        widget.assetPath!,
-                        fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) =>
-                            _buildFallbackIcon(),
-                      ),
+                    child: Image.asset(
+                      widget.assetPath!,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) =>
+                          _buildFallbackIcon(),
                     )
                         .animate(
                           onPlay: (controller) =>
@@ -121,24 +105,7 @@ class _DominoGameCardState extends State<DominoGameCard>
                 else
                   _buildFallbackIcon(),
 
-                // 2. GLASSMORPHIC TOP & BOTTOM GRADIENT OVERLAY
-                Positioned.fill(
-                  child: Container(
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [
-                          Colors.black.withValues(alpha: 0.15),
-                          Colors.transparent,
-                          Colors.black.withValues(alpha: 0.85),
-                        ],
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                      ),
-                    ),
-                  ),
-                ),
-
-                // 3. ANIMATED "NEW" BADGE
+                // 2. ANIMATED "NEW" BADGE
                 if (widget.isNew)
                   Positioned(
                     top: 5.h,
@@ -154,12 +121,6 @@ class _DominoGameCardState extends State<DominoGameCard>
                         ),
                         borderRadius: BorderRadius.circular(8.r),
                         border: Border.all(color: Colors.white, width: 0.8.w),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.red.withValues(alpha: 0.7),
-                            blurRadius: 6.r,
-                          ),
-                        ],
                       ),
                       child: Text(
                         'NEW',
@@ -181,7 +142,7 @@ class _DominoGameCardState extends State<DominoGameCard>
                         ),
                   ),
 
-                // 4. ANIMATED ARABIC GAME TITLE WITH GLOW
+                // 3. ARABIC & ENGLISH GAME TITLES (FLAT, NO SHADOWS)
                 Positioned(
                   bottom: 6.h,
                   left: 4.w,
@@ -196,18 +157,6 @@ class _DominoGameCardState extends State<DominoGameCard>
                           fontWeight: FontWeight.w900,
                           color: const Color(0xFFFFD700),
                           height: 1.0,
-                          shadows: [
-                            Shadow(
-                              color: Colors.black,
-                              blurRadius: 5.r,
-                              offset: const Offset(1, 1),
-                            ),
-                            Shadow(
-                              color: const Color(0xFFFFD700)
-                                  .withValues(alpha: 0.8),
-                              blurRadius: 8.r,
-                            ),
-                          ],
                         ),
                         textAlign: TextAlign.center,
                         maxLines: 1,
@@ -219,15 +168,8 @@ class _DominoGameCardState extends State<DominoGameCard>
                         style: GoogleFonts.montserrat(
                           fontSize: 8.sp,
                           fontWeight: FontWeight.w800,
-                          color: Colors.white70,
+                          color: Colors.white,
                           letterSpacing: 0.8.w,
-                          shadows: [
-                            Shadow(
-                              color: Colors.black,
-                              blurRadius: 3.r,
-                              offset: const Offset(1, 1),
-                            ),
-                          ],
                         ),
                         textAlign: TextAlign.center,
                         maxLines: 1,
@@ -246,14 +188,7 @@ class _DominoGameCardState extends State<DominoGameCard>
 
   Widget _buildFallbackIcon() {
     return Container(
-      decoration: BoxDecoration(
-        gradient: RadialGradient(
-          colors: [
-            widget.cardBgColor.withValues(alpha: 0.9),
-            Colors.black.withValues(alpha: 0.8),
-          ],
-        ),
-      ),
+      color: widget.cardBgColor,
       child: Center(
         child: Icon(
           widget.icon,
