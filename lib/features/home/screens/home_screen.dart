@@ -5,15 +5,15 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 
 import '../../../core/audio/sound_manager.dart';
-import '../../games/backgammon_31/screens/backgammon_31_game_screen.dart';
-import '../../games/backgammon_classic/screens/backgammon_classic_game_screen.dart';
-import '../../games/chess/screens/chess_game_screen.dart';
-import '../../games/domino_american/screens/domino_american_game_screen.dart';
-import '../../games/domino_classic/screens/domino_classic_game_screen.dart';
-import '../../games/estimation/screens/estimation_game_screen.dart';
-import '../../games/ludo/screens/ludo_game_screen.dart';
-import '../../games/tarneeb/screens/tarneeb_game_screen.dart';
-import '../../games/uno/screens/uno_game_screen.dart';
+import '../../../games/backgammon_31/backgammon_31_game_screen.dart';
+import '../../../games/backgammon_classic/backgammon_classic_game_screen.dart';
+import '../../../games/chess/chess_game_screen.dart';
+import '../../../games/domino_american/domino_american_game_screen.dart';
+import '../../../games/domino_classic/domino_classic_game_screen.dart';
+import '../../../games/estimation/estimation_game_screen.dart';
+import '../../../games/ludo/ludo_game_screen.dart';
+import '../../../games/tarneeb/tarneeb_game_screen.dart';
+import '../../../games/uno/uno_game_screen.dart';
 import '../../leaderboard/screens/leaderboard_screen.dart';
 import '../../profile/screens/profile_screen.dart';
 import '../../store/screens/store_screen.dart';
@@ -24,6 +24,7 @@ import '../widgets/rive_flame_nav_bar.dart';
 import '../widgets/star_explosion_overlay.dart';
 import '../widgets/game_download_dialog.dart';
 import '../widgets/game_stakes_dialog.dart';
+import '../widgets/domino_rooms_dialog.dart';
 import '../widgets/special_offers_dialog.dart';
 
 class GameTileData {
@@ -171,13 +172,23 @@ class _HomeScreenState extends State<HomeScreen> {
       icon: game.icon,
       assetPath: game.assetPath,
       onComplete: () {
-        GameStakesDialog.show(
-          context,
-          gameTitleAr: game.titleAr,
-          gameTitleEn: game.titleEn,
-          icon: game.icon,
-          targetGameScreen: game.targetScreen,
-        );
+        if (game.titleEn.toUpperCase().contains('DOMINO')) {
+          DominoRoomsDialog.show(
+            context,
+            gameTitleAr: game.titleAr,
+            gameTitleEn: game.titleEn,
+            icon: game.icon,
+            isAmerican: game.titleEn.toUpperCase().contains('AMERICAN'),
+          );
+        } else {
+          GameStakesDialog.show(
+            context,
+            gameTitleAr: game.titleAr,
+            gameTitleEn: game.titleEn,
+            icon: game.icon,
+            targetGameScreen: game.targetScreen,
+          );
+        }
       },
     );
   }

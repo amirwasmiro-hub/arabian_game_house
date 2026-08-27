@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:arabian_game_house/features/games/domino_classic/models/domino_piece.dart';
-import 'package:arabian_game_house/features/games/domino_classic/logic/domino_classic_engine.dart';
+import 'package:arabian_game_house/games/domino_classic/domino_piece.dart';
+import 'package:arabian_game_house/games/domino_classic/domino_classic_engine.dart';
 
 void main() {
   group('DominoPiece Tests', () {
