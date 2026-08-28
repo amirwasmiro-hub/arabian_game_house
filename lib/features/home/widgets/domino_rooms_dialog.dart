@@ -101,7 +101,7 @@ class _DominoRoomsDialogState extends State<DominoRoomsDialog> {
       subtitleAr: 'أجواء الحارة الدافئة وبداية التحدي',
       betCoins: 5000,
       prizeCoins: 10000,
-      imagePath: 'assets/images/domino_room_1.jpg',
+      imagePath: 'assets/images/domino_room_4.jpg',
       cardGradient: [Color(0xFF0C2415), Color(0xFF144525), Color(0xFF05120A)],
       borderColor: Color(0xFF4CAF50),
       glowColor: Color(0xFF4CAF50),
@@ -114,7 +114,7 @@ class _DominoRoomsDialogState extends State<DominoRoomsDialog> {
       subtitleAr: 'أصالة المقاهي القديمة وروح التحدي',
       betCoins: 25000,
       prizeCoins: 50000,
-      imagePath: 'assets/images/domino_room_2.jpg',
+      imagePath: 'assets/images/domino_room_3.jpg',
       cardGradient: [Color(0xFF071F3D), Color(0xFF0F3E78), Color(0xFF020C1A)],
       borderColor: Color(0xFF29B6F6),
       glowColor: Color(0xFF0288D1),
@@ -127,7 +127,7 @@ class _DominoRoomsDialogState extends State<DominoRoomsDialog> {
       subtitleAr: 'جلسات الوجهاء وصراع المحترفين',
       betCoins: 100000,
       prizeCoins: 200000,
-      imagePath: 'assets/images/domino_room_3.jpg',
+      imagePath: 'assets/images/domino_room_5.jpg',
       cardGradient: [Color(0xFF381802), Color(0xFF6E3307), Color(0xFF1B0A00)],
       borderColor: Color(0xFFFFB300),
       glowColor: Color(0xFFFF8F00),
@@ -140,7 +140,7 @@ class _DominoRoomsDialogState extends State<DominoRoomsDialog> {
       subtitleAr: 'طاولات كبار الشخصيات والرهان العالي',
       betCoins: 500000,
       prizeCoins: 1000000,
-      imagePath: 'assets/images/domino_room_4.jpg',
+      imagePath: 'assets/images/domino_room_1.jpg',
       cardGradient: [Color(0xFF380512), Color(0xFF700E26), Color(0xFF190107)],
       borderColor: Color(0xFFFF2A6D),
       glowColor: Color(0xFFD81B60),
@@ -153,7 +153,7 @@ class _DominoRoomsDialogState extends State<DominoRoomsDialog> {
       subtitleAr: 'قاعات الملوك وأصحاب الملايين',
       betCoins: 2000000,
       prizeCoins: 4000000,
-      imagePath: 'assets/images/domino_room_5.jpg',
+      imagePath: 'assets/images/domino_room_2.jpg',
       cardGradient: [Color(0xFF260442), Color(0xFF4E0E82), Color(0xFF11011F)],
       borderColor: Color(0xFFBA68C8),
       glowColor: Color(0xFF8E24AA),
@@ -275,20 +275,25 @@ class _DominoRoomsDialogState extends State<DominoRoomsDialog> {
 
                 SizedBox(height: 10.h),
 
-                // 2. HORIZONTAL RIGHT-TO-LEFT 7 ROOM CARDS
+                // 2. HORIZONTAL RIGHT-TO-LEFT ROOM CARDS (CLEAN, COMPACT & SHORTER HEIGHT)
                 Expanded(
-                  child: ListView.builder(
-                    controller: _scrollController,
-                    scrollDirection: Axis.horizontal,
-                    physics: const BouncingScrollPhysics(),
-                    padding:
-                        EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
-                    itemCount: _tiers.length,
-                    itemBuilder: (context, index) {
-                      final tier = _tiers[index];
-                      final isUnlocked = userCoins >= tier.betCoins;
-                      return _buildRoomCard(tier, isUnlocked, userCoins, index);
-                    },
+                  child: Center(
+                    child: SizedBox(
+                      height: 215.h,
+                      child: ListView.builder(
+                        controller: _scrollController,
+                        scrollDirection: Axis.horizontal,
+                        physics: const BouncingScrollPhysics(),
+                        padding: EdgeInsets.symmetric(horizontal: 16.w),
+                        itemCount: _tiers.length,
+                        itemBuilder: (context, index) {
+                          final tier = _tiers[index];
+                          final isUnlocked = userCoins >= tier.betCoins;
+                          return _buildRoomCard(
+                              tier, isUnlocked, userCoins, index);
+                        },
+                      ),
+                    ),
                   ),
                 ),
 
@@ -462,89 +467,54 @@ class _DominoRoomsDialogState extends State<DominoRoomsDialog> {
       },
       onTap: () => _onSelectRoom(tier, userCoins),
       child: Container(
-        width: 132.w,
-        margin: EdgeInsets.symmetric(horizontal: 6.w, vertical: 4.h),
+        width: 128.w,
+        margin: EdgeInsets.symmetric(horizontal: 5.w, vertical: 2.h),
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(20.r),
+          borderRadius: BorderRadius.circular(14.r),
           gradient: LinearGradient(
             colors: tier.cardGradient,
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
           ),
           border: Border.all(
-            color: isUnlocked ? tier.borderColor : Colors.white24,
-            width: isUnlocked ? 1.6.w : 1.w,
+            color: isUnlocked
+                ? tier.borderColor.withValues(alpha: 0.6)
+                : Colors.white24,
+            width: 1.w,
           ),
-          boxShadow: [
+          boxShadow: const [
             BoxShadow(
-              color: isUnlocked
-                  ? tier.glowColor.withValues(alpha: 0.38)
-                  : Colors.black.withValues(alpha: 0.4),
-              blurRadius: isUnlocked ? 16.r : 6.r,
-              spreadRadius: isUnlocked ? 1.r : 0,
+              color: Colors.black45,
+              blurRadius: 6,
+              offset: Offset(0, 3),
             ),
           ],
         ),
         child: ClipRRect(
-          borderRadius: BorderRadius.circular(18.r),
+          borderRadius: BorderRadius.circular(13.r),
           child: Stack(
             children: [
-              // 1. EXPRESSIVE BACKGROUND IMAGE (WITH SLOW PULSE/BREATHING ANIMATION)
+              // 1. CLEAN STATIC BACKGROUND IMAGE
               Positioned.fill(
-                child: Opacity(
-                  opacity: isUnlocked ? 0.42 : 0.16,
-                  child: Image.asset(
-                    tier.imagePath,
-                    fit: BoxFit.cover,
-                    errorBuilder: (ctx, err, stack) => Container(
-                      color: Colors.black45,
-                    ),
-                  ).animate(onPlay: (c) => c.repeat(reverse: true)).scale(
-                        begin: const Offset(1.0, 1.0),
-                        end: const Offset(1.06, 1.06),
-                        duration: 4000.ms,
-                        curve: Curves.easeInOut,
-                      ),
+                child: Image.asset(
+                  tier.imagePath,
+                  fit: BoxFit.cover,
+                  errorBuilder: (ctx, err, stack) => Container(
+                    color: Colors.black45,
+                  ),
                 ),
               ),
 
-              // 2. ANIMATED FLOATING PARTICLES & LIGHT SPARKLES
-              if (isUnlocked)
-                Positioned.fill(
-                  child: _CardFloatingParticles(color: tier.particleColor),
-                ),
-
-              // 3. ANIMATED SHIMMER LIGHT BEAM SWEEP
-              if (isUnlocked)
-                Positioned.fill(
-                  child: Container(
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [
-                          Colors.transparent,
-                          tier.particleColor.withValues(alpha: 0.12),
-                          Colors.transparent,
-                        ],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                      ),
-                    ),
-                  ).animate(onPlay: (c) => c.repeat()).shimmer(
-                      duration: 2800.ms,
-                      color: Colors.white.withValues(alpha: 0.15)),
-                ),
-
-              // 4. LUXURY GRADIENT SCRIM OVERLAY (FOR CRISP TEXT LEGIBILITY)
+              // 2. LUXURY GRADIENT SCRIM OVERLAY (FOR CRISP BOTTOM BUTTON READABILITY)
               Positioned.fill(
                 child: Container(
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
                       colors: [
-                        Colors.black.withValues(alpha: 0.1),
-                        Colors.black.withValues(alpha: 0.5),
-                        Colors.black.withValues(alpha: 0.96),
+                        Colors.transparent,
+                        Colors.black.withValues(alpha: 0.85),
                       ],
-                      stops: const [0.0, 0.45, 1.0],
+                      stops: const [0.5, 1.0],
                       begin: Alignment.topCenter,
                       end: Alignment.bottomCenter,
                     ),
@@ -552,156 +522,83 @@ class _DominoRoomsDialogState extends State<DominoRoomsDialog> {
                 ),
               ),
 
-              // 5. CARD CONTENT (CLEAN, PROMINENT, PRESTIGIOUS)
+              // 3. CARD CONTENT WITH COMPACT 3D BUTTON AND DISTINCTIVE KUFIC TEXT
               Padding(
-                padding: EdgeInsets.symmetric(horizontal: 9.w, vertical: 12.h),
+                padding: EdgeInsets.symmetric(horizontal: 7.w, vertical: 7.h),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    SizedBox(height: 6.h),
-
-                    // ROOM NAME (CLEAN & PROMINENT)
-                    Center(
-                      child: Text(
-                        tier.titleAr,
-                        textAlign: TextAlign.center,
-                        style: GoogleFonts.cairo(
-                          fontSize: 13.sp,
-                          fontWeight: FontWeight.w900,
-                          color: isUnlocked
-                              ? const Color(0xFFFFD700)
-                              : Colors.white70,
-                          height: 1.2,
-                        ),
-                      ),
-                    ),
-
-                    SizedBox(height: 3.h),
-
-                    // SUBTITLE (DESCRIPTION OF THE LUXURY TIER)
-                    Center(
-                      child: Text(
-                        tier.subtitleAr,
-                        textAlign: TextAlign.center,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        style: GoogleFonts.cairo(
-                          fontSize: 7.2.sp,
-                          color: Colors.white70,
-                          fontWeight: FontWeight.w600,
-                          height: 1.15,
-                        ),
-                      ),
-                    ),
-
                     const Spacer(),
 
-                    // BET & PRIZE CONTAINER
+                    // COMPACT 3D BUTTON (DISTINCTIVE KUFIC & VIBRANT)
                     Container(
-                      padding:
-                          EdgeInsets.symmetric(horizontal: 8.w, vertical: 6.h),
-                      decoration: BoxDecoration(
-                        color: Colors.black.withValues(alpha: 0.6),
-                        borderRadius: BorderRadius.circular(10.r),
-                        border: Border.all(
-                          color: isUnlocked
-                              ? tier.borderColor.withValues(alpha: 0.35)
-                              : Colors.white12,
-                          width: 0.8.w,
-                        ),
-                      ),
-                      child: Column(
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                '🪙 الرهان:',
-                                style: GoogleFonts.cairo(
-                                  fontSize: 7.5.sp,
-                                  color: Colors.white70,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                              Text(
-                                _formatCoins(tier.betCoins),
-                                style: GoogleFonts.cairo(
-                                  fontSize: 8.2.sp,
-                                  color: const Color(0xFFFFD700),
-                                  fontWeight: FontWeight.w900,
-                                ),
-                              ),
-                            ],
-                          ),
-                          SizedBox(height: 3.h),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                '🏆 الجائزة:',
-                                style: GoogleFonts.cairo(
-                                  fontSize: 7.5.sp,
-                                  color: Colors.white70,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                              Text(
-                                _formatCoins(tier.prizeCoins),
-                                style: GoogleFonts.cairo(
-                                  fontSize: 8.2.sp,
-                                  color: const Color(0xFF00E676),
-                                  fontWeight: FontWeight.w900,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-
-                    SizedBox(height: 8.h),
-
-                    // ENTER / LOCKED BUTTON
-                    Container(
-                      height: 26.h,
+                      height: 23.h,
                       decoration: BoxDecoration(
                         gradient: isUnlocked
                             ? LinearGradient(
-                                colors: [tier.borderColor, tier.glowColor],
+                                colors: [
+                                  tier.borderColor,
+                                  tier.glowColor,
+                                ],
+                                begin: Alignment.topCenter,
+                                end: Alignment.bottomCenter,
                               )
-                            : null,
-                        color: isUnlocked ? null : Colors.white12,
-                        borderRadius: BorderRadius.circular(12.r),
-                        boxShadow: isUnlocked
-                            ? [
-                                BoxShadow(
-                                  color: tier.glowColor.withValues(alpha: 0.45),
-                                  blurRadius: 8.r,
-                                ),
-                              ]
-                            : null,
+                            : const LinearGradient(
+                                colors: [
+                                  Color(0xFF424957),
+                                  Color(0xFF282C35),
+                                ],
+                                begin: Alignment.topCenter,
+                                end: Alignment.bottomCenter,
+                              ),
+                        borderRadius: BorderRadius.circular(8.r),
+                        border: Border.all(
+                          color: isUnlocked
+                              ? Colors.white.withValues(alpha: 0.6)
+                              : Colors.white24,
+                          width: 0.8.w,
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.5),
+                            offset: isUnlocked
+                                ? const Offset(0, 2.0)
+                                : const Offset(0, 1.8),
+                            blurRadius: 0,
+                          ),
+                        ],
                       ),
                       child: Center(
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Icon(
-                              isUnlocked
-                                  ? Icons.play_arrow_rounded
-                                  : Icons.lock_rounded,
-                              color: isUnlocked ? Colors.black : Colors.white38,
-                              size: 14.r,
-                            ),
-                            SizedBox(width: 4.w),
+                            if (isUnlocked)
+                              Text(
+                                '🪙',
+                                style: TextStyle(fontSize: 8.5.sp),
+                              )
+                            else
+                              Icon(
+                                Icons.lock_rounded,
+                                color: const Color(0xFFFFD700),
+                                size: 10.r,
+                              ),
+                            SizedBox(width: 3.w),
                             Text(
-                              isUnlocked
-                                  ? 'دخول الغرفة'
-                                  : 'مغلق (تحتاج ${_formatCoins(tier.betCoins)})',
-                              style: GoogleFonts.cairo(
-                                fontSize: 7.5.sp,
-                                fontWeight: FontWeight.w900,
-                                color:
-                                    isUnlocked ? Colors.black : Colors.white38,
+                              _formatCoins(tier.betCoins),
+                              style: GoogleFonts.notoKufiArabic(
+                                fontSize: 8.5.sp,
+                                fontWeight: FontWeight.w800,
+                                color: isUnlocked
+                                    ? const Color(0xFFFFEA00)
+                                    : Colors.white,
+                                shadows: const [
+                                  Shadow(
+                                    color: Colors.black87,
+                                    offset: Offset(0, 1.2),
+                                    blurRadius: 2.0,
+                                  ),
+                                ],
                               ),
                             ),
                           ],
