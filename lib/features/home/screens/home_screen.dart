@@ -266,7 +266,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
                 trailing: Switch(
                   value: SoundManager().isSoundEnabled,
-                  activeThumbColor: const Color(0xFFFFD700),
+                  activeColor: const Color(0xFFFFD700),
                   activeTrackColor: const Color(0xFF8B6B14),
                   onChanged: (val) {
                     setState(() {
@@ -284,7 +284,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
                 trailing: Switch(
                   value: SoundManager().isMusicEnabled,
-                  activeThumbColor: const Color(0xFFFFD700),
+                  activeColor: const Color(0xFFFFD700),
                   activeTrackColor: const Color(0xFF8B6B14),
                   onChanged: (val) {
                     setState(() {

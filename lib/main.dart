@@ -140,7 +140,7 @@ class _MainNavigationWrapperState extends State<MainNavigationWrapper> {
                 trailing: StatefulBuilder(
                   builder: (context, setTileState) => Switch(
                     value: SoundManager().isSoundEnabled,
-                    activeThumbColor: const Color(0xFFFFD700),
+                    activeColor: const Color(0xFFFFD700),
                     activeTrackColor: const Color(0xFF8B6B14),
                     onChanged: (val) {
                       SoundManager().toggleSound(val);
@@ -158,7 +158,7 @@ class _MainNavigationWrapperState extends State<MainNavigationWrapper> {
                 trailing: StatefulBuilder(
                   builder: (context, setTileState) => Switch(
                     value: SoundManager().isMusicEnabled,
-                    activeThumbColor: const Color(0xFFFFD700),
+                    activeColor: const Color(0xFFFFD700),
                     activeTrackColor: const Color(0xFF8B6B14),
                     onChanged: (val) {
                       SoundManager().toggleMusic(val);
