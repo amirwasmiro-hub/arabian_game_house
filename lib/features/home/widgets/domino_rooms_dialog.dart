@@ -273,31 +273,31 @@ class _DominoRoomsDialogState extends State<DominoRoomsDialog> {
                 // 1. FLOATING TOP BAR (FRAMELESS)
                 _buildTopBar(userCoins),
 
-                SizedBox(height: 10.h),
-
-                // 2. HORIZONTAL RIGHT-TO-LEFT ROOM CARDS (CLEAN, COMPACT & SHORTER HEIGHT)
+                // 2. HORIZONTAL RIGHT-TO-LEFT ROOM CARDS (CLEAN, COMPACT & SHORTER HEIGHT, MOVED UP)
                 Expanded(
-                  child: Center(
-                    child: SizedBox(
-                      height: 215.h,
-                      child: ListView.builder(
-                        controller: _scrollController,
-                        scrollDirection: Axis.horizontal,
-                        physics: const BouncingScrollPhysics(),
-                        padding: EdgeInsets.symmetric(horizontal: 16.w),
-                        itemCount: _tiers.length,
-                        itemBuilder: (context, index) {
-                          final tier = _tiers[index];
-                          final isUnlocked = userCoins >= tier.betCoins;
-                          return _buildRoomCard(
-                              tier, isUnlocked, userCoins, index);
-                        },
+                  child: Align(
+                    alignment: Alignment.topCenter,
+                    child: Padding(
+                      padding: EdgeInsets.only(top: 8.h),
+                      child: SizedBox(
+                        height: 165.h,
+                        child: ListView.builder(
+                          controller: _scrollController,
+                          scrollDirection: Axis.horizontal,
+                          physics: const BouncingScrollPhysics(),
+                          padding: EdgeInsets.symmetric(horizontal: 16.w),
+                          itemCount: _tiers.length,
+                          itemBuilder: (context, index) {
+                            final tier = _tiers[index];
+                            final isUnlocked = userCoins >= tier.betCoins;
+                            return _buildRoomCard(
+                                tier, isUnlocked, userCoins, index);
+                          },
+                        ),
                       ),
                     ),
                   ),
                 ),
-
-                SizedBox(height: 8.h),
               ],
             ),
           ),
@@ -337,54 +337,6 @@ class _DominoRoomsDialogState extends State<DominoRoomsDialog> {
           ),
 
           SizedBox(width: 12.w),
-
-          // Game Title & Room Subtitle
-          Container(
-            padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 5.h),
-            decoration: BoxDecoration(
-              color: Colors.black.withValues(alpha: 0.65),
-              borderRadius: BorderRadius.circular(20.r),
-              border: Border.all(
-                  color: const Color(0xFFFFD700).withValues(alpha: 0.6),
-                  width: 1.w),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.5),
-                  blurRadius: 10.r,
-                ),
-              ],
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(widget.icon, color: const Color(0xFFFFD700), size: 16.r),
-                SizedBox(width: 6.w),
-                Text(
-                  'غرف ${widget.gameTitleAr}',
-                  style: GoogleFonts.cairo(
-                    fontSize: 12.sp,
-                    fontWeight: FontWeight.w900,
-                    color: const Color(0xFFFFD700),
-                  ),
-                ),
-                SizedBox(width: 6.w),
-                Container(
-                  width: 3.w,
-                  height: 12.h,
-                  color: Colors.white24,
-                ),
-                SizedBox(width: 6.w),
-                Text(
-                  'اختر طاولتك المفضلة',
-                  style: GoogleFonts.cairo(
-                    fontSize: 8.5.sp,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.white70,
-                  ),
-                ),
-              ],
-            ),
-          ),
 
           const Spacer(),
 
@@ -467,7 +419,7 @@ class _DominoRoomsDialogState extends State<DominoRoomsDialog> {
       },
       onTap: () => _onSelectRoom(tier, userCoins),
       child: Container(
-        width: 128.w,
+        width: 140.w,
         margin: EdgeInsets.symmetric(horizontal: 5.w, vertical: 2.h),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(14.r),
@@ -522,7 +474,7 @@ class _DominoRoomsDialogState extends State<DominoRoomsDialog> {
                 ),
               ),
 
-              // 3. CARD CONTENT WITH COMPACT 3D BUTTON AND DISTINCTIVE KUFIC TEXT
+              // 3. CARD CONTENT WITH TRANSPARENT PULSING BUTTON & SHINY SILVER BORDER
               Padding(
                 padding: EdgeInsets.symmetric(horizontal: 7.w, vertical: 7.h),
                 child: Column(
@@ -530,42 +482,31 @@ class _DominoRoomsDialogState extends State<DominoRoomsDialog> {
                   children: [
                     const Spacer(),
 
-                    // COMPACT 3D BUTTON (DISTINCTIVE KUFIC & VIBRANT)
+                    // TRANSPARENT BUTTON WITH SHINY SILVER BORDER & REPEATING PULSE
                     Container(
-                      height: 23.h,
+                      height: 28.h,
                       decoration: BoxDecoration(
-                        gradient: isUnlocked
-                            ? LinearGradient(
-                                colors: [
-                                  tier.borderColor,
-                                  tier.glowColor,
-                                ],
-                                begin: Alignment.topCenter,
-                                end: Alignment.bottomCenter,
-                              )
-                            : const LinearGradient(
-                                colors: [
-                                  Color(0xFF424957),
-                                  Color(0xFF282C35),
-                                ],
-                                begin: Alignment.topCenter,
-                                end: Alignment.bottomCenter,
-                              ),
-                        borderRadius: BorderRadius.circular(8.r),
+                        color: Colors.black.withValues(alpha: 0.38),
+                        borderRadius: BorderRadius.circular(10.r),
                         border: Border.all(
                           color: isUnlocked
-                              ? Colors.white.withValues(alpha: 0.6)
-                              : Colors.white24,
-                          width: 0.8.w,
+                              ? const Color(0xFFF5F5F7) // Metallic Silver
+                              : Colors.white30,
+                          width: 1.5.w,
                         ),
                         boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.5),
-                            offset: isUnlocked
-                                ? const Offset(0, 2.0)
-                                : const Offset(0, 1.8),
-                            blurRadius: 0,
-                          ),
+                          if (isUnlocked)
+                            BoxShadow(
+                              color: const Color(0xFFCFD8DC)
+                                  .withValues(alpha: 0.5), // Silver glow
+                              blurRadius: 6.r,
+                              spreadRadius: 0.5.r,
+                            )
+                          else
+                            BoxShadow(
+                              color: Colors.black.withValues(alpha: 0.3),
+                              blurRadius: 4.r,
+                            ),
                         ],
                       ),
                       child: Center(
@@ -575,28 +516,28 @@ class _DominoRoomsDialogState extends State<DominoRoomsDialog> {
                             if (isUnlocked)
                               Text(
                                 '🪙',
-                                style: TextStyle(fontSize: 8.5.sp),
+                                style: TextStyle(fontSize: 12.sp),
                               )
                             else
                               Icon(
                                 Icons.lock_rounded,
-                                color: const Color(0xFFFFD700),
-                                size: 10.r,
+                                color: const Color(0xFFECEFF1),
+                                size: 14.r,
                               ),
-                            SizedBox(width: 3.w),
+                            SizedBox(width: 4.w),
                             Text(
                               _formatCoins(tier.betCoins),
-                              style: GoogleFonts.notoKufiArabic(
-                                fontSize: 8.5.sp,
-                                fontWeight: FontWeight.w800,
+                              style: GoogleFonts.cairo(
+                                fontSize: 13.sp,
+                                fontWeight: FontWeight.w900,
                                 color: isUnlocked
-                                    ? const Color(0xFFFFEA00)
-                                    : Colors.white,
+                                    ? const Color(0xFFFFD700)
+                                    : Colors.white70,
                                 shadows: const [
                                   Shadow(
-                                    color: Colors.black87,
+                                    color: Colors.black,
                                     offset: Offset(0, 1.2),
-                                    blurRadius: 2.0,
+                                    blurRadius: 3.0,
                                   ),
                                 ],
                               ),
@@ -604,7 +545,17 @@ class _DominoRoomsDialogState extends State<DominoRoomsDialog> {
                           ],
                         ),
                       ),
-                    ),
+                    )
+                        .animate(
+                          onPlay: (controller) =>
+                              controller.repeat(reverse: true),
+                        )
+                        .scale(
+                          begin: const Offset(1.0, 1.0),
+                          end: const Offset(1.05, 1.05),
+                          duration: 800.ms,
+                          curve: Curves.easeInOut,
+                        ),
                   ],
                 ),
               ),

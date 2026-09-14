@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'core/theme/oriental_theme.dart';
 import 'core/audio/sound_manager.dart';
@@ -183,6 +184,78 @@ class _MainNavigationWrapperState extends State<MainNavigationWrapper> {
     );
   }
 
+  Future<bool> _showExitConfirmationDialog() async {
+    final result = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => Directionality(
+        textDirection: TextDirection.rtl,
+        child: AlertDialog(
+          backgroundColor: const Color(0xFF1D0E38),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20.r),
+            side: const BorderSide(color: Color(0xFFFFD700), width: 1.5),
+          ),
+          title: Row(
+            children: [
+              const Icon(
+                Icons.exit_to_app_rounded,
+                color: Color(0xFFFFD700),
+                size: 28,
+              ),
+              SizedBox(width: 10.w),
+              Text(
+                'تأكيد الخروج',
+                style: GoogleFonts.cairo(
+                  color: const Color(0xFFFFD700),
+                  fontWeight: FontWeight.bold,
+                  fontSize: 18.sp,
+                ),
+              ),
+            ],
+          ),
+          content: Text(
+            'هل تريد الخروج من اللعبة؟',
+            style: GoogleFonts.cairo(
+              color: Colors.white,
+              fontSize: 15.sp,
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(ctx).pop(false),
+              child: Text(
+                'إلغاء',
+                style: GoogleFonts.cairo(
+                  color: const Color(0xFFB0A2C3),
+                  fontWeight: FontWeight.bold,
+                  fontSize: 14.sp,
+                ),
+              ),
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFFD32F2F),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10.r),
+                ),
+              ),
+              onPressed: () => Navigator.of(ctx).pop(true),
+              child: Text(
+                'خروج',
+                style: GoogleFonts.cairo(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 14.sp,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+    return result ?? false;
+  }
+
   @override
   Widget build(BuildContext context) {
     final List<Widget> tabs = [
@@ -198,24 +271,42 @@ class _MainNavigationWrapperState extends State<MainNavigationWrapper> {
 
     final effectiveIndex = _currentIndex < tabs.length ? _currentIndex : 0;
 
-    return Scaffold(
-      backgroundColor: OrientalTheme.bgDark,
-      body: Directionality(
-        textDirection: TextDirection.rtl,
-        child: Column(
-          children: [
-            Expanded(
-              child: IndexedStack(
-                index: effectiveIndex,
-                children: tabs,
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (bool didPop, dynamic result) async {
+        if (didPop) return;
+
+        if (_currentIndex != 0) {
+          setState(() {
+            _currentIndex = 0;
+          });
+          return;
+        }
+
+        final shouldExit = await _showExitConfirmationDialog();
+        if (shouldExit) {
+          SystemNavigator.pop();
+        }
+      },
+      child: Scaffold(
+        backgroundColor: OrientalTheme.bgDark,
+        body: Directionality(
+          textDirection: TextDirection.rtl,
+          child: Column(
+            children: [
+              Expanded(
+                child: IndexedStack(
+                  index: effectiveIndex,
+                  children: tabs,
+                ),
               ),
-            ),
-            if (effectiveIndex != 0)
-              RoyalRiveFlameNavBar(
-                selectedIndex: _currentIndex,
-                onTabSelected: _onTabSelected,
-              ),
-          ],
+              if (effectiveIndex != 0)
+                RoyalRiveFlameNavBar(
+                  selectedIndex: _currentIndex,
+                  onTabSelected: _onTabSelected,
+                ),
+            ],
+          ),
         ),
       ),
     );
