@@ -46,6 +46,9 @@ dependencies:
   rive: ^0.13.20
   flame: ^1.30.1
   flame_rive: ^1.10.17
+  provider: ^6.1.2
+  connectivity_plus: ^6.0.5
+  cached_network_image: ^3.3.1
 
   # --- Dynamic Game Asset Bundles & Storage ---
   dio: ^5.7.0
