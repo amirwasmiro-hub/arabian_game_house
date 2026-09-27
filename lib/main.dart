@@ -9,6 +9,7 @@ import 'core/audio/sound_manager.dart';
 import 'core/services/supabase_service.dart';
 import 'core/providers/game_user_provider.dart';
 import 'features/splash/screens/orodragon_splash_screen.dart';
+import 'features/splash/screens/gaming_masters_splash_screen.dart';
 import 'features/home/screens/home_screen.dart';
 import 'features/leaderboard/screens/leaderboard_screen.dart';
 import 'features/store/screens/store_screen.dart';
@@ -73,15 +74,23 @@ class AppEntryFlow extends StatefulWidget {
 }
 
 class _AppEntryFlowState extends State<AppEntryFlow> {
-  bool _showSplash = true;
+  int _splashStage = 1; // 1: Orodragon, 2: Gaming Masters, 0: Main Navigation
 
   @override
   Widget build(BuildContext context) {
-    if (_showSplash) {
+    if (_splashStage == 1) {
       return OrodragonSplashScreen(
         onFinish: () {
           setState(() {
-            _showSplash = false;
+            _splashStage = 2;
+          });
+        },
+      );
+    } else if (_splashStage == 2) {
+      return GamingMastersSplashScreen(
+        onFinish: () {
+          setState(() {
+            _splashStage = 0;
           });
         },
       );

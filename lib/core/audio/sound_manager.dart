@@ -127,6 +127,12 @@ class SoundManager {
     _playSfx('audio/tile_draw.mp3');
   }
 
+  void playTileSlam() {
+    if (!isSoundEnabled) return;
+    HapticFeedback.heavyImpact();
+    _playSfx('audio/tile_place.mp3');
+  }
+
   void dispose() {
     _sfxPlayer.dispose();
     _bgmPlayer.dispose();

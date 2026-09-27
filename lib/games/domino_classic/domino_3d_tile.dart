@@ -11,6 +11,7 @@ class Domino3DTile extends StatelessWidget {
   final bool onTable;
   final VoidCallback? onTap;
   final double scale;
+  final Color? glowColor;
 
   const Domino3DTile({
     super.key,
@@ -22,6 +23,7 @@ class Domino3DTile extends StatelessWidget {
     this.onTable = false,
     this.onTap,
     this.scale = 1.0,
+    this.glowColor,
   });
 
   @override
@@ -44,29 +46,58 @@ class Domino3DTile extends StatelessWidget {
         transform: Matrix4.translationValues(0.0, isSelected ? -8.0 : 0.0, 0.0),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(6.r),
-          boxShadow: isSelected
+          border: glowColor != null
+              ? Border.all(color: glowColor!, width: 2.w)
+              : isSelected
+                  ? Border.all(color: const Color(0xFFFFD700), width: 1.5.w)
+                  : isValid && !onTable
+                      ? Border.all(
+                          color: Colors.white.withValues(alpha: 0.85),
+                          width: 1.2.w,
+                        )
+                      : null,
+          boxShadow: glowColor != null
               ? [
                   BoxShadow(
-                    color: const Color(0xFFFFD700).withValues(alpha: 0.9),
-                    blurRadius: 14.r,
-                    spreadRadius: 2.r,
+                    color: glowColor!.withValues(alpha: 0.95),
+                    blurRadius: 16.r,
+                    spreadRadius: 3.r,
                   ),
                   BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.6),
-                    blurRadius: 12.r,
-                    offset: const Offset(2, 6),
+                    color: glowColor!.withValues(alpha: 0.5),
+                    blurRadius: 26.r,
+                    spreadRadius: 6.r,
                   ),
                 ]
-              : isValid && !onTable
+              : isSelected
                   ? [
                       BoxShadow(
-                        color: const Color(0xFF00E676).withValues(alpha: 0.5),
-                        blurRadius: 6.r,
-                        spreadRadius: 1.r,
+                        color: const Color(0xFFFFD700).withValues(alpha: 0.9),
+                        blurRadius: 14.r,
+                        spreadRadius: 2.r,
                       ),
                       BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.45),
-                        blurRadius: 5.r,
+                        color: Colors.black.withValues(alpha: 0.6),
+                        blurRadius: 12.r,
+                        offset: const Offset(2, 6),
+                      ),
+                    ]
+              : isValid && !onTable
+                  ? [
+                      // Subtle glowing soft white glow (جلو أبيض مضيء خفيف للكروت المتاحة فقط)
+                      BoxShadow(
+                        color: Colors.white.withValues(alpha: 0.75),
+                        blurRadius: 8.r,
+                        spreadRadius: 1.5.r,
+                      ),
+                      BoxShadow(
+                        color: Colors.white.withValues(alpha: 0.35),
+                        blurRadius: 14.r,
+                        spreadRadius: 2.5.r,
+                      ),
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.35),
+                        blurRadius: 4.r,
                         offset: const Offset(1.5, 3.5),
                       ),
                     ]
@@ -270,30 +301,33 @@ class _Realistic3DDominoPainter extends CustomPainter {
         ]);
         break;
       case 6:
-        positions.addAll([
-          Offset(cx - dx, cy - dy),
-          Offset(cx + dx, cy - dy),
-          Offset(cx - dx, cy),
-          Offset(cx + dx, cy),
-          Offset(cx - dx, cy + dy),
-          Offset(cx + dx, cy + dy),
-        ]);
+        if (onTable) {
+          // Horizontal layout on table: 2 rows of 3 dots across
+          positions.addAll([
+            Offset(cx - dx, cy - dy),
+            Offset(cx, cy - dy),
+            Offset(cx + dx, cy - dy),
+            Offset(cx - dx, cy + dy),
+            Offset(cx, cy + dy),
+            Offset(cx + dx, cy + dy),
+          ]);
+        } else {
+          // Vertical layout in player hand: 2 columns of 3 dots down
+          positions.addAll([
+            Offset(cx - dx, cy - dy),
+            Offset(cx + dx, cy - dy),
+            Offset(cx - dx, cy),
+            Offset(cx + dx, cy),
+            Offset(cx - dx, cy + dy),
+            Offset(cx + dx, cy + dy),
+          ]);
+        }
         break;
     }
 
-    // Color theme for pips based on number (Domino Cafe Deluxe Colors)
-    Color pipPrimaryColor = const Color(0xFF1E1E1E);
-    Color pipShadowColor = const Color(0xFF000000);
-    if (count == 6) {
-      pipPrimaryColor = const Color(0xFFB71C1C); // Ruby Red 6s
-      pipShadowColor = const Color(0xFF4A0000);
-    } else if (count == 5) {
-      pipPrimaryColor = const Color(0xFF0D47A1); // Sapphire Blue 5s
-      pipShadowColor = const Color(0xFF00194A);
-    } else if (count == 4) {
-      pipPrimaryColor = const Color(0xFF1B5E20); // Emerald Green 4s
-      pipShadowColor = const Color(0xFF052A0B);
-    }
+    // Color theme for pips: ALL PIPS ARE PURE JET BLACK (كل الدوت في كل الكروت باللون الأسود)
+    const Color pipPrimaryColor = Color(0xFF1A1A1A);
+    const Color pipShadowColor = Color(0xFF000000);
 
     for (final pos in positions) {
       // 1. Pip Inset Shadow (Engraved 3D feel)
@@ -331,6 +365,7 @@ class _Realistic3DDominoPainter extends CustomPainter {
         old.bottom != bottom ||
         old.isHorizontal != isHorizontal ||
         old.isSelected != isSelected ||
-        old.isValid != isValid;
+        old.isValid != isValid ||
+        old.onTable != onTable;
   }
 }
