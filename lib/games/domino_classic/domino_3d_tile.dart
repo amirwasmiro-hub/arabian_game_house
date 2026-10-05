@@ -28,9 +28,12 @@ class Domino3DTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Dimensions
-    final double width = isHorizontal ? (onTable ? 48.w : 56.w) : (onTable ? 24.w : 32.w);
-    final double height = isHorizontal ? (onTable ? 24.h : 30.h) : (onTable ? 48.h : 64.h);
+    // Real domino proportions (exactly 2:1). Both sides use .r so the ratio
+    // never stretches on screens with a different aspect ratio.
+    final double shortSide = onTable ? 21.r : 27.r;
+    final double longSide = shortSide * 2;
+    final double width = isHorizontal ? longSide : shortSide;
+    final double height = isHorizontal ? shortSide : longSide;
 
     final double effectiveWidth = width * scale;
     final double effectiveHeight = height * scale;
@@ -39,7 +42,7 @@ class Domino3DTile extends StatelessWidget {
       onTap: isValid ? onTap : null,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 180),
-        curve: Curves.easeOutBack,
+        curve: Curves.easeOutCubic,
         width: effectiveWidth,
         height: effectiveHeight,
         margin: EdgeInsets.all(onTable ? 1.5.w : 2.5.w),
@@ -82,32 +85,32 @@ class Domino3DTile extends StatelessWidget {
                         offset: const Offset(2, 6),
                       ),
                     ]
-              : isValid && !onTable
-                  ? [
-                      // Subtle glowing soft white glow (جلو أبيض مضيء خفيف للكروت المتاحة فقط)
-                      BoxShadow(
-                        color: Colors.white.withValues(alpha: 0.75),
-                        blurRadius: 8.r,
-                        spreadRadius: 1.5.r,
-                      ),
-                      BoxShadow(
-                        color: Colors.white.withValues(alpha: 0.35),
-                        blurRadius: 14.r,
-                        spreadRadius: 2.5.r,
-                      ),
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.35),
-                        blurRadius: 4.r,
-                        offset: const Offset(1.5, 3.5),
-                      ),
-                    ]
-                  : [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.5),
-                        blurRadius: 4.r,
-                        offset: const Offset(1.5, 3),
-                      ),
-                    ],
+                  : isValid && !onTable
+                      ? [
+                          // Subtle glowing soft white glow (جلو أبيض مضيء خفيف للكروت المتاحة فقط)
+                          BoxShadow(
+                            color: Colors.white.withValues(alpha: 0.75),
+                            blurRadius: 8.r,
+                            spreadRadius: 1.5.r,
+                          ),
+                          BoxShadow(
+                            color: Colors.white.withValues(alpha: 0.35),
+                            blurRadius: 14.r,
+                            spreadRadius: 2.5.r,
+                          ),
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.35),
+                            blurRadius: 4.r,
+                            offset: const Offset(1.5, 3.5),
+                          ),
+                        ]
+                      : [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.5),
+                            blurRadius: 4.r,
+                            offset: const Offset(1.5, 3),
+                          ),
+                        ],
         ),
         child: ClipRRect(
           borderRadius: BorderRadius.circular(6.r),
@@ -281,7 +284,11 @@ class _Realistic3DDominoPainter extends CustomPainter {
         positions.addAll([Offset(cx - dx, cy - dy), Offset(cx + dx, cy + dy)]);
         break;
       case 3:
-        positions.addAll([Offset(cx - dx, cy - dy), Offset(cx, cy), Offset(cx + dx, cy + dy)]);
+        positions.addAll([
+          Offset(cx - dx, cy - dy),
+          Offset(cx, cy),
+          Offset(cx + dx, cy + dy)
+        ]);
         break;
       case 4:
         positions.addAll([
@@ -301,8 +308,18 @@ class _Realistic3DDominoPainter extends CustomPainter {
         ]);
         break;
       case 6:
-        if (onTable) {
-          // Horizontal layout on table: 2 rows of 3 dots across
+        if (onTable && (top == 6 && bottom == 6)) {
+          // كارت 6:6 على الطاولة فقط: 3 صفوف كل صف فيه 2 دوت (بالطول)
+          positions.addAll([
+            Offset(cx - dx, cy - dy),
+            Offset(cx + dx, cy - dy),
+            Offset(cx - dx, cy),
+            Offset(cx + dx, cy),
+            Offset(cx - dx, cy + dy),
+            Offset(cx + dx, cy + dy),
+          ]);
+        } else if (onTable) {
+          // باقي الكروت التي تحتوي على 6 على الطاولة: صفّين كل صف 3 دوت
           positions.addAll([
             Offset(cx - dx, cy - dy),
             Offset(cx, cy - dy),
@@ -312,7 +329,7 @@ class _Realistic3DDominoPainter extends CustomPainter {
             Offset(cx + dx, cy + dy),
           ]);
         } else {
-          // Vertical layout in player hand: 2 columns of 3 dots down
+          // في اليد: كما هو مرسوم (3 صفوف كل صف فيه 2 دوت)
           positions.addAll([
             Offset(cx - dx, cy - dy),
             Offset(cx + dx, cy - dy),

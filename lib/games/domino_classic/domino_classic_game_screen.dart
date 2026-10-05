@@ -30,11 +30,12 @@ class DominoClassicGameScreen extends StatefulWidget {
   });
 
   @override
-  State<DominoClassicGameScreen> createState() => _DominoClassicGameScreenState();
+  State<DominoClassicGameScreen> createState() =>
+      _DominoClassicGameScreenState();
 }
 
 class _DominoClassicGameScreenState extends State<DominoClassicGameScreen>
-    with SingleTickerProviderStateMixin {
+    with TickerProviderStateMixin {
   final DominoClassicEngine _engine = DominoClassicEngine();
   DominoPiece? _selectedPiece;
   bool _botThinking = false;
@@ -66,6 +67,16 @@ class _DominoClassicGameScreenState extends State<DominoClassicGameScreen>
   Offset? _flyingTargetPos;
   bool _showImpactRipple = false;
   Offset? _impactPosition;
+  bool _isTileDragging = false;
+  bool _isPlacingPiece = false;
+  bool _isAutoDrawing = false;
+  bool _isAutoPassing = false;
+
+  // Boneyard -> player hand draw flight animation
+  late AnimationController _drawFlightController;
+  DominoPiece? _drawFlyingPiece;
+  Offset? _drawStartPos;
+  Offset? _drawTargetPos;
 
   final List<String> _quickTaunts = [
     'العب يا معلم! ⏳',
@@ -93,6 +104,14 @@ class _DominoClassicGameScreenState extends State<DominoClassicGameScreen>
       if (mounted) setState(() {});
     });
 
+    _drawFlightController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 520),
+    );
+    _drawFlightController.addListener(() {
+      if (mounted) setState(() {});
+    });
+
     _engine.startNewGame();
     if (widget.showInitialSettings && !_hasShownInitialSettings) {
       _hasShownInitialSettings = true;
@@ -110,6 +129,7 @@ class _DominoClassicGameScreenState extends State<DominoClassicGameScreen>
   @override
   void dispose() {
     _flyingCardController.dispose();
+    _drawFlightController.dispose();
     _turnTimer?.cancel();
     _bubbleDismissTimer?.cancel();
     super.dispose();
@@ -143,7 +163,8 @@ class _DominoClassicGameScreenState extends State<DominoClassicGameScreen>
         final piece = validPieces.first;
         final edge = _engine.getValidEdgesFor(piece).first;
         _onPlacePiece(piece, edge);
-      } else if (_engine.boneyard.isNotEmpty && _engine.mode == DominoPlayMode.oneVsOne) {
+      } else if (_engine.boneyard.isNotEmpty &&
+          _engine.mode == DominoPlayMode.oneVsOne) {
         _drawFromBoneyard();
       } else {
         _passTurn();
@@ -157,7 +178,46 @@ class _DominoClassicGameScreenState extends State<DominoClassicGameScreen>
   void _checkBotTurn() {
     if (!_engine.isPlayerTurn && !_engine.isGameOver && !_botThinking) {
       _triggerBotPlay();
+    } else {
+      _checkPlayerAutoDraw();
     }
+  }
+
+  /// When it's the player's turn and no tile in hand can be played:
+  /// - 1v1 with tiles in the boneyard: auto-draw until a playable tile is found.
+  /// - Otherwise (boneyard empty / 4P): auto-pass the turn to the next player.
+  void _checkPlayerAutoDraw() {
+    if (!_engine.isPlayerTurn ||
+        _engine.isGameOver ||
+        _isAutoDrawing ||
+        _isAutoPassing) return;
+    if (_engine.board.isEmpty) return;
+
+    final hasValidMoves =
+        _engine.playerHand.any((p) => _engine.getValidEdgesFor(p).isNotEmpty);
+    if (hasValidMoves) return;
+
+    final canDraw =
+        _engine.mode == DominoPlayMode.oneVsOne && _engine.boneyard.isNotEmpty;
+
+    if (canDraw) {
+      // Short pause so the player sees the bot's move before drawing starts
+      Future.delayed(const Duration(milliseconds: 450), () {
+        if (!mounted) return;
+        _startAutoDrawFromBoneyard();
+      });
+      return;
+    }
+
+    // No playable tile and nothing to draw -> pass automatically
+    _isAutoPassing = true;
+    Future.delayed(const Duration(milliseconds: 700), () {
+      _isAutoPassing = false;
+      if (!mounted || !_engine.isPlayerTurn || _engine.isGameOver) return;
+      final stillNoMoves = !_engine.playerHand
+          .any((p) => _engine.getValidEdgesFor(p).isNotEmpty);
+      if (stillNoMoves) _passTurn();
+    });
   }
 
   Offset _getBotStartOffset(int botIdx, Size tableSize) {
@@ -167,7 +227,10 @@ class _DominoClassicGameScreenState extends State<DominoClassicGameScreen>
       if (hudContext != null && tableContext != null) {
         final hudBox = hudContext.findRenderObject() as RenderBox?;
         final tableBox = tableContext.findRenderObject() as RenderBox?;
-        if (hudBox != null && tableBox != null && hudBox.hasSize && tableBox.hasSize) {
+        if (hudBox != null &&
+            tableBox != null &&
+            hudBox.hasSize &&
+            tableBox.hasSize) {
           final hudGlobal = hudBox.localToGlobal(Offset.zero);
           final tableGlobal = tableBox.localToGlobal(Offset.zero);
           final relativeOffset = hudGlobal - tableGlobal;
@@ -198,7 +261,8 @@ class _DominoClassicGameScreenState extends State<DominoClassicGameScreen>
 
   Offset _getBoardTargetOffset(DominoEdgeLocation edge, Size tableSize) {
     final board = _engine.board;
-    final centerY = (tableSize.height * 0.44).clamp(70.h, tableSize.height - 70.h);
+    final centerY =
+        (tableSize.height * 0.44).clamp(70.h, tableSize.height - 70.h);
     if (board.isEmpty) {
       return Offset((tableSize.width / 2) - 24.w, centerY);
     }
@@ -206,7 +270,7 @@ class _DominoClassicGameScreenState extends State<DominoClassicGameScreen>
     // Estimate width of domino chain
     final double unscaledWidth = board.fold<double>(
       0.0,
-      (sum, p) => sum + (p.isDouble ? 27.w : 51.w),
+      (sum, p) => sum + (p.isDouble ? 24.r : 45.r),
     );
     final double autoScale = (680.w / unscaledWidth).clamp(0.65, 1.0);
     final double halfChainWidth = (unscaledWidth * autoScale) / 2;
@@ -243,7 +307,9 @@ class _DominoClassicGameScreenState extends State<DominoClassicGameScreen>
       ClassicBotMoveResult? move = _engine.pickBotMove();
 
       // If bot has no move and mode is 1v1, draw from boneyard until playable or empty
-      if (move == null && _engine.mode == DominoPlayMode.oneVsOne && _engine.boneyard.isNotEmpty) {
+      if (move == null &&
+          _engine.mode == DominoPlayMode.oneVsOne &&
+          _engine.boneyard.isNotEmpty) {
         while (move == null && _engine.boneyard.isNotEmpty && mounted) {
           _engine.botDrawFromBoneyard();
           SoundManager().playTileDraw();
@@ -340,7 +406,8 @@ class _DominoClassicGameScreenState extends State<DominoClassicGameScreen>
   }
 
   void _onTileTap(DominoPiece piece) {
-    if (!_engine.isPlayerTurn || _engine.isGameOver) return;
+    if (!_engine.isPlayerTurn || _engine.isGameOver || _isPlacingPiece) return;
+    if (_isTileDragging) return; // Guard against tap racing with active drag
 
     final validEdges = _engine.getValidEdgesFor(piece);
     if (validEdges.isEmpty) return;
@@ -349,11 +416,8 @@ class _DominoClassicGameScreenState extends State<DominoClassicGameScreen>
 
     setState(() {
       if (_selectedPiece == piece) {
-        if (validEdges.length == 1) {
-          _onPlacePiece(piece, validEdges.first);
-        } else {
-          _selectedPiece = null;
-        }
+        // إلغاء الدبل كليك: الضغط مرة أخرى يقوم بإلغاء التحديد فقط ولا يلعب الكارت
+        _selectedPiece = null;
       } else {
         _selectedPiece = piece;
       }
@@ -361,16 +425,27 @@ class _DominoClassicGameScreenState extends State<DominoClassicGameScreen>
   }
 
   void _onTileDragStarted(DominoPiece piece) {
-    if (!_engine.isPlayerTurn || _engine.isGameOver) return;
+    if (!_engine.isPlayerTurn || _engine.isGameOver || _isPlacingPiece) return;
+    _isTileDragging = true;
     setState(() {
       _selectedPiece = piece;
     });
   }
 
-  void _onPlacePiece(DominoPiece piece, DominoEdgeLocation edge) {
-    if (!_engine.isPlayerTurn || _engine.isGameOver) return;
-    if (!_engine.playerHand.contains(piece)) return; // Guard against duplicate drop execution
+  void _onTileDragEnded() {
+    if (!mounted) return;
+    setState(() {
+      _isTileDragging = false;
+    });
+  }
 
+  void _onPlacePiece(DominoPiece piece, DominoEdgeLocation edge) {
+    if (!_engine.isPlayerTurn || _engine.isGameOver || _isPlacingPiece) return;
+    if (!_engine.playerHand.contains(piece))
+      return; // Guard against duplicate drop execution
+
+    _isPlacingPiece = true;
+    _isTileDragging = false;
     final isDouble = piece.isDouble;
     _engine.playPiece(piece, edge);
 
@@ -387,39 +462,77 @@ class _DominoClassicGameScreenState extends State<DominoClassicGameScreen>
 
     _checkGameOver();
     _checkBotTurn();
+    _isPlacingPiece = false;
+  }
+
+  Future<void> _startAutoDrawFromBoneyard([int? preferredIndex]) async {
+    if (!_engine.isPlayerTurn ||
+        _engine.boneyard.isEmpty ||
+        _isAutoDrawing ||
+        _isPlacingPiece) return;
+
+    // Rule: Cannot draw if there is already a valid playable piece in hand!
+    var hasValidMoves =
+        _engine.playerHand.any((p) => _engine.getValidEdgesFor(p).isNotEmpty);
+    if (hasValidMoves) return;
+
+    _isAutoDrawing = true;
+    setState(() {});
+
+    while (!hasValidMoves &&
+        _engine.boneyard.isNotEmpty &&
+        mounted &&
+        _engine.isPlayerTurn) {
+      final drawnIndex =
+          (preferredIndex != null && preferredIndex < _engine.boneyard.length)
+              ? preferredIndex
+              : (_engine.boneyard.length - 1);
+      preferredIndex = null; // Only use preferredIndex for the very first draw
+
+      final drawn = _engine.boneyard.removeAt(drawnIndex);
+
+      // Animate the tile flying from the boneyard into the player's hand
+      final flight = _computeDrawFlightPositions();
+      SoundManager().playTileDraw();
+      setState(() {
+        _drawFlyingPiece = drawn;
+        _drawStartPos = flight.$1;
+        _drawTargetPos = flight.$2;
+      });
+      try {
+        await _drawFlightController.forward(from: 0.0);
+      } catch (_) {}
+      if (!mounted) return;
+
+      _engine.playerHand.add(drawn);
+      SoundManager().playTilePlace();
+      setState(() {
+        _drawFlyingPiece = null;
+        _drawStartPos = null;
+        _drawTargetPos = null;
+      });
+
+      hasValidMoves =
+          _engine.playerHand.any((p) => _engine.getValidEdgesFor(p).isNotEmpty);
+
+      // Stop once an available/playable tile is drawn or boneyard is empty
+      if (hasValidMoves || _engine.boneyard.isEmpty) {
+        break;
+      }
+
+      await Future.delayed(const Duration(milliseconds: 140));
+    }
+
+    _isAutoDrawing = false;
+    if (mounted) {
+      setState(() {});
+      _checkGameOver();
+      _checkBotTurn();
+    }
   }
 
   void _drawFromBoneyard() {
-    if (!_engine.isPlayerTurn || _engine.boneyard.isEmpty) return;
-
-    // Rule: Cannot draw if there is a valid playable piece in hand!
-    final hasValidMoves = _engine.playerHand.any((p) => _engine.getValidEdgesFor(p).isNotEmpty);
-    if (hasValidMoves) return;
-
-    final drawn = _engine.boneyard.removeLast();
-    _engine.playerHand.add(drawn);
-    SoundManager().playTileDraw();
-
-    setState(() {});
-    _checkGameOver();
-    _checkBotTurn();
-  }
-
-  void _drawSpecificTileFromBoneyard(int index) {
-    if (!_engine.isPlayerTurn || _engine.boneyard.isEmpty) return;
-    if (index < 0 || index >= _engine.boneyard.length) return;
-
-    // Rule: Cannot draw if there is a valid playable piece in hand!
-    final hasValidMoves = _engine.playerHand.any((p) => _engine.getValidEdgesFor(p).isNotEmpty);
-    if (hasValidMoves) return;
-
-    final drawn = _engine.boneyard.removeAt(index);
-    _engine.playerHand.add(drawn);
-    SoundManager().playTileDraw();
-
-    setState(() {});
-    _checkGameOver();
-    _checkBotTurn();
+    _startAutoDrawFromBoneyard();
   }
 
   void _passTurn() {
@@ -465,7 +578,8 @@ class _DominoClassicGameScreenState extends State<DominoClassicGameScreen>
           );
 
           // If match is won by player team, award mega win dialog
-          if (_engine.isMatchOver && _engine.lastRoundResult?.winningTeam == 1) {
+          if (_engine.isMatchOver &&
+              _engine.lastRoundResult?.winningTeam == 1) {
             Future.delayed(const Duration(milliseconds: 600), () {
               if (!mounted) return;
               MegaWinDialog.show(
@@ -515,7 +629,8 @@ class _DominoClassicGameScreenState extends State<DominoClassicGameScreen>
             ),
             title: Row(
               children: [
-                const Icon(Icons.settings_suggest_rounded, color: Color(0xFFFFD700)),
+                const Icon(Icons.settings_suggest_rounded,
+                    color: Color(0xFFFFD700)),
                 SizedBox(width: 8.w),
                 Text(
                   'إعدادات طاولة الدومينو 🀄',
@@ -533,7 +648,11 @@ class _DominoClassicGameScreenState extends State<DominoClassicGameScreen>
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('طور اللعب:', style: GoogleFonts.cairo(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 10.sp)),
+                  Text('طور اللعب:',
+                      style: GoogleFonts.cairo(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 10.sp)),
                   SizedBox(height: 6.h),
                   Row(
                     children: [
@@ -541,63 +660,82 @@ class _DominoClassicGameScreenState extends State<DominoClassicGameScreen>
                         label: 'فردي (1 ضد 1) 👤',
                         isSelected: _engine.mode == DominoPlayMode.oneVsOne,
                         onTap: () {
-                          setDialogState(() => _engine.mode = DominoPlayMode.oneVsOne);
+                          setDialogState(
+                              () => _engine.mode = DominoPlayMode.oneVsOne);
                         },
                       ),
                       SizedBox(width: 8.w),
                       _buildConfigChip(
                         label: 'شراكة (2 ضد 2) 👥',
-                        isSelected: _engine.mode == DominoPlayMode.partnership4P,
+                        isSelected:
+                            _engine.mode == DominoPlayMode.partnership4P,
                         onTap: () {
-                          setDialogState(() => _engine.mode = DominoPlayMode.partnership4P);
+                          setDialogState(() =>
+                              _engine.mode = DominoPlayMode.partnership4P);
                         },
                       ),
                     ],
                   ),
                   SizedBox(height: 12.h),
-                  Text('مستوى الذكاء الاصطناعي:', style: GoogleFonts.cairo(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 10.sp)),
+                  Text('مستوى الذكاء الاصطناعي:',
+                      style: GoogleFonts.cairo(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 10.sp)),
                   SizedBox(height: 6.h),
                   Wrap(
                     spacing: 6.w,
                     children: [
                       _buildConfigChip(
                         label: 'عادي 🟢',
-                        isSelected: _engine.difficulty == DominoDifficulty.casual,
-                        onTap: () => setDialogState(() => _engine.difficulty = DominoDifficulty.casual),
+                        isSelected:
+                            _engine.difficulty == DominoDifficulty.casual,
+                        onTap: () => setDialogState(
+                            () => _engine.difficulty = DominoDifficulty.casual),
                       ),
                       _buildConfigChip(
                         label: 'محترف 🟡',
                         isSelected: _engine.difficulty == DominoDifficulty.pro,
-                        onTap: () => setDialogState(() => _engine.difficulty = DominoDifficulty.pro),
+                        onTap: () => setDialogState(
+                            () => _engine.difficulty = DominoDifficulty.pro),
                       ),
                       _buildConfigChip(
                         label: 'داهية القهاوي 🔴',
-                        isSelected: _engine.difficulty == DominoDifficulty.grandmaster,
-                        onTap: () => setDialogState(() => _engine.difficulty = DominoDifficulty.grandmaster),
+                        isSelected:
+                            _engine.difficulty == DominoDifficulty.grandmaster,
+                        onTap: () => setDialogState(() =>
+                            _engine.difficulty = DominoDifficulty.grandmaster),
                       ),
                     ],
                   ),
                   SizedBox(height: 12.h),
-                  Text('هدف الماتش (نقاط الفوز):', style: GoogleFonts.cairo(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 10.sp)),
+                  Text('هدف الماتش (نقاط الفوز):',
+                      style: GoogleFonts.cairo(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 10.sp)),
                   SizedBox(height: 6.h),
                   Row(
                     children: [
                       _buildConfigChip(
                         label: '101 نقطة 🏆',
                         isSelected: _engine.targetScore == 101,
-                        onTap: () => setDialogState(() => _engine.targetScore = 101),
+                        onTap: () =>
+                            setDialogState(() => _engine.targetScore = 101),
                       ),
                       SizedBox(width: 6.w),
                       _buildConfigChip(
                         label: '50 نقطة ⚡',
                         isSelected: _engine.targetScore == 50,
-                        onTap: () => setDialogState(() => _engine.targetScore = 50),
+                        onTap: () =>
+                            setDialogState(() => _engine.targetScore = 50),
                       ),
                       SizedBox(width: 6.w),
                       _buildConfigChip(
                         label: 'جولة واحدة 🎯',
                         isSelected: _engine.targetScore == 0,
-                        onTap: () => setDialogState(() => _engine.targetScore = 0),
+                        onTap: () =>
+                            setDialogState(() => _engine.targetScore = 0),
                       ),
                     ],
                   ),
@@ -614,14 +752,16 @@ class _DominoClassicGameScreenState extends State<DominoClassicGameScreen>
                 },
                 child: Text(
                   isInitial ? 'خروج' : 'إلغاء',
-                  style: GoogleFonts.cairo(color: Colors.white60, fontSize: 10.sp),
+                  style:
+                      GoogleFonts.cairo(color: Colors.white60, fontSize: 10.sp),
                 ),
               ),
               ElevatedButton(
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFFFFD700),
                   foregroundColor: Colors.black,
-                  padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 6.h),
+                  padding:
+                      EdgeInsets.symmetric(horizontal: 16.w, vertical: 6.h),
                 ),
                 onPressed: () {
                   Navigator.pop(ctx);
@@ -632,8 +772,11 @@ class _DominoClassicGameScreenState extends State<DominoClassicGameScreen>
                   _checkBotTurn();
                 },
                 child: Text(
-                  isInitial ? 'تأكيد وبدء اللعب 🎲' : 'تطبيق وبدء مباراة جديدة 🎲',
-                  style: GoogleFonts.cairo(fontWeight: FontWeight.bold, fontSize: 10.sp),
+                  isInitial
+                      ? 'تأكيد وبدء اللعب 🎲'
+                      : 'تطبيق وبدء مباراة جديدة 🎲',
+                  style: GoogleFonts.cairo(
+                      fontWeight: FontWeight.bold, fontSize: 10.sp),
                 ),
               ),
             ],
@@ -643,7 +786,10 @@ class _DominoClassicGameScreenState extends State<DominoClassicGameScreen>
     );
   }
 
-  Widget _buildConfigChip({required String label, required bool isSelected, required VoidCallback onTap}) {
+  Widget _buildConfigChip(
+      {required String label,
+      required bool isSelected,
+      required VoidCallback onTap}) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -651,7 +797,8 @@ class _DominoClassicGameScreenState extends State<DominoClassicGameScreen>
         decoration: BoxDecoration(
           color: isSelected ? const Color(0xFFFFD700) : Colors.black45,
           borderRadius: BorderRadius.circular(10.r),
-          border: Border.all(color: isSelected ? const Color(0xFFFFD700) : Colors.white24),
+          border: Border.all(
+              color: isSelected ? const Color(0xFFFFD700) : Colors.white24),
         ),
         child: Text(
           label,
@@ -695,10 +842,12 @@ class _DominoClassicGameScreenState extends State<DominoClassicGameScreen>
                 children: _quickTaunts.map((taunt) {
                   return ActionChip(
                     backgroundColor: const Color(0xFF2C103D),
-                    side: const BorderSide(color: Color(0xFFFFD700), width: 0.5),
+                    side:
+                        const BorderSide(color: Color(0xFFFFD700), width: 0.5),
                     label: Text(
                       taunt,
-                      style: GoogleFonts.cairo(color: Colors.white, fontSize: 10.sp),
+                      style: GoogleFonts.cairo(
+                          color: Colors.white, fontSize: 10.sp),
                     ),
                     onPressed: () {
                       Navigator.pop(ctx);
@@ -762,6 +911,7 @@ class _DominoClassicGameScreenState extends State<DominoClassicGameScreen>
                             selectedPiece: _selectedPiece,
                             onPlacePiece: _onPlacePiece,
                             totalPotCoins: (widget.betCoins ?? 80000) * 2,
+                            isDragging: _isTileDragging,
                           ),
 
                           // Opponent West (Left or Top Right in 1v1)
@@ -772,7 +922,8 @@ class _DominoClassicGameScreenState extends State<DominoClassicGameScreen>
                               child: DominoPlayerHud(
                                 key: _hudKeys[3],
                                 name: 'الكينج رامي 👑',
-                                avatarUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150',
+                                avatarUrl:
+                                    'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150',
                                 flag: '🇪🇬',
                                 vipTier: 'VIP 4',
                                 coins: 1850000,
@@ -794,7 +945,8 @@ class _DominoClassicGameScreenState extends State<DominoClassicGameScreen>
                                 child: DominoPlayerHud(
                                   key: _hudKeys[2],
                                   name: 'المعلم محروس (شريكك) 🤝',
-                                  avatarUrl: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150',
+                                  avatarUrl:
+                                      'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150',
                                   flag: '🇪🇬',
                                   vipTier: 'VIP 3',
                                   coins: 1200000,
@@ -814,7 +966,8 @@ class _DominoClassicGameScreenState extends State<DominoClassicGameScreen>
                               child: DominoPlayerHud(
                                 key: _hudKeys[1],
                                 name: 'أبو علي ⚡',
-                                avatarUrl: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150',
+                                avatarUrl:
+                                    'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150',
                                 flag: '🇪🇬',
                                 vipTier: 'VIP 2',
                                 coins: 950000,
@@ -833,7 +986,8 @@ class _DominoClassicGameScreenState extends State<DominoClassicGameScreen>
                               child: DominoPlayerHud(
                                 key: _hudKeys[3],
                                 name: 'الكينج رامي 👑',
-                                avatarUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150',
+                                avatarUrl:
+                                    'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150',
                                 flag: '🇪🇬',
                                 vipTier: 'VIP 4',
                                 coins: 1850000,
@@ -876,17 +1030,23 @@ class _DominoClassicGameScreenState extends State<DominoClassicGameScreen>
                                       child: Container(
                                         padding: EdgeInsets.all(5.w),
                                         decoration: BoxDecoration(
-                                          color: Colors.black.withValues(alpha: 0.75),
+                                          color: Colors.black
+                                              .withValues(alpha: 0.75),
                                           shape: BoxShape.circle,
-                                          border: Border.all(color: const Color(0xFFFFD700), width: 1.w),
+                                          border: Border.all(
+                                              color: const Color(0xFFFFD700),
+                                              width: 1.w),
                                           boxShadow: [
                                             BoxShadow(
-                                              color: const Color(0xFFFFD700).withValues(alpha: 0.4),
+                                              color: const Color(0xFFFFD700)
+                                                  .withValues(alpha: 0.4),
                                               blurRadius: 6.r,
                                             ),
                                           ],
                                         ),
-                                        child: Icon(Icons.chat_bubble_rounded, color: const Color(0xFFFFD700), size: 14.r),
+                                        child: Icon(Icons.chat_bubble_rounded,
+                                            color: const Color(0xFFFFD700),
+                                            size: 14.r),
                                       ),
                                     ),
                                     SizedBox(height: 5.h),
@@ -900,7 +1060,10 @@ class _DominoClassicGameScreenState extends State<DominoClassicGameScreen>
                                       child: Container(
                                         padding: EdgeInsets.all(4.w),
                                         decoration: BoxDecoration(
-                                          color: _showEmojiMenu ? const Color(0xFFFFD700) : Colors.black.withValues(alpha: 0.75),
+                                          color: _showEmojiMenu
+                                              ? const Color(0xFFFFD700)
+                                              : Colors.black
+                                                  .withValues(alpha: 0.75),
                                           shape: BoxShape.circle,
                                           border: Border.all(
                                             color: const Color(0xFFFFD700),
@@ -908,7 +1071,11 @@ class _DominoClassicGameScreenState extends State<DominoClassicGameScreen>
                                           ),
                                           boxShadow: [
                                             BoxShadow(
-                                              color: const Color(0xFFFFD700).withValues(alpha: _showEmojiMenu ? 0.7 : 0.4),
+                                              color: const Color(0xFFFFD700)
+                                                  .withValues(
+                                                      alpha: _showEmojiMenu
+                                                          ? 0.7
+                                                          : 0.4),
                                               blurRadius: 8.r,
                                             ),
                                           ],
@@ -938,11 +1105,12 @@ class _DominoClassicGameScreenState extends State<DominoClassicGameScreen>
                                 ),
                               )
                                   .animate()
-                                  .scale(duration: 200.ms, curve: Curves.easeOutBack, alignment: Alignment.bottomLeft)
+                                  .scale(
+                                      duration: 200.ms,
+                                      curve: Curves.easeOutBack,
+                                      alignment: Alignment.bottomLeft)
                                   .fadeIn(),
                             ),
-
-
 
                           // Player Domino Tiles (Floating directly over the green velvet table)
                           Positioned(
@@ -954,8 +1122,11 @@ class _DominoClassicGameScreenState extends State<DominoClassicGameScreen>
                               validPieces: validPieces,
                               selectedPiece: _selectedPiece,
                               isPlayerTurn: _engine.isPlayerTurn,
-                              onTileTap: (piece) => _onTileTap(piece as DominoPiece),
-                              onTileDragStarted: (piece) => _onTileDragStarted(piece as DominoPiece),
+                              onTileTap: (piece) =>
+                                  _onTileTap(piece as DominoPiece),
+                              onTileDragStarted: (piece) =>
+                                  _onTileDragStarted(piece as DominoPiece),
+                              onTileDragEnded: _onTileDragEnded,
                             ),
                           ),
 
@@ -965,13 +1136,22 @@ class _DominoClassicGameScreenState extends State<DominoClassicGameScreen>
                             top: 72.h,
                             bottom: 10.h,
                             child: Center(
-                              child: _buildBoneyardArea(mustDraw: validPieces.isEmpty),
+                              child: _buildBoneyardArea(
+                                  mustDraw: validPieces.isEmpty),
                             ),
                           ),
 
                           // Flying Opponent Tile Overlay (Appears under bot avatar and flies to target)
-                          if (_flyingPiece != null && _flyingStartPos != null && _flyingTargetPos != null)
+                          if (_flyingPiece != null &&
+                              _flyingStartPos != null &&
+                              _flyingTargetPos != null)
                             _buildFlyingTileOverlay(),
+
+                          // Drawn tile flying from the boneyard into the player's hand
+                          if (_drawFlyingPiece != null &&
+                              _drawStartPos != null &&
+                              _drawTargetPos != null)
+                            _buildDrawFlightOverlay(),
 
                           // Landing Impact Ripple Effect
                           if (_showImpactRipple && _impactPosition != null)
@@ -1006,7 +1186,8 @@ class _DominoClassicGameScreenState extends State<DominoClassicGameScreen>
           IconButton(
             padding: EdgeInsets.zero,
             constraints: const BoxConstraints(),
-            icon: const Icon(Icons.arrow_back_ios, color: Color(0xFFFFD700), size: 16),
+            icon: const Icon(Icons.arrow_back_ios,
+                color: Color(0xFFFFD700), size: 16),
             onPressed: () => Navigator.pop(context),
           ),
           SizedBox(width: 8.w),
@@ -1043,26 +1224,38 @@ class _DominoClassicGameScreenState extends State<DominoClassicGameScreen>
             decoration: BoxDecoration(
               color: Colors.black.withValues(alpha: 0.6),
               borderRadius: BorderRadius.circular(10.r),
-              border: Border.all(color: const Color(0xFFFFD700).withValues(alpha: 0.5)),
+              border: Border.all(
+                  color: const Color(0xFFFFD700).withValues(alpha: 0.5)),
             ),
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
                   'الماتش (الجولة ${_engine.currentRound}): ',
-                  style: GoogleFonts.cairo(fontSize: 7.sp, color: Colors.white70),
+                  style:
+                      GoogleFonts.cairo(fontSize: 7.sp, color: Colors.white70),
                 ),
                 Text(
                   '${_engine.team1MatchScore}',
-                  style: GoogleFonts.montserrat(fontSize: 8.sp, fontWeight: FontWeight.bold, color: const Color(0xFF00E676)),
+                  style: GoogleFonts.montserrat(
+                      fontSize: 8.sp,
+                      fontWeight: FontWeight.bold,
+                      color: const Color(0xFF00E676)),
                 ),
-                Text(' : ', style: GoogleFonts.montserrat(fontSize: 8.sp, color: Colors.white)),
+                Text(' : ',
+                    style: GoogleFonts.montserrat(
+                        fontSize: 8.sp, color: Colors.white)),
                 Text(
                   '${_engine.team2MatchScore}',
-                  style: GoogleFonts.montserrat(fontSize: 8.sp, fontWeight: FontWeight.bold, color: const Color(0xFFFF5252)),
+                  style: GoogleFonts.montserrat(
+                      fontSize: 8.sp,
+                      fontWeight: FontWeight.bold,
+                      color: const Color(0xFFFF5252)),
                 ),
                 if (_engine.targetScore > 0) ...[
-                  Text(' / ${_engine.targetScore}', style: GoogleFonts.montserrat(fontSize: 7.sp, color: const Color(0xFFFFD700))),
+                  Text(' / ${_engine.targetScore}',
+                      style: GoogleFonts.montserrat(
+                          fontSize: 7.sp, color: const Color(0xFFFFD700))),
                 ],
               ],
             ),
@@ -1076,12 +1269,14 @@ class _DominoClassicGameScreenState extends State<DominoClassicGameScreen>
             decoration: BoxDecoration(
               color: Colors.black.withValues(alpha: 0.5),
               borderRadius: BorderRadius.circular(10.r),
-              border: Border.all(color: const Color(0xFFFFD700).withValues(alpha: 0.4)),
+              border: Border.all(
+                  color: const Color(0xFFFFD700).withValues(alpha: 0.4)),
             ),
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(Icons.monetization_on_rounded, color: const Color(0xFFFFD700), size: 12.r),
+                Icon(Icons.monetization_on_rounded,
+                    color: const Color(0xFFFFD700), size: 12.r),
                 SizedBox(width: 4.w),
                 Text(
                   'الرهان: ${_formatNumber(widget.betCoins ?? 80000)}',
@@ -1120,66 +1315,70 @@ class _DominoClassicGameScreenState extends State<DominoClassicGameScreen>
 
   Widget _buildBoneyardArea({required bool mustDraw}) {
     final is1v1 = _engine.mode == DominoPlayMode.oneVsOne;
-    final canDraw = _engine.isPlayerTurn && _engine.boneyard.isNotEmpty && is1v1 && mustDraw;
-    final canPass = _engine.isPlayerTurn && (_engine.boneyard.isEmpty || !is1v1) && mustDraw;
+    final canDraw = _engine.isPlayerTurn &&
+        _engine.boneyard.isNotEmpty &&
+        is1v1 &&
+        mustDraw;
 
-    // Pass button when boneyard is empty or in 4P mode and player has no valid moves
-    if (canPass) {
-      return GestureDetector(
-        onTap: _passTurn,
-        child: Container(
-          padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
-          decoration: BoxDecoration(
-            gradient: const LinearGradient(colors: [Color(0xFFFF1744), Color(0xFFFF5252)]),
-            borderRadius: BorderRadius.circular(10.r),
-            border: Border.all(color: Colors.white, width: 1.w),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.red.withValues(alpha: 0.6),
-                blurRadius: 8.r,
-              ),
-            ],
-          ),
-          child: Text(
-            'باص ⏭️',
-            style: GoogleFonts.cairo(
-              fontSize: 8.sp,
-              fontWeight: FontWeight.w900,
-              color: Colors.white,
-            ),
-          ),
-        ),
-      );
-    }
-
+    // No pass button: passing happens automatically in _checkPlayerAutoDraw
     if (!is1v1 || _engine.boneyard.isEmpty) {
       return const SizedBox.shrink(); // No boneyard needed in 4P or if empty
     }
 
     final boneyardCount = _engine.boneyard.length;
 
-    // Vertical column of face-down ivory cards on the right edge of the table (no box, no text header)
-    // Sized dynamically and wrapped in FittedBox so ALL boneyard cards (all 14) are 100% visible at once without scrolling
+    // Two columns of face-down domino cards on the right side ("عمودين")
+    // Sized dynamically with auto-draw on tap
+    final col1Count = (boneyardCount + 1) ~/ 2;
+    const tileWidth = 25.0;
+    const tileHeight = 12.5;
+
     return FittedBox(
       fit: BoxFit.scaleDown,
-      child: Column(
+      child: Row(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.center,
-        children: List.generate(boneyardCount, (index) {
-          return DominoFaceDownTile(
-            width: (boneyardCount > 10) ? 25.0 : (boneyardCount > 6 ? 27.0 : 29.0),
-            height: (boneyardCount > 10) ? 10.5 : (boneyardCount > 6 ? 12.0 : 13.5),
-            margin: EdgeInsets.symmetric(
-              vertical: (boneyardCount > 10) ? 0.8.h : 1.2.h,
+        children: [
+          // Column 1 (Left of the 2 columns)
+          Column(
+            mainAxisSize: MainAxisSize.min,
+            children: List.generate(col1Count, (i) {
+              return DominoFaceDownTile(
+                width: tileWidth,
+                height: tileHeight,
+                margin:
+                    EdgeInsets.symmetric(vertical: 1.2.h, horizontal: 1.5.w),
+                isSelectable: canDraw && !_isAutoDrawing,
+                onTap: () {
+                  if (canDraw && !_isAutoDrawing) {
+                    _startAutoDrawFromBoneyard(i);
+                  }
+                },
+              );
+            }),
+          ),
+          SizedBox(width: 2.w),
+          // Column 2 (Right of the 2 columns)
+          if (boneyardCount > col1Count)
+            Column(
+              mainAxisSize: MainAxisSize.min,
+              children: List.generate(boneyardCount - col1Count, (i) {
+                final idx = col1Count + i;
+                return DominoFaceDownTile(
+                  width: tileWidth,
+                  height: tileHeight,
+                  margin:
+                      EdgeInsets.symmetric(vertical: 1.2.h, horizontal: 1.5.w),
+                  isSelectable: canDraw && !_isAutoDrawing,
+                  onTap: () {
+                    if (canDraw && !_isAutoDrawing) {
+                      _startAutoDrawFromBoneyard(idx);
+                    }
+                  },
+                );
+              }),
             ),
-            isSelectable: canDraw,
-            onTap: () {
-              if (canDraw) {
-                _drawSpecificTileFromBoneyard(index);
-              }
-            },
-          );
-        }),
+        ],
       ),
     );
   }
@@ -1191,6 +1390,89 @@ class _DominoClassicGameScreenState extends State<DominoClassicGameScreen>
       return '${(number / 1000).toStringAsFixed(0)}K';
     }
     return number.toString();
+  }
+
+  /// Start (boneyard on the right edge) and target (end of player's hand rack)
+  /// positions, relative to the table Stack.
+  (Offset, Offset) _computeDrawFlightPositions() {
+    Size tableSize;
+    final box = _tableStackKey.currentContext?.findRenderObject() as RenderBox?;
+    if (box != null && box.hasSize) {
+      tableSize = box.size;
+    } else {
+      final size = MediaQuery.of(context).size;
+      tableSize = Size(size.width, size.height - 40.h);
+    }
+
+    final start = Offset(tableSize.width - 44.w, tableSize.height / 2 - 10.h);
+
+    // Rack spans left: 175.w -> right: 50.w and is centered; new tile lands at its end
+    final rackLeft = 175.w;
+    final rackWidth = tableSize.width - 175.w - 50.w;
+    final handCount = _engine.playerHand.length + 1;
+    final targetX = (rackLeft + rackWidth / 2 + handCount * 16.r)
+        .clamp(rackLeft, tableSize.width - 80.w)
+        .toDouble();
+    final target = Offset(targetX, tableSize.height - 66.r);
+
+    return (start, target);
+  }
+
+  /// Drawn tile flying from the boneyard to the hand: arcs up, spins and
+  /// flips from face-down to face-up halfway through the flight.
+  Widget _buildDrawFlightOverlay() {
+    final t = _drawFlightController.value;
+    final p = Curves.easeInOutCubic.transform(t);
+    final start = _drawStartPos!;
+    final target = _drawTargetPos!;
+
+    final x = lerpDouble(start.dx, target.dx, p)!;
+    final arc = math.sin(t * math.pi);
+    final y = lerpDouble(start.dy, target.dy, p)! - 60.h * arc;
+
+    final scale = 0.9 + 0.35 * arc;
+    final spin = lerpDouble(-0.6, 0.0, p)!;
+
+    // 3D flip around the Y axis: face-down for first half, face-up after
+    final flipAngle = t * math.pi;
+    final showFace = flipAngle > math.pi / 2;
+    final displayAngle = showFace ? flipAngle - math.pi : flipAngle;
+
+    final Widget face = showFace
+        ? Domino3DTile(
+            top: _drawFlyingPiece!.top,
+            bottom: _drawFlyingPiece!.bottom,
+          )
+        : const DominoFaceDownTile(
+            width: 34, height: 17, margin: EdgeInsets.zero);
+
+    return Positioned(
+      left: x,
+      top: y,
+      child: IgnorePointer(
+        child: Transform(
+          alignment: Alignment.center,
+          transform: Matrix4.identity()
+            ..setEntry(3, 2, 0.0015)
+            ..rotateZ(spin)
+            ..rotateY(displayAngle)
+            ..scaleByDouble(scale, scale, 1.0, 1.0),
+          child: Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(6.r),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.3 + 0.3 * arc),
+                  blurRadius: (6 + 14 * arc).r,
+                  offset: Offset(2, 4 + 10 * arc),
+                ),
+              ],
+            ),
+            child: face,
+          ),
+        ),
+      ),
+    );
   }
 
   /// Animated Domino Tile that emerges from beneath the bot's avatar HUD,
@@ -1238,7 +1520,8 @@ class _DominoClassicGameScreenState extends State<DominoClassicGameScreen>
                 borderRadius: BorderRadius.circular(6.r),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.35 + (0.35 * flightArc)),
+                    color: Colors.black
+                        .withValues(alpha: 0.35 + (0.35 * flightArc)),
                     blurRadius: shadowBlur.r,
                     offset: shadowOffset,
                     spreadRadius: (1.5 + (2.5 * flightArc)).r,

@@ -12,6 +12,7 @@ class DominoTileRack extends StatelessWidget {
   final bool isPlayerTurn;
   final void Function(dynamic piece) onTileTap;
   final void Function(dynamic piece)? onTileDragStarted;
+  final VoidCallback? onTileDragEnded;
 
   const DominoTileRack({
     super.key,
@@ -21,6 +22,7 @@ class DominoTileRack extends StatelessWidget {
     required this.isPlayerTurn,
     required this.onTileTap,
     this.onTileDragStarted,
+    this.onTileDragEnded,
   });
 
   @override
@@ -39,7 +41,7 @@ class DominoTileRack extends StatelessWidget {
     }
 
     return SizedBox(
-      height: 64.h,
+      height: 66.r,
       child: Center(
         child: SingleChildScrollView(
           scrollDirection: Axis.horizontal,
@@ -69,11 +71,16 @@ class DominoTileRack extends StatelessWidget {
                 },
                 onDragStarted: () {
                   SoundManager().playTileDraw();
-                  if (onTileDragStarted != null) {
-                    onTileDragStarted!(piece);
-                  } else {
-                    onTileTap(piece);
-                  }
+                  onTileDragStarted?.call(piece);
+                },
+                onDragEnd: (_) {
+                  onTileDragEnded?.call();
+                },
+                onDraggableCanceled: (_, __) {
+                  onTileDragEnded?.call();
+                },
+                onDragCompleted: () {
+                  onTileDragEnded?.call();
                 },
                 feedback: Material(
                   color: Colors.transparent,

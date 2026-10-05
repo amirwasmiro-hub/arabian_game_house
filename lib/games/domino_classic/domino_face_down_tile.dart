@@ -25,8 +25,8 @@ class DominoFaceDownTile extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        width: width.w,
-        height: height.h,
+        width: width.r,
+        height: height.r,
         margin: margin ?? EdgeInsets.symmetric(vertical: 1.5.h),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(3.r),
