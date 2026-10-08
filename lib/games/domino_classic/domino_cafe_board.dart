@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:flutter_animate/flutter_animate.dart';
 import 'domino_classic_engine.dart';
 import 'domino_piece.dart';
 import 'domino_3d_tile.dart';
+import 'domino_snake_layout.dart';
 
 class DominoCafeBoard extends StatefulWidget {
   final DominoClassicEngine engine;
@@ -27,7 +28,8 @@ class DominoCafeBoard extends StatefulWidget {
 }
 
 class _DominoCafeBoardState extends State<DominoCafeBoard> {
-  final TransformationController _transformController = TransformationController();
+  double _zoomScale = 1.0;
+  double _baseScale = 1.0;
   DominoEdgeLocation? _hoveredEdge;
   DominoPiece? _draggedPiece;
 
@@ -42,12 +44,6 @@ class _DominoCafeBoardState extends State<DominoCafeBoard> {
       _hoveredEdge = null;
       _draggedPiece = null;
     }
-  }
-
-  @override
-  void dispose() {
-    _transformController.dispose();
-    super.dispose();
   }
 
   @override
@@ -67,100 +63,141 @@ class _DominoCafeBoardState extends State<DominoCafeBoard> {
         final tableHeight = constraints.maxHeight;
         final halfWidth = tableWidth / 2;
 
-        return Container(
-          width: double.infinity,
-          height: double.infinity,
-          decoration: const BoxDecoration(
-            // Royal Green Velvet Felt with dark radial vignette across full screen
-            gradient: RadialGradient(
-              center: Alignment.center,
-              radius: 1.25,
-              colors: [
-                Color(0xFF0F4D2A), // Vibrant emerald felt center
-                Color(0xFF0A331C), // Deep green
-                Color(0xFF04180C), // Dark mahogany edge vignette
-              ],
-            ),
-          ),
-          child: Stack(
-            alignment: Alignment.center,
-            children: [
-              // 1. Arabesque Table Patterns (Subtle watermarks in corners)
-              Positioned(
-                top: 10.h,
-                right: 12.w,
-                child: Icon(
-                  Icons.all_inclusive_rounded,
-                  color: const Color(0xFFFFD700).withValues(alpha: 0.08),
-                  size: 44.r,
+        return GestureDetector(
+          onScaleStart: (details) {
+            _baseScale = _zoomScale;
+          },
+          onScaleUpdate: (details) {
+            if (details.pointerCount >= 2) {
+              setState(() {
+                _zoomScale = (_baseScale * details.scale).clamp(0.6, 1.8);
+              });
+            }
+          },
+          onDoubleTap: () {
+            setState(() {
+              _zoomScale = 1.0;
+            });
+          },
+          child: Listener(
+            onPointerSignal: (pointerSignal) {
+              if (pointerSignal is PointerScrollEvent) {
+                setState(() {
+                  final delta = pointerSignal.scrollDelta.dy < 0 ? 0.08 : -0.08;
+                  _zoomScale = (_zoomScale + delta).clamp(0.6, 1.8);
+                });
+              }
+            },
+            child: Container(
+              width: double.infinity,
+              height: double.infinity,
+              decoration: const BoxDecoration(
+                // Royal Green Velvet Felt with dark radial vignette across full screen
+                gradient: RadialGradient(
+                  center: Alignment.center,
+                  radius: 1.25,
+                  colors: [
+                    Color(0xFF0F4D2A), // Vibrant emerald felt center
+                    Color(0xFF0A331C), // Deep green
+                    Color(0xFF04180C), // Dark mahogany edge vignette
+                  ],
                 ),
               ),
-              Positioned(
-                bottom: 10.h,
-                left: 12.w,
-                child: Icon(
-                  Icons.all_inclusive_rounded,
-                  color: const Color(0xFFFFD700).withValues(alpha: 0.08),
-                  size: 44.r,
-                ),
-              ),
-
-              // 2. Table Watermark: Stake Value written large on the table felt with subtle shadow
-              Center(
-                child: IgnorePointer(
-                  child: Text(
-                    _formatNumber(widget.totalPotCoins),
-                    style: GoogleFonts.cairo(
-                      fontSize: 52.sp,
-                      fontWeight: FontWeight.w900,
-                      letterSpacing: 2.0,
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  // 1. Arabesque Table Patterns (Subtle watermarks in corners)
+                  Positioned(
+                    top: 10.h,
+                    right: 12.w,
+                    child: Icon(
+                      Icons.all_inclusive_rounded,
                       color: const Color(0xFFFFD700).withValues(alpha: 0.08),
-                      shadows: [
-                        Shadow(
-                          color: Colors.black.withValues(alpha: 0.35),
-                          blurRadius: 10,
-                          offset: const Offset(1, 3),
-                        ),
-                      ],
+                      size: 44.r,
                     ),
                   ),
-                ),
-              ),
+                  Positioned(
+                    bottom: 10.h,
+                    left: 12.w,
+                    child: Icon(
+                      Icons.all_inclusive_rounded,
+                      color: const Color(0xFFFFD700).withValues(alpha: 0.08),
+                      size: 44.r,
+                    ),
+                  ),
 
-              // 3. Interactive Domino Table Surface (Chain & Glowing End Targets)
-              Positioned.fill(
-                child: isFirstMove
-                    ? _buildFirstMoveTarget()
-                    : _buildDominoChain(
-                        widget.engine.board,
-                        canPlayLeft: canPlayLeft,
-                        canPlayRight: canPlayRight,
+                  // 2. Table Watermark: Stake Value written large on the table felt with subtle shadow
+                  Center(
+                    child: IgnorePointer(
+                      child: Text(
+                        _formatNumber(widget.totalPotCoins),
+                        style: GoogleFonts.cairo(
+                          fontSize: 52.sp,
+                          fontWeight: FontWeight.w900,
+                          letterSpacing: 2.0,
+                          color:
+                              const Color(0xFFFFD700).withValues(alpha: 0.08),
+                          shadows: [
+                            Shadow(
+                              color: Colors.black.withValues(alpha: 0.35),
+                              blurRadius: 10,
+                              offset: const Offset(1, 3),
+                            ),
+                          ],
+                        ),
                       ),
-              ),
+                    ),
+                  ),
 
-              // 4. Broad Drop Zones (Left & Right halves of the table)
-              // Placed ON TOP of the table surface so drops anywhere on either half are captured instantly!
-              Positioned(
-                left: 0,
-                top: 0,
-                bottom: 0,
-                width: halfWidth,
-                child: IgnorePointer(
-                  ignoring: !widget.isDragging,
-                  child: _buildSideDropZone(DominoEdgeLocation.left, halfWidth, tableHeight),
-                ),
+                  // 3. Interactive Domino Table Surface (Chain & Targets strictly anchored at center)
+                  Positioned.fill(
+                    child: Transform.scale(
+                      scale: _zoomScale,
+                      alignment: Alignment.center,
+                      child: isFirstMove
+                          ? _buildFirstMoveTarget()
+                          : _buildDominoChain(
+                              widget.engine.board,
+                              canPlayLeft: canPlayLeft,
+                              canPlayRight: canPlayRight,
+                            ),
+                    ),
+                  ),
+
+                  // 4. Subtle Zoom Controls (+ / 100% / -) at Top Left of Table
+                  Positioned(
+                    top: 8.h,
+                    left: 10.w,
+                    child: _buildZoomControls(),
+                  ),
+
+                  // 4. Broad Drop Zones (Left & Right halves of the table)
+                  // Placed ON TOP of the table surface so drops anywhere on either half are captured instantly!
+                  Positioned(
+                    left: 0,
+                    top: 0,
+                    bottom: 0,
+                    width: halfWidth,
+                    child: IgnorePointer(
+                      ignoring: !widget.isDragging,
+                      child: _buildSideDropZone(
+                          DominoEdgeLocation.left, halfWidth, tableHeight),
+                    ),
+                  ),
+                  Positioned(
+                    right: 0,
+                    top: 0,
+                    bottom: 0,
+                    width: halfWidth,
+                    child: IgnorePointer(
+                      ignoring: !widget.isDragging,
+                      child: _buildSideDropZone(
+                          DominoEdgeLocation.right, halfWidth, tableHeight),
+                    ),
+                  ),
+                ],
               ),
-              Positioned(
-                right: 0,
-                top: 0,
-                bottom: 0,
-                width: halfWidth,
-                child: IgnorePointer(
-                  ignoring: !widget.isDragging,
-                  child: _buildSideDropZone(DominoEdgeLocation.right, halfWidth, tableHeight),
-                ),
-              ),
-            ],
+            ),
           ),
         );
       },
@@ -170,7 +207,8 @@ class _DominoCafeBoardState extends State<DominoCafeBoard> {
   /// Broad Drop Zone covering a full half of the table.
   /// When a player drags a piece towards that side, it triggers the glow on the END CARD,
   /// shows a subtle ambient highlight, and drops smoothly anywhere on that half.
-  Widget _buildSideDropZone(DominoEdgeLocation edge, double width, double height) {
+  Widget _buildSideDropZone(
+      DominoEdgeLocation edge, double width, double height) {
     return DragTarget<DominoPiece>(
       onWillAcceptWithDetails: (details) {
         final piece = details.data;
@@ -218,9 +256,11 @@ class _DominoCafeBoardState extends State<DominoCafeBoard> {
         }
       },
       builder: (context, candidateData, rejectedData) {
-        final isHovered = _hoveredEdge == edge && (candidateData.isNotEmpty || widget.isDragging);
+        final isHovered = _hoveredEdge == edge &&
+            (candidateData.isNotEmpty || widget.isDragging);
         final isLeft = edge == DominoEdgeLocation.left;
-        final highlightColor = isLeft ? const Color(0xFF00E5FF) : const Color(0xFFFFD700);
+        final highlightColor =
+            isLeft ? const Color(0xFF00E5FF) : const Color(0xFFFFD700);
 
         return GestureDetector(
           onTap: () {
@@ -240,7 +280,9 @@ class _DominoCafeBoardState extends State<DominoCafeBoard> {
               // Extremely subtle emerald vignette highlight when hovering over this half of the table
               gradient: isHovered
                   ? RadialGradient(
-                      center: isLeft ? const Alignment(-0.6, 0.0) : const Alignment(0.6, 0.0),
+                      center: isLeft
+                          ? const Alignment(-0.6, 0.0)
+                          : const Alignment(0.6, 0.0),
                       radius: 0.85,
                       colors: [
                         const Color(0xFF00E676).withValues(alpha: 0.12),
@@ -285,7 +327,8 @@ class _DominoCafeBoardState extends State<DominoCafeBoard> {
         },
         builder: (context, candidateData, rejectedData) {
           final isHovered = candidateData.isNotEmpty;
-          final borderCol = isHovered ? const Color(0xFF00E676) : const Color(0xFFFFD700);
+          final borderCol =
+              isHovered ? const Color(0xFF00E676) : const Color(0xFFFFD700);
 
           return GestureDetector(
             onTap: () {
@@ -294,35 +337,39 @@ class _DominoCafeBoardState extends State<DominoCafeBoard> {
                 widget.onPlacePiece?.call(piece, DominoEdgeLocation.right);
               }
             },
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 200),
-              width: 42.r,
-              height: 21.r,
-              decoration: BoxDecoration(
-                color: borderCol.withValues(alpha: isHovered ? 0.35 : 0.12),
-                borderRadius: BorderRadius.circular(6.r),
-                border: Border.all(
-                  color: borderCol,
-                  width: isHovered ? 2.2.w : 1.5.w,
-                ),
-                boxShadow: [
-                  BoxShadow(
-                    color: borderCol.withValues(alpha: isHovered ? 0.7 : 0.35),
-                    blurRadius: isHovered ? 16.r : 8.r,
-                    spreadRadius: isHovered ? 2.r : 0.5.r,
+            child: AnimatedScale(
+              scale: isHovered ? 1.08 : 1.0,
+              duration: const Duration(milliseconds: 180),
+              curve: Curves.easeOutCubic,
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                width: 42.r,
+                height: 21.r,
+                decoration: BoxDecoration(
+                  color: borderCol.withValues(alpha: isHovered ? 0.35 : 0.12),
+                  borderRadius: BorderRadius.circular(6.r),
+                  border: Border.all(
+                    color: borderCol,
+                    width: isHovered ? 2.2.w : 1.5.w,
                   ),
-                ],
-              ),
-              child: Center(
-                child: Icon(
-                  isHovered ? Icons.check_rounded : Icons.add_rounded,
-                  size: 16.r,
-                  color: borderCol,
+                  boxShadow: [
+                    BoxShadow(
+                      color:
+                          borderCol.withValues(alpha: isHovered ? 0.7 : 0.35),
+                      blurRadius: isHovered ? 16.r : 8.r,
+                      spreadRadius: isHovered ? 2.r : 0.5.r,
+                    ),
+                  ],
+                ),
+                child: Center(
+                  child: Icon(
+                    isHovered ? Icons.check_rounded : Icons.add_rounded,
+                    size: 16.r,
+                    color: borderCol,
+                  ),
                 ),
               ),
-            )
-                .animate(onPlay: (c) => c.repeat(reverse: true))
-                .scale(duration: 1000.ms, begin: const Offset(0.96, 0.96), end: const Offset(1.04, 1.04)),
+            ),
           );
         },
       ),
@@ -337,6 +384,14 @@ class _DominoCafeBoardState extends State<DominoCafeBoard> {
   /// 4. End tiles glow directly when valid.
   /// 5. A subtle glowing domino ghost slot appears at the open side of the last valid card.
   /// 6. Dropping on the card, ghost slot, or table side executes the move smoothly.
+  /// Builds a clean, continuous Domino chain following a 2D rectangular / snake path:
+  /// 1. Double tiles stand VERTICALLY (isHorizontal: false).
+  /// 2. Normal tiles lay HORIZONTALLY along the rows (isHorizontal: true).
+  /// 3. Initial tile is anchored at center (0, 0) and cards never shift or shrink.
+  /// 4. Right branch turns UP before the right edge and travels LEFT along the top row.
+  /// 5. Left branch turns DOWN before the left edge and travels RIGHT along the bottom row.
+  /// 6. Touching values always match physically.
+  /// 7. End cards and ghost drop slots glow and accept drops/taps.
   Widget _buildDominoChain(
     List<PlacedDomino> board, {
     required bool canPlayLeft,
@@ -344,126 +399,246 @@ class _DominoCafeBoardState extends State<DominoCafeBoard> {
   }) {
     if (board.isEmpty) return const SizedBox.shrink();
 
-    // Auto-scale to ensure long domino chains remain visible on screen
-    final double unscaledWidth = board.fold<double>(
-      0.0,
-      (sum, p) => sum + (p.isDouble ? 24.r : 45.r),
+    final layout = DominoSnakeLayout.compute(
+      board: board,
+      initialTileIndex: widget.engine.safeInitialTileIndex,
+      tileShort: 21.r,
+      tileLong: 42.r,
+      gap: 2.r,
+      rowSpacing: 21.r,
+      includeGhosts: true,
     );
-    final double autoScale = (680.w / unscaledWidth).clamp(0.65, 1.0);
 
-    // CRITICAL: We enforce TextDirection.ltr for the Domino chain so that
-    // board[0] (Left end) is laid out on the physical LEFT, and board[N-1] (Right end)
-    // is laid out on the physical RIGHT.
-    // This guarantees matching touching values meet physically!
+    const double boardCanvasWidth = 720.0;
+    const double boardCanvasHeight = 240.0;
+    final double originX = boardCanvasWidth.w / 2;
+    final double originY = boardCanvasHeight.h / 2;
+
     return Directionality(
       textDirection: TextDirection.ltr,
-      child: GestureDetector(
-        onDoubleTap: () {
-          // Reset zoom & pan on double tap
-          _transformController.value = Matrix4.identity();
-        },
-        child: InteractiveViewer(
-          transformationController: _transformController,
-          minScale: 0.35,
-          maxScale: 2.5,
-          boundaryMargin: EdgeInsets.symmetric(horizontal: 400.w, vertical: 150.h),
-          child: Center(
-            child: Padding(
-              padding: EdgeInsets.symmetric(horizontal: 32.w, vertical: 16.h),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  // Left Ghost Slot (at the left open side of the chain)
-                  if (canPlayLeft && board.length > 1)
-                    _buildGhostSlot(
-                      DominoEdgeLocation.left,
-                      autoScale,
-                      _hoveredEdge == DominoEdgeLocation.left,
-                    ),
+      child: Center(
+        child: SizedBox(
+          width: boardCanvasWidth.w,
+          height: boardCanvasHeight.h,
+          child: Stack(
+            clipBehavior: Clip.none,
+            children: [
+              // Left Ghost Slot
+              if (canPlayLeft && layout.leftGhost != null)
+                Positioned(
+                  left: originX +
+                      layout.leftGhost!.x -
+                      (layout.leftGhost!.width / 2),
+                  top: originY +
+                      layout.leftGhost!.y -
+                      (layout.leftGhost!.height / 2),
+                  width: layout.leftGhost!.width,
+                  height: layout.leftGhost!.height,
+                  child: _buildGhostSlot(
+                    layout.leftGhost!,
+                    _hoveredEdge == DominoEdgeLocation.left,
+                  ),
+                ),
 
-                  // Domino chain tiles
-                  ...List.generate(board.length, (i) {
-                    final placed = board[i];
-                    final isFirst = (i == 0);
-                    final isLast = (i == board.length - 1);
+              // Right Ghost Slot
+              if (canPlayRight && layout.rightGhost != null)
+                Positioned(
+                  left: originX +
+                      layout.rightGhost!.x -
+                      (layout.rightGhost!.width / 2),
+                  top: originY +
+                      layout.rightGhost!.y -
+                      (layout.rightGhost!.height / 2),
+                  width: layout.rightGhost!.width,
+                  height: layout.rightGhost!.height,
+                  child: _buildGhostSlot(
+                    layout.rightGhost!,
+                    _hoveredEdge == DominoEdgeLocation.right,
+                  ),
+                ),
 
-                    return _buildTileWidget(
-                      placed: placed,
-                      index: i,
-                      isFirst: isFirst,
-                      isLast: isLast,
-                      totalTiles: board.length,
-                      canPlayLeft: canPlayLeft,
-                      canPlayRight: canPlayRight,
-                      scale: autoScale,
-                    );
-                  }),
-
-                  // Right Ghost Slot (at the right open side of the chain)
-                  if (canPlayRight && board.length > 1)
-                    _buildGhostSlot(
-                      DominoEdgeLocation.right,
-                      autoScale,
-                      _hoveredEdge == DominoEdgeLocation.right,
-                    ),
-                ],
-              ),
-            ),
+              // Placed Domino chain tiles
+              ...layout.tiles.map((item) {
+                return Positioned(
+                  left: originX + item.x - (item.width / 2),
+                  top: originY + item.y - (item.height / 2),
+                  width: item.width,
+                  height: item.height,
+                  child: _buildTileWidget(
+                    item: item,
+                    totalTiles: board.length,
+                    canPlayLeft: canPlayLeft,
+                    canPlayRight: canPlayRight,
+                  ),
+                );
+              }),
+            ],
           ),
         ),
       ),
     );
   }
 
-  /// Builds each tile widget.
+  /// Compact, elegant zoom in / out / reset controls (+ / 100% / -)
+  Widget _buildZoomControls() {
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 2.h),
+      decoration: BoxDecoration(
+        color: Colors.black.withValues(alpha: 0.6),
+        borderRadius: BorderRadius.circular(16.r),
+        border: Border.all(
+          color: const Color(0xFFFFD700).withValues(alpha: 0.35),
+          width: 0.8.w,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.3),
+            blurRadius: 4.r,
+          ),
+        ],
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // Zoom Out (-)
+          GestureDetector(
+            onTap: () {
+              setState(() {
+                _zoomScale = (_zoomScale - 0.1).clamp(0.6, 1.8);
+              });
+            },
+            child: Container(
+              padding: EdgeInsets.all(2.5.r),
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.08),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(Icons.remove_rounded,
+                  color: const Color(0xFFFFD700), size: 12.r),
+            ),
+          ),
+          SizedBox(width: 4.w),
+          // Percentage / Reset
+          GestureDetector(
+            onTap: () {
+              setState(() {
+                _zoomScale = 1.0;
+              });
+            },
+            child: Padding(
+              padding: EdgeInsets.symmetric(horizontal: 2.w),
+              child: Text(
+                '${(_zoomScale * 100).round()}%',
+                style: GoogleFonts.montserrat(
+                  fontSize: 7.sp,
+                  fontWeight: FontWeight.bold,
+                  color: const Color(0xFFFFD700),
+                ),
+              ),
+            ),
+          ),
+          SizedBox(width: 4.w),
+          // Zoom In (+)
+          GestureDetector(
+            onTap: () {
+              setState(() {
+                _zoomScale = (_zoomScale + 0.1).clamp(0.6, 1.8);
+              });
+            },
+            child: Container(
+              padding: EdgeInsets.all(2.5.r),
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.08),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(Icons.add_rounded,
+                  color: const Color(0xFFFFD700), size: 12.r),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Builds each tile widget positioned in the 2D snake path.
   /// Middle tiles are clean and static.
-  /// The last valid card at the end of the chain glows directly!
+  /// Active end cards glow and accept drop / tap.
   Widget _buildTileWidget({
-    required PlacedDomino placed,
-    required int index,
-    required bool isFirst,
-    required bool isLast,
+    required DominoTileLayoutItem item,
     required int totalTiles,
     required bool canPlayLeft,
     required bool canPlayRight,
-    required double scale,
   }) {
-    final isDouble = placed.isDouble;
-    final isHorizontal = !isDouble;
-
     // Single tile edge case (board.length == 1)
     if (totalTiles == 1) {
-      return _buildSingleTileTarget(
-        placed: placed,
-        canPlayLeft: canPlayLeft,
-        canPlayRight: canPlayRight,
-        scale: scale,
+      Color? singleGlow;
+      DominoEdgeLocation? singleEdge;
+      if (_hoveredEdge != null) {
+        if ((_hoveredEdge == DominoEdgeLocation.left && canPlayLeft) ||
+            (_hoveredEdge == DominoEdgeLocation.right && canPlayRight)) {
+          singleGlow = const Color(0xFF00E676);
+          singleEdge = _hoveredEdge;
+        }
+      } else if (canPlayLeft && canPlayRight) {
+        singleGlow = const Color(0xFFFFD700);
+        singleEdge = DominoEdgeLocation.right;
+      } else if (canPlayLeft) {
+        singleGlow = const Color(0xFF00E5FF);
+        singleEdge = DominoEdgeLocation.left;
+      } else if (canPlayRight) {
+        singleGlow = const Color(0xFFFFD700);
+        singleEdge = DominoEdgeLocation.right;
+      }
+
+      final baseTile = Domino3DTile(
+        top: item.topValue,
+        bottom: item.bottomValue,
+        isHorizontal: item.isHorizontal,
+        onTable: true,
+        scale: 1.0,
+        glowColor: singleGlow,
+      );
+
+      if (singleEdge == null) return baseTile;
+
+      return GestureDetector(
+        onTap: () {
+          final piece = widget.selectedPiece ?? _draggedPiece;
+          if (piece != null) {
+            widget.onPlacePiece?.call(piece, singleEdge!);
+          }
+        },
+        child: AnimatedScale(
+          scale: _hoveredEdge != null ? 1.06 : (singleGlow != null ? 1.02 : 1.0),
+          duration: const Duration(milliseconds: 180),
+          curve: Curves.easeOutCubic,
+          child: baseTile,
+        ),
       );
     }
 
-    // Determine if this tile is an active end that should glow and accept drops
+    // Multi-tile chain: determine if this tile is an active end
     Color? glowCol;
     DominoEdgeLocation? targetEdge;
 
-    if (isFirst && canPlayLeft) {
+    if (item.isFirst && canPlayLeft) {
       targetEdge = DominoEdgeLocation.left;
       glowCol = (_hoveredEdge == DominoEdgeLocation.left)
-          ? const Color(0xFF00E676) // Vibrant Emerald when hovered towards this side
-          : const Color(0xFF00E5FF); // Glowing Cyan for Left End
-    } else if (isLast && canPlayRight) {
+          ? const Color(0xFF00E676)
+          : const Color(0xFF00E5FF);
+    } else if (item.isLast && canPlayRight) {
       targetEdge = DominoEdgeLocation.right;
       glowCol = (_hoveredEdge == DominoEdgeLocation.right)
-          ? const Color(0xFF00E676) // Vibrant Emerald when hovered towards this side
-          : const Color(0xFFFFD700); // Glowing Gold for Right End
+          ? const Color(0xFF00E676)
+          : const Color(0xFFFFD700);
     }
 
     final Widget baseTile = Domino3DTile(
-      top: placed.leftValue,
-      bottom: placed.rightValue,
-      isHorizontal: isHorizontal,
+      top: item.topValue,
+      bottom: item.bottomValue,
+      isHorizontal: item.isHorizontal,
       onTable: true,
-      scale: scale,
+      scale: 1.0,
       glowColor: glowCol,
     );
 
@@ -500,7 +675,8 @@ class _DominoCafeBoardState extends State<DominoCafeBoard> {
         }
       },
       builder: (context, candidateData, rejectedData) {
-        final isHovered = candidateData.isNotEmpty || (_hoveredEdge == targetEdge);
+        final isHovered =
+            candidateData.isNotEmpty || (_hoveredEdge == targetEdge);
         final activeGlow = isHovered ? const Color(0xFF00E676) : glowCol;
 
         return GestureDetector(
@@ -510,20 +686,19 @@ class _DominoCafeBoardState extends State<DominoCafeBoard> {
               widget.onPlacePiece?.call(piece, targetEdge!);
             }
           },
-          child: Domino3DTile(
-            top: placed.leftValue,
-            bottom: placed.rightValue,
-            isHorizontal: isHorizontal,
-            onTable: true,
-            scale: scale,
-            glowColor: activeGlow,
-          )
-              .animate(onPlay: (c) => c.repeat(reverse: true))
-              .scale(
-                duration: isHovered ? 450.ms : 800.ms,
-                begin: const Offset(0.97, 0.97),
-                end: const Offset(1.05, 1.05),
-              ),
+          child: AnimatedScale(
+            scale: isHovered ? 1.06 : 1.0,
+            duration: const Duration(milliseconds: 180),
+            curve: Curves.easeOutCubic,
+            child: Domino3DTile(
+              top: item.topValue,
+              bottom: item.bottomValue,
+              isHorizontal: item.isHorizontal,
+              onTable: true,
+              scale: 1.0,
+              glowColor: activeGlow,
+            ),
+          ),
         );
       },
     );
@@ -531,9 +706,11 @@ class _DominoCafeBoardState extends State<DominoCafeBoard> {
 
   /// Builds a subtle domino ghost slot directly adjacent to an active end card ("ناحيته")
   /// Completely wordless, perfectly sized like a domino tile, with neon border and pulse.
-  Widget _buildGhostSlot(DominoEdgeLocation edge, double scale, bool isHovered) {
+  Widget _buildGhostSlot(DominoGhostLayoutItem ghostItem, bool isHovered) {
+    final edge = ghostItem.edge;
     final isLeft = edge == DominoEdgeLocation.left;
-    final defaultColor = isLeft ? const Color(0xFF00E5FF) : const Color(0xFFFFD700);
+    final defaultColor =
+        isLeft ? const Color(0xFF00E5FF) : const Color(0xFFFFD700);
 
     return DragTarget<DominoPiece>(
       onWillAcceptWithDetails: (details) =>
@@ -572,107 +749,40 @@ class _DominoCafeBoardState extends State<DominoCafeBoard> {
               widget.onPlacePiece?.call(piece, edge);
             }
           },
-          child: AnimatedContainer(
-            duration: const Duration(milliseconds: 200),
-            width: 42.r * scale,
-            height: 21.r * scale,
-            margin: EdgeInsets.symmetric(horizontal: 3.w * scale),
-            decoration: BoxDecoration(
-              color: color.withValues(alpha: hovered ? 0.35 : 0.12),
-              borderRadius: BorderRadius.circular(6.r * scale),
-              border: Border.all(
-                color: color,
-                width: hovered ? 2.2.w : 1.5.w,
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: color.withValues(alpha: hovered ? 0.7 : 0.35),
-                  blurRadius: hovered ? 14.r : 8.r,
-                  spreadRadius: hovered ? 2.r : 0.5.r,
+          child: AnimatedScale(
+            scale: hovered ? 1.08 : 1.0,
+            duration: const Duration(milliseconds: 180),
+            curve: Curves.easeOutCubic,
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 200),
+              width: ghostItem.width,
+              height: ghostItem.height,
+              decoration: BoxDecoration(
+                color: color.withValues(alpha: hovered ? 0.35 : 0.12),
+                borderRadius: BorderRadius.circular(6.r),
+                border: Border.all(
+                  color: color,
+                  width: hovered ? 2.2.w : 1.5.w,
                 ),
-              ],
-            ),
-            child: Center(
-              child: Icon(
-                hovered ? Icons.check_rounded : Icons.add_rounded,
-                color: color,
-                size: 13.r * scale,
+                boxShadow: [
+                  BoxShadow(
+                    color: color.withValues(alpha: hovered ? 0.7 : 0.35),
+                    blurRadius: hovered ? 14.r : 8.r,
+                    spreadRadius: hovered ? 2.r : 0.5.r,
+                  ),
+                ],
+              ),
+              child: Center(
+                child: Icon(
+                  hovered ? Icons.check_rounded : Icons.add_rounded,
+                  color: color,
+                  size: 13.r,
+                ),
               ),
             ),
-          )
-              .animate(onPlay: (c) => c.repeat(reverse: true))
-              .scale(
-                duration: hovered ? 450.ms : 800.ms,
-                begin: const Offset(0.95, 0.95),
-                end: const Offset(1.05, 1.05),
-              ),
+          ),
         );
       },
-    );
-  }
-
-  /// Builds the single tile target when the board has only 1 placed tile
-  Widget _buildSingleTileTarget({
-    required PlacedDomino placed,
-    required bool canPlayLeft,
-    required bool canPlayRight,
-    required double scale,
-  }) {
-    final isDouble = placed.isDouble;
-    final isHorizontal = !isDouble;
-
-    Color? glowCol;
-    if (_hoveredEdge != null) {
-      if ((_hoveredEdge == DominoEdgeLocation.left && canPlayLeft) ||
-          (_hoveredEdge == DominoEdgeLocation.right && canPlayRight)) {
-        glowCol = const Color(0xFF00E676);
-      }
-    } else if (canPlayLeft && canPlayRight) {
-      glowCol = const Color(0xFFFFD700);
-    } else if (canPlayLeft) {
-      glowCol = const Color(0xFF00E5FF);
-    } else if (canPlayRight) {
-      glowCol = const Color(0xFFFFD700);
-    }
-
-    final tileWidget = GestureDetector(
-      onTap: () {
-        final piece = widget.selectedPiece ?? _draggedPiece;
-        if (piece != null) {
-          final edge = canPlayRight ? DominoEdgeLocation.right : DominoEdgeLocation.left;
-          widget.onPlacePiece?.call(piece, edge);
-        }
-      },
-      child: Domino3DTile(
-        top: placed.leftValue,
-        bottom: placed.rightValue,
-        isHorizontal: isHorizontal,
-        onTable: true,
-        scale: scale,
-        glowColor: glowCol,
-      )
-          .animate(target: glowCol != null ? 1 : 0)
-          .scale(duration: 600.ms, begin: const Offset(0.97, 0.97), end: const Offset(1.05, 1.05)),
-    );
-
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        if (canPlayLeft)
-          _buildGhostSlot(
-            DominoEdgeLocation.left,
-            scale,
-            _hoveredEdge == DominoEdgeLocation.left,
-          ),
-        tileWidget,
-        if (canPlayRight)
-          _buildGhostSlot(
-            DominoEdgeLocation.right,
-            scale,
-            _hoveredEdge == DominoEdgeLocation.right,
-          ),
-      ],
     );
   }
 

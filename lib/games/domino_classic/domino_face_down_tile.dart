@@ -22,6 +22,9 @@ class DominoFaceDownTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isVertical = height > width;
+    final pinSize = isVertical ? (width * 0.35).clamp(2.5, 4.0).r : 4.r;
+
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -29,7 +32,7 @@ class DominoFaceDownTile extends StatelessWidget {
         height: height.r,
         margin: margin ?? EdgeInsets.symmetric(vertical: 1.5.h),
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(3.r),
+          borderRadius: BorderRadius.circular(2.5.r),
           // Deep 3D Ivory Gradient Face (Real Porcelain/Bone Domino matching player tiles)
           gradient: const LinearGradient(
             begin: Alignment.topLeft,
@@ -59,17 +62,20 @@ class DominoFaceDownTile extends StatelessWidget {
           children: [
             // Center Metallic Dividing Groove Line (subtle)
             Positioned(
-              top: 1.5.h,
-              bottom: 1.5.h,
+              left: isVertical ? 1.w : null,
+              right: isVertical ? 1.w : null,
+              top: isVertical ? null : 1.5.h,
+              bottom: isVertical ? null : 1.5.h,
               child: Container(
-                width: 0.8.w,
+                width: isVertical ? null : 0.8.w,
+                height: isVertical ? 0.8.h : null,
                 color: const Color(0xFF6B5B45).withValues(alpha: 0.35),
               ),
             ),
             // Central Golden Brass Rivet Pin
             Container(
-              width: 4.r,
-              height: 4.r,
+              width: pinSize,
+              height: pinSize,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 gradient: const RadialGradient(

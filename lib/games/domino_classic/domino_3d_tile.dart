@@ -38,95 +38,110 @@ class Domino3DTile extends StatelessWidget {
     final double effectiveWidth = width * scale;
     final double effectiveHeight = height * scale;
 
-    return GestureDetector(
-      onTap: isValid ? onTap : null,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 180),
-        curve: Curves.easeOutCubic,
-        width: effectiveWidth,
-        height: effectiveHeight,
-        margin: EdgeInsets.all(onTable ? 1.5.w : 2.5.w),
-        transform: Matrix4.translationValues(0.0, isSelected ? -8.0 : 0.0, 0.0),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(6.r),
-          border: glowColor != null
-              ? Border.all(color: glowColor!, width: 2.w)
-              : isSelected
-                  ? Border.all(color: const Color(0xFFFFD700), width: 1.5.w)
-                  : isValid && !onTable
-                      ? Border.all(
-                          color: Colors.white.withValues(alpha: 0.85),
-                          width: 1.2.w,
-                        )
-                      : null,
-          boxShadow: glowColor != null
+    final tileDecoration = BoxDecoration(
+      borderRadius: BorderRadius.circular(6.r),
+      border: glowColor != null
+          ? Border.all(color: glowColor!, width: 2.w)
+          : isSelected
+              ? Border.all(color: const Color(0xFFFFD700), width: 1.5.w)
+              : isValid && !onTable
+                  ? Border.all(
+                      color: Colors.white.withValues(alpha: 0.85),
+                      width: 1.2.w,
+                    )
+                  : null,
+      boxShadow: glowColor != null
+          ? [
+              BoxShadow(
+                color: glowColor!.withValues(alpha: 0.95),
+                blurRadius: 16.r,
+                spreadRadius: 3.r,
+              ),
+              BoxShadow(
+                color: glowColor!.withValues(alpha: 0.5),
+                blurRadius: 26.r,
+                spreadRadius: 6.r,
+              ),
+            ]
+          : isSelected
               ? [
                   BoxShadow(
-                    color: glowColor!.withValues(alpha: 0.95),
-                    blurRadius: 16.r,
-                    spreadRadius: 3.r,
+                    color: const Color(0xFFFFD700).withValues(alpha: 0.9),
+                    blurRadius: 14.r,
+                    spreadRadius: 2.r,
                   ),
                   BoxShadow(
-                    color: glowColor!.withValues(alpha: 0.5),
-                    blurRadius: 26.r,
-                    spreadRadius: 6.r,
+                    color: Colors.black.withValues(alpha: 0.6),
+                    blurRadius: 12.r,
+                    offset: const Offset(2, 6),
                   ),
                 ]
-              : isSelected
+              : isValid && !onTable
                   ? [
+                      // Subtle glowing soft white glow (جلو أبيض مضيء خفيف للكروت المتاحة فقط)
                       BoxShadow(
-                        color: const Color(0xFFFFD700).withValues(alpha: 0.9),
-                        blurRadius: 14.r,
-                        spreadRadius: 2.r,
+                        color: Colors.white.withValues(alpha: 0.75),
+                        blurRadius: 8.r,
+                        spreadRadius: 1.5.r,
                       ),
                       BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.6),
-                        blurRadius: 12.r,
-                        offset: const Offset(2, 6),
+                        color: Colors.white.withValues(alpha: 0.35),
+                        blurRadius: 14.r,
+                        spreadRadius: 2.5.r,
+                      ),
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.35),
+                        blurRadius: 4.r,
+                        offset: const Offset(1.5, 3.5),
                       ),
                     ]
-                  : isValid && !onTable
-                      ? [
-                          // Subtle glowing soft white glow (جلو أبيض مضيء خفيف للكروت المتاحة فقط)
-                          BoxShadow(
-                            color: Colors.white.withValues(alpha: 0.75),
-                            blurRadius: 8.r,
-                            spreadRadius: 1.5.r,
-                          ),
-                          BoxShadow(
-                            color: Colors.white.withValues(alpha: 0.35),
-                            blurRadius: 14.r,
-                            spreadRadius: 2.5.r,
-                          ),
-                          BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.35),
-                            blurRadius: 4.r,
-                            offset: const Offset(1.5, 3.5),
-                          ),
-                        ]
-                      : [
-                          BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.5),
-                            blurRadius: 4.r,
-                            offset: const Offset(1.5, 3),
-                          ),
-                        ],
-        ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(6.r),
-          child: CustomPaint(
-            size: Size(effectiveWidth, effectiveHeight),
-            painter: _Realistic3DDominoPainter(
-              top: top,
-              bottom: bottom,
-              isHorizontal: isHorizontal,
-              isSelected: isSelected,
-              isValid: isValid,
-              onTable: onTable,
-            ),
+                  : [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.5),
+                        blurRadius: 4.r,
+                        offset: const Offset(1.5, 3),
+                      ),
+                    ],
+    );
+
+    final tileChild = ClipRRect(
+      borderRadius: BorderRadius.circular(6.r),
+      child: RepaintBoundary(
+        child: CustomPaint(
+          size: Size(effectiveWidth, effectiveHeight),
+          painter: _Realistic3DDominoPainter(
+            top: top,
+            bottom: bottom,
+            isHorizontal: isHorizontal,
+            isSelected: isSelected,
+            isValid: isValid,
+            onTable: onTable,
           ),
         ),
       ),
+    );
+
+    return GestureDetector(
+      onTap: isValid ? onTap : null,
+      child: onTable
+          ? Container(
+              width: effectiveWidth,
+              height: effectiveHeight,
+              margin: EdgeInsets.zero,
+              decoration: tileDecoration,
+              child: tileChild,
+            )
+          : AnimatedContainer(
+              duration: const Duration(milliseconds: 180),
+              curve: Curves.easeOutCubic,
+              width: effectiveWidth,
+              height: effectiveHeight,
+              margin: EdgeInsets.all(2.5.w),
+              transform:
+                  Matrix4.translationValues(0.0, isSelected ? -8.0 : 0.0, 0.0),
+              decoration: tileDecoration,
+              child: tileChild,
+            ),
     );
   }
 }

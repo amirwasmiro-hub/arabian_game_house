@@ -82,6 +82,11 @@ class DominoClassicEngine {
   /// The linear chain of dominoes on the table from Left (index 0) to Right (index length-1)
   final List<PlacedDomino> board = [];
 
+  /// Index of the first tile ever placed in the current round, guaranteed to be anchored at (0, 0).
+  int initialTileIndex = 0;
+  int get safeInitialTileIndex =>
+      board.isEmpty ? 0 : initialTileIndex.clamp(0, board.length - 1);
+
   // Match cumulative scoring
   int targetScore = 101; // First team to 101 wins the match
   int team1MatchScore = 0; // You (+ Partner in 4P)
@@ -144,6 +149,7 @@ class DominoClassicEngine {
     }
     boneyard.clear();
     board.clear();
+    initialTileIndex = 0;
     isGameOver = false;
     lastRoundResult = null;
     consecutivePasses = 0;
@@ -245,6 +251,7 @@ class DominoClassicEngine {
     if (!hand.contains(piece)) return false;
 
     if (board.isEmpty) {
+      initialTileIndex = 0;
       board.add(PlacedDomino(
         piece: piece,
         leftValue: piece.a,
@@ -270,6 +277,7 @@ class DominoClassicEngine {
             placedOn: edge,
           ),
         );
+        initialTileIndex++;
       } else {
         final r = rightEnd!;
         if (piece.a != r && piece.b != r) return false;

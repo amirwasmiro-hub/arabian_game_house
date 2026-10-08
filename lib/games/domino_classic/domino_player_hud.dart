@@ -13,6 +13,7 @@ class DominoPlayerHud extends StatelessWidget {
   final int tilesCount;
   final bool isCurrentTurn;
   final int remainingSeconds;
+  final int totalTurnSeconds;
   final String? activeSpeechBubble;
   final VoidCallback? onAvatarTap;
   final bool showFaceDownTiles;
@@ -26,7 +27,8 @@ class DominoPlayerHud extends StatelessWidget {
     required this.coins,
     required this.tilesCount,
     required this.isCurrentTurn,
-    this.remainingSeconds = 15,
+    this.remainingSeconds = 6,
+    this.totalTurnSeconds = 6,
     this.activeSpeechBubble,
     this.onAvatarTap,
     this.showFaceDownTiles = false,
@@ -34,8 +36,8 @@ class DominoPlayerHud extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final timerProgress = (remainingSeconds / 15.0).clamp(0.0, 1.0);
-    final isUrgent = remainingSeconds <= 4;
+    final timerProgress = (remainingSeconds / totalTurnSeconds).clamp(0.0, 1.0);
+    final isUrgent = remainingSeconds <= 2;
 
     return Stack(
       clipBehavior: Clip.none,
@@ -237,53 +239,37 @@ class DominoPlayerHud extends StatelessWidget {
     );
   }
 
-  /// Face-down porcelain domino cards arranged neatly beneath opponent avatar, matching draw tiles
+  /// Face-down porcelain domino cards standing vertically directly on table beneath opponent avatar (no container box)
   Widget _buildOpponentTilesRack() {
     if (tilesCount <= 0) return const SizedBox.shrink();
     final count = tilesCount.clamp(0, 14);
-    final double tileW = 15.0.w;
-    final double tileH = 8.5.h;
+    final double tileW = 8.5.r;
+    final double tileH = 17.0.r;
 
-    // Spacing between tile starts so they fit neatly in up to 96.w width without negative margins
+    // Spacing between vertical tiles so they fan out neatly beneath the avatar card
+    final double maxRackW = 86.w;
     final double spacing = count > 1
-        ? ((96.w - tileW) / (count - 1)).clamp(5.w, 13.w)
+        ? ((maxRackW - tileW) / (count - 1)).clamp(4.5.w, 9.5.w)
         : 0.0;
     final double totalWidth = count > 1 ? (count - 1) * spacing + tileW : tileW;
 
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 2.h),
-      decoration: BoxDecoration(
-        color: Colors.black.withValues(alpha: 0.45),
-        borderRadius: BorderRadius.circular(5.r),
-        border: Border.all(
-          color: const Color(0xFFFFD700).withValues(alpha: 0.25),
-          width: 0.5.w,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.35),
-            blurRadius: 4.r,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: SizedBox(
-        width: totalWidth,
-        height: tileH,
-        child: Stack(
-          clipBehavior: Clip.none,
-          children: List.generate(count, (index) {
-            return Positioned(
-              left: index * spacing,
-              top: 0,
-              child: const DominoFaceDownTile(
-                width: 15.0,
-                height: 8.5,
-                margin: EdgeInsets.zero,
-              ),
-            );
-          }),
-        ),
+    return SizedBox(
+      width: totalWidth,
+      height: tileH,
+      child: Stack(
+        clipBehavior: Clip.none,
+        alignment: Alignment.centerLeft,
+        children: List.generate(count, (index) {
+          return Positioned(
+            left: index * spacing,
+            top: 0,
+            child: const DominoFaceDownTile(
+              width: 8.5,
+              height: 17.0,
+              margin: EdgeInsets.zero,
+            ),
+          );
+        }),
       ),
     );
   }

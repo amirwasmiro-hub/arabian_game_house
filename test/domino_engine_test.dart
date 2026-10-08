@@ -223,6 +223,22 @@ void main() {
       // Now mustDraw is true, so player must draw!
       expect(validPiecesAfter.isEmpty, isTrue);
     });
+
+    test('Drawn tile is added to the right (index 0 in RTL) of player hand', () {
+      final engine = DominoClassicEngine();
+      engine.startNewGame();
+      final initialPieces = [const DominoPiece(1, 1), const DominoPiece(2, 2)];
+      engine.playerHand.clear();
+      engine.playerHand.addAll(initialPieces);
+
+      const drawnTile = DominoPiece(5, 5);
+      // Inserting at index 0 places the tile on the right in RTL
+      engine.playerHand.insert(0, drawnTile);
+
+      expect(engine.playerHand.first, equals(drawnTile));
+      expect(engine.playerHand[1], equals(const DominoPiece(1, 1)));
+      expect(engine.playerHand[2], equals(const DominoPiece(2, 2)));
+    });
   });
 }
 
